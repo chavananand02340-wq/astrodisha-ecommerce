@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useStore } from "./StoreProvider";
 
 export type Product = {
   id: string;
@@ -18,34 +20,70 @@ type ProductCardProps = {
   product: Product;
 };
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({
+  product
+}: ProductCardProps) {
+  const {
+    addToCart,
+    toggleWishlist,
+    isWishlisted
+  } = useStore();
+
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const wishlisted = isWishlisted(product.id);
+
   return (
     <article className="product-card group overflow-hidden rounded-sm border border-[#d9cec1] bg-[#fbf8f2]">
-
-      {/* Product Image */}
       <div className="relative aspect-square overflow-hidden bg-[#eee5db]">
 
-        <Link href={`/product/${product.slug}`}>
+        {!imageLoaded && (
+          <div className="absolute inset-0 animate-pulse bg-[#e8ddd2]" />
+        )}
+
+        <Link
+          href={`/product/${product.slug}`}
+          aria-label={`View ${product.name}`}
+        >
           <img
             src={product.image}
-            alt={product.name}
-            className="product-image h-full w-full object-cover"
+            alt={`${product.name} - ${product.category}`}
+            className={`product-image h-full w-full object-cover transition-opacity duration-300 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            onLoad={() => setImageLoaded(true)}
+            onError={(event) => {
+              const image = event.currentTarget;
+
+              if (!image.src.includes("placeholder-product.svg")) {
+                image.src = "/images/placeholder-product.svg";
+              }
+
+              setImageLoaded(true);
+            }}
           />
         </Link>
 
-        {/* Wishlist */}
         <button
           type="button"
-          aria-label={`Add ${product.name} to wishlist`}
-          className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-xl text-[#5a3150] shadow-sm transition hover:bg-white"
+          aria-label={
+            wishlisted
+              ? `Remove ${product.name} from wishlist`
+              : `Add ${product.name} to wishlist`
+          }
+          aria-pressed={wishlisted}
+          onClick={() => toggleWishlist(product)}
+          className={`absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-xl shadow-sm transition active:scale-90 ${
+            wishlisted
+              ? "text-[#5a3150]"
+              : "text-[#8a607a]"
+          }`}
         >
-          ♡
+          {wishlisted ? "♥" : "♡"}
         </button>
       </div>
 
-      {/* Product Information */}
       <div className="p-3.5">
-
         <p className="mb-1 text-[9px] uppercase tracking-[0.08em] text-[#8a607a]">
           {product.category}
         </p>
@@ -60,9 +98,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.description}
         </p>
 
-        {/* Price + Rating */}
         <div className="mt-3 flex items-center justify-between">
-
           <span className="text-[15px] font-bold text-[#5a3150]">
             ₹{product.price.toLocaleString("en-IN")}
           </span>
@@ -77,10 +113,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        {/* Add to Cart */}
         <button
           type="button"
-          className="mt-3 w-full rounded-sm bg-[#5a3150] py-3 text-[10px] font-semibold tracking-wide text-white transition hover:bg-[#3e2237] sm:text-xs"
+          onClick={() => addToCart(product)}
+          className="mt-3 w-full rounded-sm bg-[#5a3150] py-3 text-[10px] font-semibold tracking-wide text-white transition hover:bg-[#3e2237] active:scale-[0.98] sm:text-xs"
         >
           Add to Cart
         </button>
