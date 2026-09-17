@@ -1,4 +1,4 @@
-import type { Product } from "../components/ProductCard";
+import type { Product } from "@/components/ProductCard";
 
 export const products: Product[] = [
   {
@@ -12,7 +12,7 @@ export const products: Product[] = [
     rating: 5,
     reviewCount: 128,
     image:
-      "https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=800&q=85"
+      "https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=900&q=90"
   },
   {
     id: "AD002",
@@ -25,7 +25,7 @@ export const products: Product[] = [
     rating: 5,
     reviewCount: 94,
     image:
-      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=800&q=85"
+      "https://images.unsplash.com/photo-1608042314453-ae338d80c427?auto=format&fit=crop&w=900&q=90"
   },
   {
     id: "AD003",
@@ -38,7 +38,7 @@ export const products: Product[] = [
     rating: 5,
     reviewCount: 76,
     image:
-      "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=800&q=85"
+      "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=900&q=90"
   },
   {
     id: "AD004",
@@ -51,7 +51,7 @@ export const products: Product[] = [
     rating: 5,
     reviewCount: 61,
     image:
-      "https://images.unsplash.com/photo-1609602582698-7e5b2e6e8f68?auto=format&fit=crop&w=800&q=85"
+      "https://images.unsplash.com/photo-1609602582698-7e5b2e6e8f68?auto=format&fit=crop&w=900&q=90"
   },
   {
     id: "AD005",
@@ -59,12 +59,14 @@ export const products: Product[] = [
     name: "5 Mukhi Rudraksha Mala",
     category: "Rudraksha",
     description:
-      "Sacred Rudraksha rooted in traditional Indian practices.",
+      "Sacred Rudraksha rooted in traditional Indian spiritual practices.",
     price: 799,
     rating: 5,
     reviewCount: 54,
+
+    // Replaced the broken image URL.
     image:
-      "https://images.unsplash.com/photo-1604608672516-f1b9d5c2b8c6?auto=format&fit=crop&w=800&q=85"
+      "https://images.pexels.com/photos/6634244/pexels-photo-6634244.jpeg?auto=compress&cs=tinysrgb&w=900"
   },
   {
     id: "AD006",
@@ -77,7 +79,7 @@ export const products: Product[] = [
     rating: 5,
     reviewCount: 31,
     image:
-      "https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=800&q=85"
+      "https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=900&q=90"
   },
   {
     id: "AD007",
@@ -90,7 +92,7 @@ export const products: Product[] = [
     rating: 5,
     reviewCount: 48,
     image:
-      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=800&q=85"
+      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=900&q=90"
   },
   {
     id: "AD008",
@@ -103,6 +105,6 @@ export const products: Product[] = [
     rating: 5,
     reviewCount: 29,
     image:
-      "https://images.unsplash.com/photo-1604608672516-f1b9d5c2b8c6?auto=format&fit=crop&w=800&q=85"
+      "https://images.unsplash.com/photo-1604608672516-f1b9d5c2b8c6?auto=format&fit=crop&w=900&q=90"
   }
 ];
