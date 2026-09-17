@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
+
 import type { Product } from "./ProductCard";
 
 export type CartItem = Product & {
@@ -12,16 +19,20 @@ type StoreContextValue = {
   wishlist: Product[];
   cartCount: number;
   wishlistCount: number;
+
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+
   toggleWishlist: (product: Product) => void;
   isWishlisted: (productId: string) => boolean;
+
   showToast: (message: string) => void;
 };
 
-const StoreContext = createContext<StoreContextValue | null>(null);
+const StoreContext =
+  createContext<StoreContextValue | null>(null);
 
 export function StoreProvider({
   children
@@ -34,8 +45,11 @@ export function StoreProvider({
 
   useEffect(() => {
     try {
-      const savedCart = localStorage.getItem("astrodisha-cart");
-      const savedWishlist = localStorage.getItem("astrodisha-wishlist");
+      const savedCart =
+        localStorage.getItem("astrodisha-cart");
+
+      const savedWishlist =
+        localStorage.getItem("astrodisha-wishlist");
 
       if (savedCart) {
         setCart(JSON.parse(savedCart));
@@ -45,12 +59,16 @@ export function StoreProvider({
         setWishlist(JSON.parse(savedWishlist));
       }
     } catch {
-      // Start fresh if local storage is corrupted.
+      setCart([]);
+      setWishlist([]);
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("astrodisha-cart", JSON.stringify(cart));
+    localStorage.setItem(
+      "astrodisha-cart",
+      JSON.stringify(cart)
+    );
   }, [cart]);
 
   useEffect(() => {
@@ -79,6 +97,7 @@ export function StoreProvider({
     return {
       cart,
       wishlist,
+
       cartCount,
       wishlistCount: wishlist.length,
 
@@ -113,15 +132,20 @@ export function StoreProvider({
 
       removeFromCart: (productId) => {
         setCart((current) =>
-          current.filter((item) => item.id !== productId)
+          current.filter(
+            (item) => item.id !== productId
+          )
         );
       },
 
       updateQuantity: (productId, quantity) => {
         if (quantity <= 0) {
           setCart((current) =>
-            current.filter((item) => item.id !== productId)
+            current.filter(
+              (item) => item.id !== productId
+            )
           );
+
           return;
         }
 
@@ -148,21 +172,28 @@ export function StoreProvider({
           );
 
           if (exists) {
-            setToast(`${product.name} removed from wishlist`);
+            setToast(
+              `${product.name} removed from wishlist`
+            );
 
             return current.filter(
               (item) => item.id !== product.id
             );
           }
 
-          setToast(`${product.name} saved to wishlist`);
+          setToast(
+            `${product.name} saved to wishlist`
+          );
 
           return [...current, product];
         });
       },
 
-      isWishlisted: (productId) =>
-        wishlist.some((item) => item.id === productId),
+      isWishlisted: (productId) => {
+        return wishlist.some(
+          (item) => item.id === productId
+        );
+      },
 
       showToast: (message) => {
         setToast(message);
@@ -197,4 +228,4 @@ export function useStore() {
   }
 
   return context;
-                               }
+      }
