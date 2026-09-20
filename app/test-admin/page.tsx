@@ -83,7 +83,12 @@ export default function TestAdminPage() {
       .single();
 
     if (error) {
-      setStatusMsg("Create FAILED: " + error.message);
+      setStatusMsg(
+        "Create FAILED: " + error.message +
+        " | code: " + error.code +
+        " | details: " + error.details +
+        " | hint: " + error.hint
+      );
       return;
     }
 
@@ -171,4 +176,4 @@ export default function TestAdminPage() {
       )}
     </div>
   );
-          }
+              }
