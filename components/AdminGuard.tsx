@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { checkIsAdmin } from "@/lib/adminAuth";
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [status, setStatus] = useState<"checking" | "authorized" | "unauthorized">("checking");
 
   useEffect(() => {
@@ -20,7 +21,8 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
         setStatus("authorized");
       } else {
         setStatus("unauthorized");
-        router.push("/admin/login");
+        const redirectTarget = encodeURIComponent(pathname || "/admin/dashboard");
+        router.push(`/admin/login?redirect=${redirectTarget}`);
       }
     }
 
@@ -29,7 +31,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
     return () => {
       isMounted = false;
     };
-  }, [router]);
+  }, [router, pathname]);
 
   if (status === "checking") {
     return (
