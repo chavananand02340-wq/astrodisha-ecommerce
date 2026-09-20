@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { checkIsAdmin } from "@/lib/adminAuth";
 
 export default function AdminLoginPage() {
   const supabase = createClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,7 +40,8 @@ export default function AdminLoginPage() {
       return;
     }
 
-    router.push("/admin/dashboard");
+    const redirectTo = searchParams.get("redirect") || "/admin/dashboard";
+    router.push(redirectTo);
   }
 
   return (
