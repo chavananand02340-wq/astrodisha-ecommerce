@@ -32,7 +32,7 @@ export default function TestAdminPage() {
     }
 
     setLoggedIn(true);
-    setStatusMsg("Logged in as: " + data.user?.email);
+    setStatusMsg("Logged in as: " + data.user?.email + " | UID: " + data.user?.id);
 
     const { data: cats, error: catError } = await supabase
       .from("categories")
@@ -158,7 +158,7 @@ export default function TestAdminPage() {
       )}
 
       {statusMsg && (
-        <p style={{ marginTop: "1.5rem", fontWeight: "bold" }}>{statusMsg}</p>
+        <p style={{ marginTop: "1.5rem", fontWeight: "bold", wordBreak: "break-all" }}>{statusMsg}</p>
       )}
     </div>
   );
