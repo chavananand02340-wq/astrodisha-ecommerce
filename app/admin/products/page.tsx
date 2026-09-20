@@ -16,6 +16,7 @@ type Product = {
   stock: number;
   is_active: boolean;
   category_id: string;
+  short_description: string | null;
   categories?: { name: string } | null;
 };
 
@@ -42,6 +43,14 @@ function ProductsContent() {
   const [shortDescription, setShortDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editCategoryId, setEditCategoryId] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editStock, setEditStock] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
   async function loadData() {
     setLoading(true);
 
@@ -53,7 +62,7 @@ function ProductsContent() {
 
     const { data: prods, error } = await supabase
       .from("products")
-      .select("id, name, price, stock, is_active, category_id, categories(name)")
+      .select("id, name, price, stock, is_active, category_id, short_description, categories(name)")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -132,6 +141,51 @@ function ProductsContent() {
     loadData();
   }
 
+  function startEdit(product: Product) {
+    setEditingId(product.id);
+    setEditName(product.name);
+    setEditCategoryId(product.category_id);
+    setEditPrice(String(product.price));
+    setEditStock(String(product.stock));
+    setEditDescription(product.short_description || "");
+    setStatusMsg("");
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+  }
+
+  async function saveEdit(productId: string) {
+    if (!editName || !editCategoryId || !editPrice) {
+      setStatusMsg("Name, category, and price are required.");
+      return;
+    }
+
+    setSavingEdit(true);
+
+    const { error } = await supabase
+      .from("products")
+      .update({
+        name: editName,
+        category_id: editCategoryId,
+        price: parseFloat(editPrice),
+        stock: editStock ? parseInt(editStock, 10) : 0,
+        short_description: editDescription || null,
+      })
+      .eq("id", productId);
+
+    setSavingEdit(false);
+
+    if (error) {
+      setStatusMsg("Failed to save changes: " + error.message);
+      return;
+    }
+
+    setStatusMsg("Product updated successfully.");
+    setEditingId(null);
+    loadData();
+  }
+
   return (
     <div style={{ padding: "2rem", maxWidth: "900px", margin: "0 auto", fontFamily: "Inter, sans-serif" }}>
       <h1 style={{ fontFamily: "Playfair Display, serif", color: "#3E2237" }}>
@@ -157,11 +211,7 @@ function ProductsContent() {
             style={inputStyle}
           />
 
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            style={inputStyle}
-          >
+          <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={inputStyle}>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -223,45 +273,130 @@ function ProductsContent() {
       ) : products.length === 0 ? (
         <p>No products yet.</p>
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#3E2237", color: "#fff" }}>
-              <th style={thStyle}>Name</th>
-              <th style={thStyle}>Category</th>
-              <th style={thStyle}>Price</th>
-              <th style={thStyle}>Stock</th>
-              <th style={thStyle}>Status</th>
-              <th style={thStyle}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((p) => (
-              <tr key={p.id} style={{ borderBottom: "1px solid #D9CEC1" }}>
-                <td style={tdStyle}>{p.name}</td>
-                <td style={tdStyle}>{p.categories?.name || "-"}</td>
-                <td style={tdStyle}>₹{p.price}</td>
-                <td style={tdStyle}>{p.stock}</td>
-                <td style={tdStyle}>{p.is_active ? "Active" : "Inactive"}</td>
-                <td style={tdStyle}>
-                  <button
-                    onClick={() => handleToggleActive(p)}
-                    style={{
-                      backgroundColor: p.is_active ? "#B00020" : "#5A3150",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "4px",
-                      padding: "0.3rem 0.7rem",
-                      fontSize: "0.8rem",
-                      cursor: "pointer",
-                    }}
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          {products.map((p) => (
+            <div
+              key={p.id}
+              style={{
+                border: "1px solid #D9CEC1",
+                borderRadius: "8px",
+                padding: "1rem",
+                backgroundColor: "#FBF8F2",
+              }}
+            >
+              {editingId === p.id ? (
+                <div>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    style={inputStyle}
+                  />
+                  <select
+                    value={editCategoryId}
+                    onChange={(e) => setEditCategoryId(e.target.value)}
+                    style={inputStyle}
                   >
-                    {p.is_active ? "Deactivate" : "Activate"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    placeholder="Price"
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    style={inputStyle}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Stock"
+                    value={editStock}
+                    onChange={(e) => setEditStock(e.target.value)}
+                    style={inputStyle}
+                  />
+                  <textarea
+                    placeholder="Short description"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    style={{ ...inputStyle, minHeight: "60px" }}
+                  />
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button
+                      onClick={() => saveEdit(p.id)}
+                      disabled={savingEdit}
+                      style={{
+                        backgroundColor: "#5A3150",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "0.5rem 1rem",
+                        cursor: savingEdit ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {savingEdit ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      style={{
+                        backgroundColor: "#D9CEC1",
+                        color: "#3E2237",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "0.5rem 1rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
+                  <div>
+                    <div style={{ fontWeight: "bold", color: "#3E2237" }}>{p.name}</div>
+                    <div style={{ fontSize: "0.85rem", color: "#8A607A" }}>
+                      {p.categories?.name || "-"} • ₹{p.price} • Stock: {p.stock} •{" "}
+                      {p.is_active ? "Active" : "Inactive"}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button
+                      onClick={() => startEdit(p)}
+                      style={{
+                        backgroundColor: "#5A3150",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "0.4rem 0.8rem",
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleToggleActive(p)}
+                      style={{
+                        backgroundColor: p.is_active ? "#B00020" : "#5A3150",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "0.4rem 0.8rem",
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {p.is_active ? "Deactivate" : "Activate"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -275,16 +410,4 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #D9CEC1",
   borderRadius: "4px",
   backgroundColor: "#fff",
-};
-
-const thStyle: React.CSSProperties = {
-  padding: "0.6rem",
-  textAlign: "left",
-  fontSize: "0.85rem",
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: "0.6rem",
-  fontSize: "0.9rem",
-  color: "#3E2237",
 };
