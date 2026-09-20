@@ -20,6 +20,14 @@ type Product = {
   categories?: { name: string } | null;
 };
 
+type ProductImage = {
+  id: string;
+  product_id: string;
+  image_url: string;
+  is_primary: boolean;
+  sort_order: number;
+};
+
 export default function AdminProductsPage() {
   return (
     <AdminGuard>
@@ -50,6 +58,11 @@ function ProductsContent() {
   const [editStock, setEditStock] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+
+  const [imagesForProduct, setImagesForProduct] = useState<string | null>(null);
+  const [images, setImages] = useState<ProductImage[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [imageMsg, setImageMsg] = useState("");
 
   async function loadData() {
     setLoading(true);
@@ -184,6 +197,152 @@ function ProductsContent() {
     setStatusMsg("Product updated successfully.");
     setEditingId(null);
     loadData();
+  }
+
+  async function loadImages(productId: string) {
+    setImagesForProduct(productId);
+    setImageMsg("");
+    const { data, error } = await supabase
+      .from("product_images")
+      .select("id, product_id, image_url, is_primary, sort_order")
+      .eq("product_id", productId)
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      setImageMsg("Failed to load images: " + error.message);
+      return;
+    }
+    setImages(data || []);
+  }
+
+  function closeImages() {
+    setImagesForProduct(null);
+    setImages([]);
+  }
+
+  function compressImage(file: File): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        img.src = e.target?.result as string;
+      };
+
+      img.onload = () => {
+        const maxDimension = 1000;
+        let { width, height } = img;
+
+        if (width > height && width > maxDimension) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else if (height > maxDimension) {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error("Compression failed"));
+          },
+          "image/jpeg",
+          0.75
+        );
+      };
+
+      img.onerror = () => reject(new Error("Failed to read image"));
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleUploadImage(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!imagesForProduct || !e.target.files || e.target.files.length === 0) return;
+
+    const file = e.target.files[0];
+    setUploading(true);
+    setImageMsg("Compressing and uploading...");
+
+    try {
+      const compressed = await compressImage(file);
+      const fileName = `${imagesForProduct}/${Date.now()}.jpg`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(fileName, compressed, { contentType: "image/jpeg" });
+
+      if (uploadError) {
+        setImageMsg("Upload failed: " + uploadError.message);
+        setUploading(false);
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+
+      const isFirstImage = images.length === 0;
+
+      const { error: insertError } = await supabase.from("product_images").insert({
+        product_id: imagesForProduct,
+        image_url: publicUrlData.publicUrl,
+        is_primary: isFirstImage,
+        sort_order: images.length,
+      });
+
+      if (insertError) {
+        setImageMsg("Saved to storage but failed to save record: " + insertError.message);
+        setUploading(false);
+        return;
+      }
+
+      setImageMsg("Image uploaded successfully.");
+      loadImages(imagesForProduct);
+    } catch (err) {
+      setImageMsg("Error: " + (err instanceof Error ? err.message : "Unknown error"));
+    }
+
+    setUploading(false);
+    e.target.value = "";
+  }
+
+  async function handleDeleteImage(image: ProductImage) {
+    const { error } = await supabase.from("product_images").delete().eq("id", image.id);
+
+    if (error) {
+      setImageMsg("Failed to delete: " + error.message);
+      return;
+    }
+
+    if (imagesForProduct) loadImages(imagesForProduct);
+  }
+
+  async function handleSetPrimary(image: ProductImage) {
+    if (!imagesForProduct) return;
+
+    await supabase
+      .from("product_images")
+      .update({ is_primary: false })
+      .eq("product_id", imagesForProduct);
+
+    const { error } = await supabase
+      .from("product_images")
+      .update({ is_primary: true })
+      .eq("id", image.id);
+
+    if (error) {
+      setImageMsg("Failed to set primary: " + error.message);
+      return;
+    }
+
+    loadImages(imagesForProduct);
   }
 
   return (
@@ -378,6 +537,20 @@ function ProductsContent() {
                       Edit
                     </button>
                     <button
+                      onClick={() => loadImages(p.id)}
+                      style={{
+                        backgroundColor: "#8A607A",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        padding: "0.4rem 0.8rem",
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Images
+                    </button>
+                    <button
                       onClick={() => handleToggleActive(p)}
                       style={{
                         backgroundColor: p.is_active ? "#B00020" : "#5A3150",
@@ -391,6 +564,104 @@ function ProductsContent() {
                     >
                       {p.is_active ? "Deactivate" : "Activate"}
                     </button>
+                  </div>
+                </div>
+              )}
+
+              {imagesForProduct === p.id && (
+                <div
+                  style={{
+                    marginTop: "1rem",
+                    borderTop: "1px solid #D9CEC1",
+                    paddingTop: "1rem",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <h3 style={{ fontSize: "0.95rem", color: "#3E2237", margin: 0 }}>
+                      Product Images ({images.length})
+                    </h3>
+                    <button
+                      onClick={closeImages}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#8A607A",
+                        cursor: "pointer",
+                        fontSize: "0.85rem",
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "0.75rem",
+                      marginTop: "0.75rem",
+                    }}
+                  >
+                    {images.map((img) => (
+                      <div
+                        key={img.id}
+                        style={{
+                          border: img.is_primary ? "2px solid #C6A15B" : "1px solid #D9CEC1",
+                          borderRadius: "6px",
+                          padding: "0.3rem",
+                          width: "100px",
+                        }}
+                      >
+                        <img
+                          src={img.image_url}
+                          alt=""
+                          style={{ width: "100%", height: "80px", objectFit: "cover", borderRadius: "4px" }}
+                        />
+                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.3rem" }}>
+                          <button
+                            onClick={() => handleSetPrimary(img)}
+                            title="Set as primary"
+                            style={{
+                              fontSize: "0.65rem",
+                              background: "none",
+                              border: "none",
+                              color: img.is_primary ? "#C6A15B" : "#8A607A",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {img.is_primary ? "★ Primary" : "☆ Set"}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteImage(img)}
+                            title="Delete"
+                            style={{
+                              fontSize: "0.65rem",
+                              background: "none",
+                              border: "none",
+                              color: "#B00020",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ marginTop: "1rem" }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUploadImage}
+                      disabled={uploading}
+                    />
+                    {uploading && <p style={{ fontSize: "0.85rem" }}>Uploading...</p>}
+                    {imageMsg && (
+                      <p style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#3E2237" }}>
+                        {imageMsg}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
