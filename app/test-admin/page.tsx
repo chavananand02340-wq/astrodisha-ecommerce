@@ -55,6 +55,13 @@ export default function TestAdminPage() {
       msg = msg + " | DB sees auth.uid(): " + whoami;
     }
 
+    const { data: adminCheck, error: adminCheckError } = await supabase.rpc("debug_admin_check");
+    if (adminCheckError) {
+      msg = msg + " | admin_check error: " + adminCheckError.message;
+    } else {
+      msg = msg + " | admin_check result: " + adminCheck;
+    }
+
     setStatusMsg(msg);
   }
 
@@ -176,4 +183,4 @@ export default function TestAdminPage() {
       )}
     </div>
   );
-              }
+}
