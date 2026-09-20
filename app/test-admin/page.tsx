@@ -32,14 +32,14 @@ export default function TestAdminPage() {
     }
 
     setLoggedIn(true);
-    setStatusMsg("Logged in as: " + data.user?.email + " | UID: " + data.user?.id);
+    let msg = "Logged in as: " + data.user?.email + " | UID: " + data.user?.id;
 
     const { data: cats, error: catError } = await supabase
       .from("categories")
       .select("id, name");
 
     if (catError) {
-      setStatusMsg("Login OK, but failed to load categories: " + catError.message);
+      setStatusMsg(msg + " | Failed to load categories: " + catError.message);
       return;
     }
 
@@ -47,6 +47,15 @@ export default function TestAdminPage() {
     if (cats && cats.length > 0) {
       setSelectedCategory(cats[0].id);
     }
+
+    const { data: whoami, error: whoamiError } = await supabase.rpc("debug_whoami");
+    if (whoamiError) {
+      msg = msg + " | whoami error: " + whoamiError.message;
+    } else {
+      msg = msg + " | DB sees auth.uid(): " + whoami;
+    }
+
+    setStatusMsg(msg);
   }
 
   async function handleCreateTestProduct() {
@@ -162,4 +171,4 @@ export default function TestAdminPage() {
       )}
     </div>
   );
-}
+          }
