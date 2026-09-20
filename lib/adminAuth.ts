@@ -1,138 +1,22 @@
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { checkIsAdmin } from "@/lib/adminAuth";
 
-export default function AdminLoginPage() {
+export async function checkIsAdmin(): Promise<boolean> {
   const supabase = createClient();
-  const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setErrorMsg("");
-    setLoading(true);
-
-    const { error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (loginError) {
-      setErrorMsg("Login failed: " + loginError.message);
-      setLoading(false);
-      return;
-    }
-
-    const isAdmin = await checkIsAdmin();
-
-    if (!isAdmin) {
-      await supabase.auth.signOut();
-      setErrorMsg("This account does not have admin access.");
-      setLoading(false);
-      return;
-    }
-
-    router.push("/admin/dashboard");
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    return false;
   }
 
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#F7F3EC",
-      }}
-    >
-      <form
-        onSubmit={handleLogin}
-        style={{
-          backgroundColor: "#FBF8F2",
-          border: "1px solid #D9CEC1",
-          borderRadius: "8px",
-          padding: "2.5rem",
-          width: "100%",
-          maxWidth: "380px",
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: "Playfair Display, serif",
-            color: "#3E2237",
-            fontSize: "1.5rem",
-            marginBottom: "0.25rem",
-          }}
-        >
-          ASTRODISHA Admin
-        </h1>
-        <p style={{ color: "#8A607A", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
-          Guidance • Healing • Divine Alignment
-        </p>
+  const { data, error } = await supabase
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", userData.user.id)
+    .maybeSingle();
 
-        <input
-          type="email"
-          placeholder="Admin email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{
-            display: "block",
-            width: "100%",
-            padding: "0.6rem",
-            marginBottom: "0.75rem",
-            border: "1px solid #D9CEC1",
-            borderRadius: "4px",
-            backgroundColor: "#fff",
-          }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{
-            display: "block",
-            width: "100%",
-            padding: "0.6rem",
-            marginBottom: "1rem",
-            border: "1px solid #D9CEC1",
-            borderRadius: "4px",
-            backgroundColor: "#fff",
-          }}
-        />
+  if (error || !data) {
+    return false;
+  }
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: "0.7rem",
-            backgroundColor: "#5A3150",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-            fontWeight: "bold",
-            cursor: loading ? "not-allowed" : "pointer",
-          }}
-        >
-          {loading ? "Logging in..." : "Log In"}
-        </button>
-
-        {errorMsg && (
-          <p style={{ color: "#B00020", marginTop: "1rem", fontSize: "0.85rem" }}>
-            {errorMsg}
-          </p>
-        )}
-      </form>
-    </div>
-  );
+  return true;
 }
