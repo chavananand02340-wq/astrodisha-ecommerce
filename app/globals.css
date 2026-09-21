@@ -1,14 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --astro-cream: #f7f3ec;
-  --astro-card: #fbf8f2;
-  --astro-burgundy: #3e2237;
-  --astro-primary: #5a3150;
-  --astro-gold: #c6a15b;
-  --astro-border: #d9cec1;
-  --astro-mauve: #8a607a;
-  --astro-white: #fffdf9;
+  /* Dark theme (default) */
+  --astro-bg: #160828;
+  --astro-text: #f4effb;
+  --astro-primary: #e8b23f;
+  --astro-primary-text: #160828;
+  --astro-accent: #b69bee;
+  --astro-card: #1f0d38;
+  --astro-border: #3a2456;
+  --astro-mauve: #b69bee;
+}
+
+[data-theme="light"] {
+  --astro-bg: #f4ece0;
+  --astro-text: #241046;
+  --astro-primary: #2d1155;
+  --astro-primary-text: #f4ece0;
+  --astro-accent: #c2412a;
+  --astro-card: #ffffff;
+  --astro-border: #ddd0bc;
+  --astro-mauve: #6b5a80;
 }
 
 * {
@@ -21,10 +33,11 @@ html {
 
 body {
   margin: 0;
-  background: var(--astro-cream);
-  color: var(--astro-burgundy);
+  background: var(--astro-bg);
+  color: var(--astro-text);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 button,
@@ -50,7 +63,7 @@ img {
 
 ::selection {
   background: var(--astro-primary);
-  color: white;
+  color: var(--astro-primary-text);
 }
 
 /* Premium serif typography */
@@ -74,7 +87,7 @@ img {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--astro-cream);
+  background: var(--astro-bg);
 }
 
 ::-webkit-scrollbar-thumb {
