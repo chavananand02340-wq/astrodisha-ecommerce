@@ -250,6 +250,7 @@ export default async function HomePage() {
             <div className="mt-3 flex flex-col gap-2 text-xs text-white/65">
               <Link href="/gemstones">Gemstones</Link>
               <Link href="/crystals">Crystals</Link>
+              <Link href="/crystal-jewellery">Crystal Jewellery</Link>
               <Link href="/rudraksha">Rudraksha</Link>
               <Link href="/puja">Puja Essentials</Link>
             </div>
@@ -286,4 +287,4 @@ export default async function HomePage() {
       </a>
     </main>
   );
-      }
+}
