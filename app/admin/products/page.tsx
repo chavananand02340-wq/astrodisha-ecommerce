@@ -115,15 +115,19 @@ function ProductsContent() {
 
     setSubmitting(true);
 
-    const { error } = await supabase.from("products").insert({
-      name,
-      slug: slugify(name),
-      category_id: categoryId,
-      price: parseFloat(price),
-      stock: stock ? parseInt(stock, 10) : 0,
-      short_description: shortDescription || null,
-      is_active: true,
-    });
+    const { data: newProduct, error } = await supabase
+      .from("products")
+      .insert({
+        name,
+        slug: slugify(name),
+        category_id: categoryId,
+        price: parseFloat(price),
+        stock: stock ? parseInt(stock, 10) : 0,
+        short_description: shortDescription || null,
+        is_active: true,
+      })
+      .select()
+      .single();
 
     setSubmitting(false);
 
@@ -136,8 +140,12 @@ function ProductsContent() {
     setPrice("");
     setStock("");
     setShortDescription("");
-    setStatusMsg("Product added successfully.");
-    loadData();
+    setStatusMsg("Product added successfully. Add images below.");
+    await loadData();
+
+    if (newProduct?.id) {
+      toggleExpand(newProduct.id);
+    }
   }
 
   async function handleToggleActive(product: Product) {
@@ -218,6 +226,14 @@ function ProductsContent() {
   function closeImages() {
     setImagesForProduct(null);
     setImages([]);
+  }
+
+  async function toggleExpand(productId: string) {
+    if (imagesForProduct === productId) {
+      closeImages();
+      return;
+    }
+    await loadImages(productId);
   }
 
   function compressImage(file: File): Promise<Blob> {
@@ -537,7 +553,7 @@ function ProductsContent() {
                       Edit
                     </button>
                     <button
-                      onClick={() => loadImages(p.id)}
+                      onClick={() => toggleExpand(p.id)}
                       style={{
                         backgroundColor: "#8A607A",
                         color: "#fff",
