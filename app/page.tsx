@@ -5,10 +5,12 @@ import SafeImage from "@/components/SafeImage";
 import { categories } from "@/data/categories";
 import { getFeaturedProducts } from "@/lib/getProducts";
 import { getActiveBanner } from "@/lib/getBanner";
+import { getActiveTestimonials } from "@/lib/getTestimonials";
 
 export default async function HomePage() {
   const featuredProducts = await getFeaturedProducts(8);
   const activeBanner = await getActiveBanner();
+  const testimonials = await getActiveTestimonials(6);
 
   return (
     <main className="min-h-screen bg-[#F7F3EC]">
@@ -170,6 +172,59 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {/* TESTIMONIALS */}
+      {testimonials.length > 0 && (
+        <section className="px-4 py-12 sm:px-6 sm:py-16">
+          <div className="mx-auto max-w-7xl">
+            <div className="text-center">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#8A607A]">
+                Testimonials
+              </p>
+              <h2 className="astro-serif mt-2 text-3xl text-[#3E2237] sm:text-4xl">
+                What Our Customers Say
+              </h2>
+            </div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {testimonials.map((t) => (
+                <div
+                  key={t.id}
+                  className="rounded-xl border border-[#D9CEC1] bg-[#FBF8F2] p-6"
+                >
+                  {t.rating && (
+                    <p className="text-sm text-[#C6A15B]">
+                      {"★".repeat(t.rating)}
+                      {"☆".repeat(5 - t.rating)}
+                    </p>
+                  )}
+
+                  <p className="mt-3 text-sm leading-6 text-[#5E4A58]">
+                    "{t.testimonial_text}"
+                  </p>
+
+                  <div className="mt-5 flex items-center gap-3">
+                    {t.image_url ? (
+                      <img
+                        src={t.image_url}
+                        alt={t.customer_name}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#5A3150] text-sm font-semibold text-white">
+                        {t.customer_name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <p className="astro-serif text-sm text-[#3E2237]">
+                      {t.customer_name}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* CONSULTATION */}
       <section id="consult" className="px-4 py-12 sm:px-6 sm:py-16">
