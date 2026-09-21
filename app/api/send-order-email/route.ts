@@ -23,6 +23,7 @@ export async function POST(request: Request) {
       shippingState,
       shippingPinCode,
       subtotal,
+      discountAmount,
       deliveryCharge,
       totalAmount,
       paymentMethod,
@@ -38,6 +39,7 @@ export async function POST(request: Request) {
       shippingState: string;
       shippingPinCode: string;
       subtotal: number;
+      discountAmount: number;
       deliveryCharge: number;
       totalAmount: number;
       paymentMethod: string;
@@ -60,6 +62,11 @@ export async function POST(request: Request) {
       )
       .join("");
 
+    const discountRowHtml =
+      discountAmount > 0
+        ? `<tr><td style="color:#C6A15B;">Discount</td><td style="text-align:right; color:#C6A15B;">−₹${discountAmount}</td></tr>`
+        : "";
+
     const paymentSummaryHtml =
       paymentMethod === "cod"
         ? `<p><strong>Payment:</strong> Cash on Delivery — ₹${advancePaid} paid online, ₹${dueOnDelivery} due on delivery</p>`
@@ -76,6 +83,7 @@ export async function POST(request: Request) {
         <table style="width: 100%; margin-top: 16px; border-collapse: collapse; font-size: 14px;">
           ${itemsHtml}
           <tr><td style="padding-top:10px; border-top:1px solid #D9CEC1;">Subtotal</td><td style="padding-top:10px; border-top:1px solid #D9CEC1; text-align:right;">₹${subtotal}</td></tr>
+          ${discountRowHtml}
           <tr><td>Delivery</td><td style="text-align:right;">₹${deliveryCharge}</td></tr>
           <tr><td style="font-weight:bold;">Total</td><td style="text-align:right; font-weight:bold;">₹${totalAmount}</td></tr>
         </table>
@@ -97,6 +105,7 @@ export async function POST(request: Request) {
         <table style="width: 100%; margin-top: 12px; border-collapse: collapse; font-size: 14px;">
           ${itemsHtml}
           <tr><td style="padding-top:10px; border-top:1px solid #D9CEC1;">Subtotal</td><td style="padding-top:10px; border-top:1px solid #D9CEC1; text-align:right;">₹${subtotal}</td></tr>
+          ${discountRowHtml}
           <tr><td>Delivery</td><td style="text-align:right;">₹${deliveryCharge}</td></tr>
           <tr><td style="font-weight:bold;">Total</td><td style="text-align:right; font-weight:bold;">₹${totalAmount}</td></tr>
         </table>
