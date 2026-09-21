@@ -77,6 +77,32 @@ export default function CheckoutPage() {
       return;
     }
 
+    const deliveryCharge = subtotal >= 999 ? 0 : 0;
+    const totalAmount = subtotal + deliveryCharge;
+
+    fetch("/api/send-order-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderNumber: result.out_order_number,
+        customerName: name,
+        customerEmail: email || null,
+        customerMobile: mobile,
+        shippingAddress: address,
+        shippingCity: city,
+        shippingState: state,
+        shippingPinCode: pinCode,
+        subtotal,
+        deliveryCharge,
+        totalAmount,
+        paymentMethod,
+        advancePaid: paymentMethod === "cod" ? advanceAmount : 0,
+        items,
+      }),
+    }).catch(() => {
+      // Email failure should never block order confirmation
+    });
+
     clearCart();
     router.push(`/order-confirmation/${result.out_order_number}`);
   }
