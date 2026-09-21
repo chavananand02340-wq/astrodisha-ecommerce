@@ -1,11 +1,9 @@
 import Header from "@/components/Header";
 import CategoryPage from "@/components/CategoryPage";
-import { products } from "@/data/products";
+import { getProductsByCategory } from "@/lib/getProducts";
 
-export default function GemstonesPage() {
-  const categoryProducts = products.filter(
-    (product) => product.category === "Gemstones"
-  );
+export default async function GemstonesPage() {
+  const categoryProducts = await getProductsByCategory("gemstones");
 
   return (
     <>
