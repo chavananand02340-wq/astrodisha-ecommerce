@@ -4,9 +4,11 @@ import ProductCard from "@/components/ProductCard";
 import SafeImage from "@/components/SafeImage";
 import { categories } from "@/data/categories";
 import { getFeaturedProducts } from "@/lib/getProducts";
+import { getActiveBanner } from "@/lib/getBanner";
 
 export default async function HomePage() {
   const featuredProducts = await getFeaturedProducts(8);
+  const activeBanner = await getActiveBanner();
 
   return (
     <main className="min-h-screen bg-[#F7F3EC]">
@@ -21,22 +23,26 @@ export default async function HomePage() {
             </p>
 
             <h1 className="astro-serif max-w-xl text-4xl leading-[1.05] text-[#3E2237] sm:text-5xl lg:text-6xl">
-              Discover What
-              <br />
-              Aligns With You.
+              {activeBanner ? activeBanner.title : (
+                <>
+                  Discover What
+                  <br />
+                  Aligns With You.
+                </>
+              )}
             </h1>
 
             <p className="mt-5 max-w-lg text-sm leading-6 text-[#6F5A68] sm:text-base">
-              Explore authentic gemstones, crystals, Rudraksha and Puja
-              essentials selected for your spiritual journey.
+              {activeBanner?.subtitle ||
+                "Explore authentic gemstones, crystals, Rudraksha and Puja essentials selected for your spiritual journey."}
             </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link
-                href="/gemstones"
+                href={activeBanner?.button_link || "/gemstones"}
                 className="rounded-sm bg-[#5A3150] px-6 py-3.5 text-center text-xs font-semibold tracking-wide text-white transition hover:bg-[#3E2237]"
               >
-                Shop Collection
+                {activeBanner?.button_text || "Shop Collection"}
               </Link>
 
               <Link
@@ -50,8 +56,11 @@ export default async function HomePage() {
 
           <div className="h-[300px] overflow-hidden rounded-xl sm:h-[420px]">
             <SafeImage
-              src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1200&q=85"
-              alt="Premium gemstone jewellery representing spiritual alignment"
+              src={
+                activeBanner?.image_url ||
+                "https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1200&q=85"
+              }
+              alt={activeBanner?.title || "Premium gemstone jewellery representing spiritual alignment"}
             />
           </div>
         </div>
@@ -287,4 +296,4 @@ export default async function HomePage() {
       </a>
     </main>
   );
-}
+            }
