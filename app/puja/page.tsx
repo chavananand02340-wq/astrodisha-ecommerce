@@ -1,11 +1,9 @@
 import Header from "@/components/Header";
 import CategoryPage from "@/components/CategoryPage";
-import { products } from "@/data/products";
+import { getProductsByCategory } from "@/lib/getProducts";
 
-export default function PujaPage() {
-  const categoryProducts = products.filter(
-    (product) => product.category === "Puja Essentials"
-  );
+export default async function PujaPage() {
+  const categoryProducts = await getProductsByCategory("puja");
 
   return (
     <>
