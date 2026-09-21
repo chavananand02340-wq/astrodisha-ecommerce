@@ -9,6 +9,7 @@ const navigation = [
   { name: "Home", href: "/" },
   { name: "Gemstones", href: "/gemstones" },
   { name: "Crystals", href: "/crystals" },
+  { name: "Crystal Jewellery", href: "/crystal-jewellery" },
   { name: "Rudraksha", href: "/rudraksha" },
   { name: "Puja", href: "/puja" },
   { name: "About Us", href: "/about" },
@@ -249,4 +250,4 @@ export default function Header() {
       </header>
     </>
   );
-}
+              }
