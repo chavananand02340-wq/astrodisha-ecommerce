@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type SafeImageProps = {
   src: string;
@@ -39,6 +39,19 @@ export default function SafeImage({
 }: SafeImageProps) {
   const [currentSrc, setCurrentSrc] = useState(src);
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    setCurrentSrc(src);
+    setLoaded(false);
+  }, [src]);
+
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth > 0) {
+      setLoaded(true);
+    }
+  }, [currentSrc]);
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -47,6 +60,7 @@ export default function SafeImage({
       )}
 
       <img
+        ref={imgRef}
         src={currentSrc}
         alt={alt}
         className={`h-full w-full object-cover transition-opacity duration-500 ${
