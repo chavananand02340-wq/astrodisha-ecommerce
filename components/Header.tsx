@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useStore } from "./StoreProvider";
-import { products } from "@/data/products";
+import { createClient } from "@/utils/supabase/client";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -16,27 +16,57 @@ const navigation = [
   { name: "Contact", href: "/contact" }
 ];
 
+type SearchResult = {
+  id: string;
+  slug: string;
+  name: string;
+  price: number;
+  categories: { name: string } | null;
+};
+
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
 
   const {
     cartCount,
     wishlistCount
   } = useStore();
 
-  const results = products.filter((product) => {
-    const query = search.toLowerCase().trim();
+  useEffect(() => {
+    const query = search.trim();
 
-    if (!query) return false;
+    if (!query) {
+      setResults([]);
+      return;
+    }
 
-    return (
-      product.name.toLowerCase().includes(query) ||
-      product.category.toLowerCase().includes(query) ||
-      product.description.toLowerCase().includes(query)
-    );
-  });
+    setSearching(true);
+
+    const timer = setTimeout(async () => {
+      const supabase = createClient();
+
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, slug, name, price, categories(name)")
+        .eq("is_active", true)
+        .or(`name.ilike.%${query}%,short_description.ilike.%${query}%`)
+        .limit(5);
+
+      if (!error && data) {
+        setResults(data as unknown as SearchResult[]);
+      } else {
+        setResults([]);
+      }
+
+      setSearching(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   return (
     <>
@@ -187,12 +217,16 @@ export default function Header() {
 
               {search.trim() && (
                 <div className="mt-3 overflow-hidden rounded-sm border border-[#d9cec1] bg-white">
-                  {results.length === 0 ? (
+                  {searching ? (
+                    <p className="px-4 py-5 text-center text-sm text-[#8a607a]">
+                      Searching...
+                    </p>
+                  ) : results.length === 0 ? (
                     <p className="px-4 py-5 text-center text-sm text-[#8a607a]">
                       No products found.
                     </p>
                   ) : (
-                    results.slice(0, 5).map((product) => (
+                    results.map((product) => (
                       <Link
                         key={product.id}
                         href={`/product/${product.slug}`}
@@ -207,7 +241,7 @@ export default function Header() {
                             {product.name}
                           </p>
                           <p className="text-[10px] text-[#8a607a]">
-                            {product.category}
+                            {product.categories?.name || ""}
                           </p>
                         </div>
 
