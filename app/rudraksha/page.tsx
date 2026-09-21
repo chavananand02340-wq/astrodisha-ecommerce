@@ -1,11 +1,9 @@
 import Header from "@/components/Header";
 import CategoryPage from "@/components/CategoryPage";
-import { products } from "@/data/products";
+import { getProductsByCategory } from "@/lib/getProducts";
 
-export default function RudrakshaPage() {
-  const categoryProducts = products.filter(
-    (product) => product.category === "Rudraksha"
-  );
+export default async function RudrakshaPage() {
+  const categoryProducts = await getProductsByCategory("rudraksha");
 
   return (
     <>
