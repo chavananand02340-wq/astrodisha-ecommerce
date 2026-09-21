@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useStore } from "./StoreProvider";
 
@@ -31,6 +31,14 @@ export default function ProductCard({
   } = useStore();
 
   const [imageLoaded, setImageLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth > 0) {
+      setImageLoaded(true);
+    }
+  }, []);
 
   const wishlisted = isWishlisted(product.id);
 
@@ -47,6 +55,7 @@ export default function ProductCard({
           aria-label={`View ${product.name}`}
         >
           <img
+            ref={imgRef}
             src={product.image}
             alt={`${product.name} - ${product.category}`}
             className={`product-image h-full w-full object-cover transition-opacity duration-300 ${
