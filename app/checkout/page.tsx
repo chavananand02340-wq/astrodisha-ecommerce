@@ -19,6 +19,7 @@ export default function CheckoutPage() {
   const [pinCode, setPinCode] = useState("");
   const [country, setCountry] = useState("India");
   const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("online");
+  const [couponCode, setCouponCode] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -61,6 +62,7 @@ export default function CheckoutPage() {
       p_payment_method: paymentMethod,
       p_advance_paid: paymentMethod === "cod" ? advanceAmount : 0,
       p_items: items,
+      p_coupon_code: couponCode || null,
     });
 
     setSubmitting(false);
@@ -77,9 +79,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    const deliveryCharge = subtotal >= 999 ? 0 : 0;
-    const totalAmount = subtotal + deliveryCharge;
-
     fetch("/api/send-order-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -92,9 +91,10 @@ export default function CheckoutPage() {
         shippingCity: city,
         shippingState: state,
         shippingPinCode: pinCode,
-        subtotal,
-        deliveryCharge,
-        totalAmount,
+        subtotal: result.out_subtotal,
+        discountAmount: result.out_discount_amount,
+        deliveryCharge: result.out_delivery_charge,
+        totalAmount: result.out_total_amount,
         paymentMethod,
         advancePaid: paymentMethod === "cod" ? advanceAmount : 0,
         items,
@@ -163,8 +163,22 @@ export default function CheckoutPage() {
           <span>Subtotal</span>
           <span>₹{subtotal.toLocaleString("en-IN")}</span>
         </div>
-        <p style={{ fontSize: "0.75rem", color: "#8A607A", marginTop: "0.5rem" }}>
-          Delivery charge and final total will be confirmed on the next screen.
+
+        <div style={{ marginTop: "1rem" }}>
+          <label style={{ fontSize: "0.85rem", color: "#3E2237", fontWeight: "bold" }}>
+            Have a coupon code?
+          </label>
+          <input
+            type="text"
+            placeholder="Enter coupon code"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+            style={{ ...inputStyle, marginTop: "0.5rem", marginBottom: 0 }}
+          />
+        </div>
+
+        <p style={{ fontSize: "0.75rem", color: "#8A607A", marginTop: "0.75rem" }}>
+          Discount (if applicable), delivery charge, and final total will be confirmed on the next screen.
         </p>
       </div>
 
