@@ -10,14 +10,18 @@ type ProductRow = {
   rating: number | null;
   review_count: number | null;
   categories: { name: string } | null;
-  product_images: { image_url: string; is_primary: boolean }[] | null;
+  product_images: { image_url: string; is_primary: boolean; sort_order: number }[] | null;
 };
 
 function mapRowToProduct(row: ProductRow): Product {
-  const primaryImage =
-    row.product_images?.find((img) => img.is_primary)?.image_url ||
-    row.product_images?.[0]?.image_url ||
-    "/images/placeholder-product.svg";
+  const sortedImages = [...(row.product_images || [])].sort((a, b) => {
+    if (a.is_primary) return -1;
+    if (b.is_primary) return 1;
+    return a.sort_order - b.sort_order;
+  });
+
+  const imageUrls = sortedImages.map((img) => img.image_url);
+  const primaryImage = imageUrls[0] || "/images/placeholder-product.svg";
 
   return {
     id: row.id,
@@ -27,6 +31,7 @@ function mapRowToProduct(row: ProductRow): Product {
     description: row.short_description || "",
     price: Number(row.price),
     image: primaryImage,
+    images: imageUrls.length > 0 ? imageUrls : [primaryImage],
     rating: row.rating ? Number(row.rating) : undefined,
     reviewCount: row.review_count ?? undefined,
   };
@@ -38,7 +43,7 @@ export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, slug, name, short_description, price, rating, review_count, categories(name), product_images(image_url, is_primary)"
+      "id, slug, name, short_description, price, rating, review_count, categories(name), product_images(image_url, is_primary, sort_order)"
     )
     .eq("is_active", true)
     .order("created_at", { ascending: false })
@@ -67,7 +72,7 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, slug, name, short_description, price, rating, review_count, categories(name), product_images(image_url, is_primary)"
+      "id, slug, name, short_description, price, rating, review_count, categories(name), product_images(image_url, is_primary, sort_order)"
     )
     .eq("is_active", true)
     .eq("category_id", category.id)
@@ -86,7 +91,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, slug, name, short_description, price, rating, review_count, categories(name), product_images(image_url, is_primary)"
+      "id, slug, name, short_description, price, rating, review_count, categories(name), product_images(image_url, is_primary, sort_order)"
     )
     .eq("is_active", true)
     .eq("slug", slug)
