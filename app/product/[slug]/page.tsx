@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductDetails from "@/components/ProductDetails";
-import { products } from "@/data/products";
+import { getProductBySlug } from "@/lib/getProducts";
 
 export default async function ProductPage({
   params
@@ -10,9 +10,7 @@ export default async function ProductPage({
 }) {
   const { slug } = await params;
 
-  const product = products.find(
-    (item) => item.slug === slug
-  );
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     return (
