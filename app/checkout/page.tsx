@@ -72,13 +72,13 @@ export default function CheckoutPage() {
 
     const result = Array.isArray(data) ? data[0] : data;
 
-    if (!result?.order_number) {
+    if (!result?.out_order_number) {
       setErrorMsg("Order was placed but confirmation details are missing.");
       return;
     }
 
     clearCart();
-    router.push(`/order-confirmation/${result.order_number}`);
+    router.push(`/order-confirmation/${result.out_order_number}`);
   }
 
   if (cart.length === 0) {
