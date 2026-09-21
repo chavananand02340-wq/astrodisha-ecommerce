@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
+import SafeImage from "@/components/SafeImage";
 import { useStore } from "@/components/StoreProvider";
 
 export default function CartPage() {
+  const router = useRouter();
   const {
     cart,
     updateQuantity,
@@ -16,12 +19,6 @@ export default function CartPage() {
       total + item.price * item.quantity,
     0
   );
-
-  const delivery = subtotal >= 999 || subtotal === 0
-    ? 0
-    : 99;
-
-  const total = subtotal + delivery;
 
   return (
     <>
@@ -64,15 +61,12 @@ export default function CartPage() {
                     key={item.id}
                     className="flex gap-4 rounded-sm border border-[#d9cec1] bg-[#fbf8f2] p-3"
                   >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-24 w-24 rounded-sm object-cover"
-                      onError={(event) => {
-                        event.currentTarget.src =
-                          "/images/placeholder-product.svg";
-                      }}
-                    />
+                    <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-sm">
+                      <SafeImage
+                        src={item.image}
+                        alt={item.name}
+                      />
+                    </div>
 
                     <div className="min-w-0 flex-1">
                       <p className="text-[9px] uppercase tracking-wider text-[#8a607a]">
@@ -151,32 +145,15 @@ export default function CartPage() {
                     </span>
                   </div>
 
-                  <div className="flex justify-between">
-                    <span className="text-[#8a607a]">
-                      Delivery
-                    </span>
-
-                    <span>
-                      {delivery === 0
-                        ? "FREE"
-                        : `₹${delivery}`}
-                    </span>
-                  </div>
-
-                  <div className="border-t border-[#d9cec1] pt-4">
-                    <div className="flex justify-between font-semibold">
-                      <span>Total</span>
-
-                      <span className="text-[#5a3150]">
-                        ₹{total.toLocaleString("en-IN")}
-                      </span>
-                    </div>
-                  </div>
+                  <p className="text-[11px] text-[#8a607a]">
+                    Delivery charge and final total will be calculated at checkout.
+                  </p>
                 </div>
 
                 <button
                   type="button"
-                  className="mt-6 w-full rounded-sm bg-[#5a3150] py-3.5 text-xs font-semibold text-white"
+                  onClick={() => router.push("/checkout")}
+                  className="mt-6 w-full rounded-sm bg-[#5a3150] py-3.5 text-xs font-semibold text-white transition hover:bg-[#3e2237]"
                 >
                   Proceed to Checkout
                 </button>
