@@ -45,5 +45,15 @@ export const categories: Category[] = [
       "Traditional essentials for your spiritual practices.",
     image:
       "https://images.unsplash.com/photo-1604608672516-f1b9d5c2b8c6?auto=format&fit=crop&w=1000&q=85"
+  },
+
+  {
+    id: "CAT005",
+    name: "Crystal Jewellery",
+    slug: "crystal-jewellery",
+    description:
+      "Elegant crystal jewellery crafted for everyday wear and spiritual intention.",
+    image:
+      "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=1000&q=85"
   }
 ];
