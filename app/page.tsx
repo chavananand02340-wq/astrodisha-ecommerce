@@ -3,10 +3,10 @@ import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
 import SafeImage from "@/components/SafeImage";
 import { categories } from "@/data/categories";
-import { products } from "@/data/products";
+import { getFeaturedProducts } from "@/lib/getProducts";
 
-export default function HomePage() {
-  const featuredProducts = products.slice(0, 8);
+export default async function HomePage() {
+  const featuredProducts = await getFeaturedProducts(8);
 
   return (
     <main className="min-h-screen bg-[#F7F3EC]">
@@ -148,11 +148,17 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {featuredProducts.length === 0 ? (
+            <p className="text-sm text-[#8A607A]">
+              New products are being added soon. Please check back shortly.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -280,4 +286,4 @@ export default function HomePage() {
       </a>
     </main>
   );
-}
+      }
