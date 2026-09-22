@@ -44,6 +44,10 @@ function ProductsContent() {
   const [loading, setLoading] = useState(true);
   const [statusMsg, setStatusMsg] = useState("");
 
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+
   const [name, setName] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [price, setPrice] = useState("");
@@ -73,10 +77,31 @@ function ProductsContent() {
       setCategoryId(cats[0].id);
     }
 
-    const { data: prods, error } = await supabase
+    let query = supabase
       .from("products")
-      .select("id, name, price, stock, is_active, category_id, short_description, categories(name)")
-      .order("created_at", { ascending: false });
+      .select("id, name, price, stock, is_active, category_id, short_description, categories(name)");
+
+    if (filterStatus === "active") {
+      query = query.eq("is_active", true);
+    } else if (filterStatus === "inactive") {
+      query = query.eq("is_active", false);
+    }
+
+    if (filterCategory !== "all") {
+      query = query.eq("category_id", filterCategory);
+    }
+
+    if (sortBy === "newest") {
+      query = query.order("created_at", { ascending: false });
+    } else if (sortBy === "oldest") {
+      query = query.order("created_at", { ascending: true });
+    } else if (sortBy === "price_high") {
+      query = query.order("price", { ascending: false });
+    } else if (sortBy === "price_low") {
+      query = query.order("price", { ascending: true });
+    }
+
+    const { data: prods, error } = await query;
 
     if (error) {
       setStatusMsg("Failed to load products: " + error.message);
@@ -90,7 +115,7 @@ function ProductsContent() {
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [filterStatus, filterCategory, sortBy]);
 
   function slugify(text: string) {
     return (
@@ -442,6 +467,49 @@ function ProductsContent() {
       <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginTop: "2rem", marginBottom: "1rem" }}>
         All Products
       </h2>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "0.75rem",
+          flexWrap: "wrap",
+          marginBottom: "1rem",
+        }}
+      >
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          style={{ ...inputStyle, width: "auto", marginBottom: 0, minWidth: "140px" }}
+        >
+          <option value="all">All Status</option>
+          <option value="active">Active Only</option>
+          <option value="inactive">Inactive Only</option>
+        </select>
+
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          style={{ ...inputStyle, width: "auto", marginBottom: 0, minWidth: "160px" }}
+        >
+          <option value="all">All Categories</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          style={{ ...inputStyle, width: "auto", marginBottom: 0, minWidth: "160px" }}
+        >
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="price_high">Price: High to Low</option>
+          <option value="price_low">Price: Low to High</option>
+        </select>
+      </div>
 
       {loading ? (
         <p>Loading...</p>
