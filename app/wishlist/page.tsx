@@ -12,31 +12,35 @@ export default function WishlistPage() {
     <>
       <Header />
 
-      <main className="min-h-screen bg-[#f7f3ec] px-4 py-10 sm:px-8">
+      <main style={{ backgroundColor: "var(--astro-bg)" }} className="min-h-screen px-4 py-10 sm:px-8">
         <div className="mx-auto max-w-7xl">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#c6a15b]">
+          <p style={{ color: "var(--astro-accent)" }} className="text-[10px] uppercase tracking-[0.2em]">
             SAVED FOR YOU
           </p>
 
-          <h1 className="astro-serif mt-2 text-4xl text-[#3e2237]">
+          <h1 style={{ color: "var(--astro-text)" }} className="astro-serif mt-2 text-4xl">
             Your Wishlist
           </h1>
 
           {wishlist.length === 0 ? (
-            <div className="mt-10 rounded-sm border border-[#d9cec1] bg-[#fbf8f2] px-6 py-16 text-center">
-              <div className="text-4xl">♡</div>
+            <div
+              style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
+              className="mt-10 rounded-sm border px-6 py-16 text-center"
+            >
+              <div style={{ color: "var(--astro-primary)" }} className="text-4xl">♡</div>
 
-              <h2 className="astro-serif mt-5 text-2xl text-[#3e2237]">
+              <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mt-5 text-2xl">
                 Nothing saved yet
               </h2>
 
-              <p className="mt-2 text-sm text-[#8a607a]">
+              <p style={{ color: "var(--astro-mauve)" }} className="mt-2 text-sm">
                 Tap the heart on any product to save it here.
               </p>
 
               <Link
                 href="/"
-                className="mt-6 inline-block rounded-sm bg-[#5a3150] px-7 py-3 text-xs font-semibold text-white"
+                style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+                className="mt-6 inline-block rounded-sm px-7 py-3 text-xs font-semibold"
               >
                 Browse Products
               </Link>
