@@ -18,7 +18,8 @@ export default function OrderConfirmationPage() {
   return (
     <div
       style={{
-        minHeight: "70vh",
+        minHeight: "100vh",
+        backgroundColor: "var(--astro-bg)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -28,32 +29,32 @@ export default function OrderConfirmationPage() {
         fontFamily: "Inter, sans-serif",
       }}
     >
-      <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>✓</div>
-      <h1 style={{ fontFamily: "Playfair Display, serif", color: "#3E2237", marginBottom: "0.5rem" }}>
+      <div style={{ fontSize: "3rem", marginBottom: "1rem", color: "var(--astro-primary)" }}>✓</div>
+      <h1 style={{ fontFamily: "Playfair Display, serif", color: "var(--astro-text)", marginBottom: "0.5rem" }}>
         Thank You for Your Order
       </h1>
-      <p style={{ color: "#8A607A", marginBottom: "1.5rem" }}>
+      <p style={{ color: "var(--astro-accent)", marginBottom: "1.5rem" }}>
         Guidance • Healing • Divine Alignment
       </p>
 
       <div
         style={{
-          backgroundColor: "#FBF8F2",
-          border: "1px solid #D9CEC1",
+          backgroundColor: "var(--astro-card)",
+          border: "1px solid var(--astro-border)",
           borderRadius: "8px",
           padding: "1.5rem 2rem",
           marginBottom: "2rem",
         }}
       >
-        <p style={{ color: "#3E2237", fontSize: "0.9rem", marginBottom: "0.3rem" }}>
+        <p style={{ color: "var(--astro-text)", fontSize: "0.9rem", marginBottom: "0.3rem" }}>
           Your Order ID
         </p>
-        <p style={{ color: "#5A3150", fontSize: "1.5rem", fontWeight: "bold" }}>
+        <p style={{ color: "var(--astro-primary)", fontSize: "1.5rem", fontWeight: "bold" }}>
           {displayId || "..."}
         </p>
       </div>
 
-      <p style={{ color: "#3E2237", maxWidth: "400px", marginBottom: "2rem" }}>
+      <p style={{ color: "var(--astro-text)", opacity: 0.85, maxWidth: "400px", marginBottom: "2rem" }}>
         We've received your order and will begin processing it shortly. You'll be
         contacted with updates on your order status.
       </p>
@@ -61,8 +62,8 @@ export default function OrderConfirmationPage() {
       <Link
         href="/"
         style={{
-          backgroundColor: "#5A3150",
-          color: "#fff",
+          backgroundColor: "var(--astro-primary)",
+          color: "var(--astro-primary-text)",
           padding: "0.7rem 1.5rem",
           borderRadius: "6px",
           textDecoration: "none",
@@ -73,4 +74,4 @@ export default function OrderConfirmationPage() {
       </Link>
     </div>
   );
-      }
+}
