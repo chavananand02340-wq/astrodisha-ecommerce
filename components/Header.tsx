@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useStore } from "./StoreProvider";
 import { createClient } from "@/utils/supabase/client";
+import { useTheme } from "./ThemeProvider";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -30,6 +31,8 @@ export default function Header() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+
+  const { theme, toggleTheme } = useTheme();
 
   const {
     cartCount,
@@ -70,25 +73,43 @@ export default function Header() {
 
   return (
     <>
-      <div className="bg-[#5a3150] px-4 py-2 text-center text-[9px] tracking-[0.08em] text-white sm:text-xs">
+      <div
+        style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+        className="px-4 py-2 text-center text-[9px] tracking-[0.08em] sm:text-xs"
+      >
         Authentic Products&nbsp; | &nbsp;Secure Payments&nbsp; | &nbsp;Expert
         Guidance
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-[#d9cec1]/70 bg-[#f7f3ec]/95 backdrop-blur-md">
+      <header
+        style={{
+          backgroundColor: "var(--astro-bg)",
+          borderColor: "var(--astro-border)",
+        }}
+        className="sticky top-0 z-50 border-b backdrop-blur-md"
+      >
         <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6">
 
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#c6a15b] text-[#c6a15b]">
+            <div
+              style={{ borderColor: "var(--astro-primary)", color: "var(--astro-primary)" }}
+              className="flex h-10 w-10 items-center justify-center rounded-full border"
+            >
               ✦
             </div>
 
             <div>
-              <div className="astro-serif text-[19px] leading-none text-[#3e2237] sm:text-[21px]">
+              <div
+                style={{ color: "var(--astro-text)" }}
+                className="astro-serif text-[19px] leading-none sm:text-[21px]"
+              >
                 ASTRODISHA
               </div>
 
-              <div className="mt-1 text-[6px] tracking-[0.14em] text-[#8a607a] sm:text-[7px]">
+              <div
+                style={{ color: "var(--astro-accent)" }}
+                className="mt-1 text-[6px] tracking-[0.14em] sm:text-[7px]"
+              >
                 GUIDANCE · HEALING · DIVINE ALIGNMENT
               </div>
             </div>
@@ -99,7 +120,8 @@ export default function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-[12px] text-[#5e4a58] transition hover:text-[#5a3150]"
+                style={{ color: "var(--astro-text)" }}
+                className="text-[12px] opacity-80 transition hover:opacity-100"
               >
                 {item.name}
               </Link>
@@ -110,9 +132,20 @@ export default function Header() {
 
             <button
               type="button"
+              aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+              onClick={toggleTheme}
+              style={{ color: "var(--astro-text)" }}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-lg transition hover:opacity-70"
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+
+            <button
+              type="button"
               aria-label="Open search"
               onClick={() => setSearchOpen((value) => !value)}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-lg text-[#3e2237] transition hover:bg-[#fbf8f2]"
+              style={{ color: "var(--astro-text)" }}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-lg transition hover:opacity-70"
             >
               ⌕
             </button>
@@ -120,11 +153,15 @@ export default function Header() {
             <Link
               href="/wishlist"
               aria-label={`Wishlist with ${wishlistCount} items`}
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-lg text-[#3e2237] transition hover:bg-[#fbf8f2]"
+              style={{ color: "var(--astro-text)" }}
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-lg transition hover:opacity-70"
             >
               ♡
               {wishlistCount > 0 && (
-                <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-[#5a3150] text-[8px] text-white">
+                <span
+                  style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+                  className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full text-[8px]"
+                >
                   {wishlistCount}
                 </span>
               )}
@@ -133,18 +170,23 @@ export default function Header() {
             <Link
               href="/cart"
               aria-label={`Cart with ${cartCount} items`}
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-lg text-[#3e2237] transition hover:bg-[#fbf8f2]"
+              style={{ color: "var(--astro-text)" }}
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-lg transition hover:opacity-70"
             >
               🛒
 
-              <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-[#5a3150] text-[8px] text-white">
+              <span
+                style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+                className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full text-[8px]"
+              >
                 {cartCount}
               </span>
             </Link>
 
             <Link
               href="/consult"
-              className="ml-2 rounded-sm bg-[#5a3150] px-4 py-2.5 text-[11px] font-semibold text-white transition hover:bg-[#3e2237]"
+              style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+              className="ml-2 rounded-sm px-4 py-2.5 text-[11px] font-semibold transition hover:opacity-90"
             >
               Consult an Expert
             </Link>
@@ -154,9 +196,20 @@ export default function Header() {
 
             <button
               type="button"
+              aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+              onClick={toggleTheme}
+              style={{ color: "var(--astro-text)" }}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-lg"
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+
+            <button
+              type="button"
               aria-label="Open search"
               onClick={() => setSearchOpen((value) => !value)}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-lg text-[#3e2237]"
+              style={{ color: "var(--astro-text)" }}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-lg"
             >
               ⌕
             </button>
@@ -164,11 +217,15 @@ export default function Header() {
             <Link
               href="/wishlist"
               aria-label="Wishlist"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-lg text-[#3e2237]"
+              style={{ color: "var(--astro-text)" }}
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-lg"
             >
               ♡
               {wishlistCount > 0 && (
-                <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-[#5a3150] text-[8px] text-white">
+                <span
+                  style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+                  className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full text-[8px]"
+                >
                   {wishlistCount}
                 </span>
               )}
@@ -177,11 +234,15 @@ export default function Header() {
             <Link
               href="/cart"
               aria-label="Cart"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-lg text-[#3e2237]"
+              style={{ color: "var(--astro-text)" }}
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-lg"
             >
               🛒
 
-              <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-[#5a3150] text-[8px] text-white">
+              <span
+                style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+                className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full text-[8px]"
+              >
                 {cartCount}
               </span>
             </Link>
@@ -191,7 +252,8 @@ export default function Header() {
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((value) => !value)}
-              className="ml-1 flex h-9 w-9 items-center justify-center rounded-full text-xl text-[#3e2237]"
+              style={{ color: "var(--astro-text)" }}
+              className="ml-1 flex h-9 w-9 items-center justify-center rounded-full text-xl"
             >
               {menuOpen ? "×" : "☰"}
             </button>
@@ -199,10 +261,16 @@ export default function Header() {
         </div>
 
         {searchOpen && (
-          <div className="border-t border-[#d9cec1] bg-[#fbf8f2] px-4 py-4">
+          <div
+            style={{ backgroundColor: "var(--astro-card)", borderColor: "var(--astro-border)" }}
+            className="border-t px-4 py-4"
+          >
             <div className="mx-auto max-w-3xl">
-              <div className="flex items-center gap-3 rounded-sm border border-[#d9cec1] bg-white px-4">
-                <span className="text-lg text-[#8a607a]">⌕</span>
+              <div
+                style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-bg)" }}
+                className="flex items-center gap-3 rounded-sm border px-4"
+              >
+                <span style={{ color: "var(--astro-mauve)" }} className="text-lg">⌕</span>
 
                 <input
                   autoFocus
@@ -211,18 +279,22 @@ export default function Header() {
                     setSearch(event.target.value)
                   }
                   placeholder="Search gemstones, crystals, Rudraksha..."
-                  className="h-12 flex-1 bg-transparent text-sm text-[#3e2237] outline-none placeholder:text-[#a28f9b]"
+                  style={{ color: "var(--astro-text)" }}
+                  className="h-12 flex-1 bg-transparent text-sm outline-none placeholder:opacity-50"
                 />
               </div>
 
               {search.trim() && (
-                <div className="mt-3 overflow-hidden rounded-sm border border-[#d9cec1] bg-white">
+                <div
+                  style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-bg)" }}
+                  className="mt-3 overflow-hidden rounded-sm border"
+                >
                   {searching ? (
-                    <p className="px-4 py-5 text-center text-sm text-[#8a607a]">
+                    <p style={{ color: "var(--astro-mauve)" }} className="px-4 py-5 text-center text-sm">
                       Searching...
                     </p>
                   ) : results.length === 0 ? (
-                    <p className="px-4 py-5 text-center text-sm text-[#8a607a]">
+                    <p style={{ color: "var(--astro-mauve)" }} className="px-4 py-5 text-center text-sm">
                       No products found.
                     </p>
                   ) : (
@@ -234,18 +306,19 @@ export default function Header() {
                           setSearch("");
                           setSearchOpen(false);
                         }}
-                        className="flex items-center justify-between border-b border-[#eee5db] px-4 py-3 last:border-b-0 hover:bg-[#f7f3ec]"
+                        style={{ borderColor: "var(--astro-border)" }}
+                        className="flex items-center justify-between border-b px-4 py-3 last:border-b-0"
                       >
                         <div>
-                          <p className="text-sm font-medium text-[#3e2237]">
+                          <p style={{ color: "var(--astro-text)" }} className="text-sm font-medium">
                             {product.name}
                           </p>
-                          <p className="text-[10px] text-[#8a607a]">
+                          <p style={{ color: "var(--astro-mauve)" }} className="text-[10px]">
                             {product.categories?.name || ""}
                           </p>
                         </div>
 
-                        <span className="text-xs font-semibold text-[#5a3150]">
+                        <span style={{ color: "var(--astro-primary)" }} className="text-xs font-semibold">
                           ₹{product.price.toLocaleString("en-IN")}
                         </span>
                       </Link>
@@ -258,14 +331,18 @@ export default function Header() {
         )}
 
         {menuOpen && (
-          <div className="border-t border-[#d9cec1] bg-[#fbf8f2] px-5 py-5 lg:hidden">
+          <div
+            style={{ backgroundColor: "var(--astro-card)", borderColor: "var(--astro-border)" }}
+            className="border-t px-5 py-5 lg:hidden"
+          >
             <nav className="flex flex-col">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className="border-b border-[#d9cec1]/60 py-4 text-sm text-[#3e2237]"
+                  style={{ borderColor: "var(--astro-border)", color: "var(--astro-text)" }}
+                  className="border-b py-4 text-sm"
                 >
                   {item.name}
                 </Link>
@@ -274,7 +351,8 @@ export default function Header() {
               <Link
                 href="/consult"
                 onClick={() => setMenuOpen(false)}
-                className="mt-5 rounded-sm bg-[#5a3150] px-5 py-3.5 text-center text-sm font-semibold text-white"
+                style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+                className="mt-5 rounded-sm px-5 py-3.5 text-center text-sm font-semibold"
               >
                 Consult an Expert
               </Link>
@@ -284,4 +362,4 @@ export default function Header() {
       </header>
     </>
   );
-              }
+            }
