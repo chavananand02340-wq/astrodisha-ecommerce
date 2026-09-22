@@ -14,25 +14,26 @@ export default function CategoryPage({
   products
 }: CategoryPageProps) {
   return (
-    <main className="min-h-screen bg-[#f7f3ec]">
-      <section className="border-b border-[#d9cec1] px-5 py-12 sm:px-8 sm:py-16">
+    <main style={{ backgroundColor: "var(--astro-bg)" }} className="min-h-screen">
+      <section style={{ borderColor: "var(--astro-border)" }} className="border-b px-5 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto max-w-7xl">
           <Link
             href="/"
-            className="text-[10px] uppercase tracking-[0.15em] text-[#8a607a]"
+            style={{ color: "var(--astro-mauve)" }}
+            className="text-[10px] uppercase tracking-[0.15em]"
           >
             ← Back to Home
           </Link>
 
-          <p className="mt-8 text-[10px] uppercase tracking-[0.2em] text-[#c6a15b]">
+          <p style={{ color: "var(--astro-accent)" }} className="mt-8 text-[10px] uppercase tracking-[0.2em]">
             ASTRODISHA COLLECTION
           </p>
 
-          <h1 className="astro-serif mt-3 text-4xl text-[#3e2237] sm:text-5xl">
+          <h1 style={{ color: "var(--astro-text)" }} className="astro-serif mt-3 text-4xl sm:text-5xl">
             {title}
           </h1>
 
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-[#765f6d]">
+          <p style={{ color: "var(--astro-text)", opacity: 0.75 }} className="mt-4 max-w-2xl text-sm leading-7">
             {description}
           </p>
         </div>
@@ -40,12 +41,15 @@ export default function CategoryPage({
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-8 sm:py-14">
         {products.length === 0 ? (
-          <div className="rounded-sm border border-[#d9cec1] bg-[#fbf8f2] px-6 py-16 text-center">
-            <h2 className="astro-serif text-2xl text-[#3e2237]">
+          <div
+            style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
+            className="rounded-sm border px-6 py-16 text-center"
+          >
+            <h2 style={{ color: "var(--astro-text)" }} className="astro-serif text-2xl">
               Coming Soon
             </h2>
 
-            <p className="mt-2 text-sm text-[#8a607a]">
+            <p style={{ color: "var(--astro-mauve)" }} className="mt-2 text-sm">
               New products are being added to this collection.
             </p>
           </div>
