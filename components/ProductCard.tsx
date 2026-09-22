@@ -43,7 +43,10 @@ export default function ProductCard({
   const wishlisted = isWishlisted(product.id);
 
   return (
-    <article className="product-card group overflow-hidden rounded-sm border border-[#d9cec1] bg-[#fbf8f2]">
+    <article
+      style={{ backgroundColor: "var(--astro-card)", borderColor: "var(--astro-border)" }}
+      className="product-card group overflow-hidden rounded-sm border"
+    >
       <div className="relative aspect-square overflow-hidden bg-[#eee5db]">
 
         {!imageLoaded && (
@@ -83,38 +86,38 @@ export default function ProductCard({
           }
           aria-pressed={wishlisted}
           onClick={() => toggleWishlist(product)}
-          className={`absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-xl shadow-sm transition active:scale-90 ${
-            wishlisted
-              ? "text-[#5a3150]"
-              : "text-[#8a607a]"
-          }`}
+          style={{ color: wishlisted ? "var(--astro-primary)" : "var(--astro-mauve)" }}
+          className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-xl shadow-sm transition active:scale-90"
         >
           {wishlisted ? "♥" : "♡"}
         </button>
       </div>
 
       <div className="p-3.5">
-        <p className="mb-1 text-[9px] uppercase tracking-[0.08em] text-[#8a607a]">
+        <p style={{ color: "var(--astro-mauve)" }} className="mb-1 text-[9px] uppercase tracking-[0.08em]">
           {product.category}
         </p>
 
         <Link href={`/product/${product.slug}`}>
-          <h3 className="astro-serif line-clamp-2 min-h-[38px] text-[15px] leading-5 text-[#3e2237] transition hover:text-[#5a3150]">
+          <h3
+            style={{ color: "var(--astro-text)" }}
+            className="astro-serif line-clamp-2 min-h-[38px] text-[15px] leading-5 transition hover:opacity-80"
+          >
             {product.name}
           </h3>
         </Link>
 
-        <p className="mt-1.5 line-clamp-1 text-[10px] leading-4 text-[#8a607a]">
+        <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 line-clamp-1 text-[10px] leading-4">
           {product.description}
         </p>
 
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-[15px] font-bold text-[#5a3150]">
+          <span style={{ color: "var(--astro-primary)" }} className="text-[15px] font-bold">
             ₹{product.price.toLocaleString("en-IN")}
           </span>
 
           {product.rating && (
-            <span className="text-[9px] text-[#8a607a]">
+            <span style={{ color: "var(--astro-mauve)" }} className="text-[9px]">
               ★★★★★
               {product.reviewCount
                 ? ` (${product.reviewCount})`
@@ -126,11 +129,12 @@ export default function ProductCard({
         <button
           type="button"
           onClick={() => addToCart(product)}
-          className="mt-3 w-full rounded-sm bg-[#5a3150] py-3 text-[10px] font-semibold tracking-wide text-white transition hover:bg-[#3e2237] active:scale-[0.98] sm:text-xs"
+          style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+          className="mt-3 w-full rounded-sm py-3 text-[10px] font-semibold tracking-wide transition hover:opacity-90 active:scale-[0.98] sm:text-xs"
         >
           Add to Cart
         </button>
       </div>
     </article>
   );
-}
+            }
