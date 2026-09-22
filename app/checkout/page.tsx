@@ -14,18 +14,44 @@ export default function CheckoutPage() {
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const [pinCode, setPinCode] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
-  const [pinCode, setPinCode] = useState("");
   const [country, setCountry] = useState("India");
   const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("online");
   const [couponCode, setCouponCode] = useState("");
 
+  const [pinLookupMsg, setPinLookupMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const advanceAmount = 100;
+
+  async function handlePinCodeChange(value: string) {
+    const digitsOnly = value.replace(/\D/g, "").slice(0, 6);
+    setPinCode(digitsOnly);
+    setPinLookupMsg("");
+
+    if (digitsOnly.length === 6) {
+      setPinLookupMsg("Looking up city/state...");
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${digitsOnly}`);
+        const data = await res.json();
+
+        if (data?.[0]?.Status === "Success" && data[0].PostOffice?.length > 0) {
+          const office = data[0].PostOffice[0];
+          setCity(office.District || "");
+          setState(office.State || "");
+          setPinLookupMsg("City and State auto-filled — please verify.");
+        } else {
+          setPinLookupMsg("Couldn't find this PIN code. Please enter city/state manually.");
+        }
+      } catch {
+        setPinLookupMsg("Couldn't look up PIN code. Please enter city/state manually.");
+      }
+    }
+  }
 
   async function handlePlaceOrder(e: React.FormEvent) {
     e.preventDefault();
@@ -109,212 +135,222 @@ export default function CheckoutPage() {
 
   if (cart.length === 0) {
     return (
-      <div style={{ padding: "2rem", textAlign: "center", color: "#3E2237" }}>
-        <h1 style={{ fontFamily: "Playfair Display, serif" }}>Your cart is empty</h1>
-        <p style={{ color: "#8A607A" }}>Add some products before checking out.</p>
+      <div style={{ backgroundColor: "var(--astro-bg)", minHeight: "100vh", padding: "2rem", textAlign: "center" }}>
+        <h1 style={{ fontFamily: "Playfair Display, serif", color: "var(--astro-text)" }}>Your cart is empty</h1>
+        <p style={{ color: "var(--astro-mauve)" }}>Add some products before checking out.</p>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: "700px", margin: "0 auto", padding: "2rem", fontFamily: "Inter, sans-serif" }}>
-      <h1 style={{ fontFamily: "Playfair Display, serif", color: "#3E2237", marginBottom: "1.5rem" }}>
-        Checkout
-      </h1>
+    <div style={{ backgroundColor: "var(--astro-bg)", minHeight: "100vh" }}>
+      <div style={{ maxWidth: "700px", margin: "0 auto", padding: "2rem", fontFamily: "Inter, sans-serif" }}>
+        <h1 style={{ fontFamily: "Playfair Display, serif", color: "var(--astro-text)", marginBottom: "1.5rem" }}>
+          Checkout
+        </h1>
 
-      <div
-        style={{
-          backgroundColor: "#FBF8F2",
-          border: "1px solid #D9CEC1",
-          borderRadius: "8px",
-          padding: "1.5rem",
-          marginBottom: "1.5rem",
-        }}
-      >
-        <h2 style={{ fontSize: "1.05rem", color: "#3E2237", marginBottom: "1rem" }}>Order Summary</h2>
-        {cart.map((item) => (
+        <div
+          style={{
+            backgroundColor: "var(--astro-card)",
+            border: "1px solid var(--astro-border)",
+            borderRadius: "8px",
+            padding: "1.5rem",
+            marginBottom: "1.5rem",
+          }}
+        >
+          <h2 style={{ fontSize: "1.05rem", color: "var(--astro-text)", marginBottom: "1rem" }}>Order Summary</h2>
+          {cart.map((item) => (
+            <div
+              key={item.id}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontSize: "0.9rem",
+                color: "var(--astro-text)",
+                marginBottom: "0.4rem",
+              }}
+            >
+              <span>
+                {item.name} × {item.quantity}
+              </span>
+              <span>₹{(item.price * item.quantity).toLocaleString("en-IN")}</span>
+            </div>
+          ))}
           <div
-            key={item.id}
             style={{
+              borderTop: "1px solid var(--astro-border)",
+              marginTop: "0.75rem",
+              paddingTop: "0.75rem",
               display: "flex",
               justifyContent: "space-between",
-              fontSize: "0.9rem",
-              color: "#3E2237",
-              marginBottom: "0.4rem",
+              fontWeight: "bold",
+              color: "var(--astro-text)",
             }}
           >
-            <span>
-              {item.name} × {item.quantity}
-            </span>
-            <span>₹{(item.price * item.quantity).toLocaleString("en-IN")}</span>
+            <span>Subtotal</span>
+            <span>₹{subtotal.toLocaleString("en-IN")}</span>
           </div>
-        ))}
-        <div
-          style={{
-            borderTop: "1px solid #D9CEC1",
-            marginTop: "0.75rem",
-            paddingTop: "0.75rem",
-            display: "flex",
-            justifyContent: "space-between",
-            fontWeight: "bold",
-            color: "#3E2237",
-          }}
-        >
-          <span>Subtotal</span>
-          <span>₹{subtotal.toLocaleString("en-IN")}</span>
+
+          <div style={{ marginTop: "1rem" }}>
+            <label style={{ fontSize: "0.85rem", color: "var(--astro-text)", fontWeight: "bold" }}>
+              Have a coupon code?
+            </label>
+            <input
+              type="text"
+              placeholder="Enter coupon code"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              style={{ ...inputStyle, marginTop: "0.5rem", marginBottom: 0 }}
+            />
+          </div>
+
+          <p style={{ fontSize: "0.75rem", color: "var(--astro-mauve)", marginTop: "0.75rem" }}>
+            Discount (if applicable), delivery charge, and final total will be confirmed on the next screen.
+          </p>
         </div>
 
-        <div style={{ marginTop: "1rem" }}>
-          <label style={{ fontSize: "0.85rem", color: "#3E2237", fontWeight: "bold" }}>
-            Have a coupon code?
-          </label>
-          <input
-            type="text"
-            placeholder="Enter coupon code"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-            style={{ ...inputStyle, marginTop: "0.5rem", marginBottom: 0 }}
-          />
-        </div>
+        <form onSubmit={handlePlaceOrder}>
+          <div
+            style={{
+              backgroundColor: "var(--astro-card)",
+              border: "1px solid var(--astro-border)",
+              borderRadius: "8px",
+              padding: "1.5rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <h2 style={{ fontSize: "1.05rem", color: "var(--astro-text)", marginBottom: "1rem" }}>
+              Delivery Details
+            </h2>
 
-        <p style={{ fontSize: "0.75rem", color: "#8A607A", marginTop: "0.75rem" }}>
-          Discount (if applicable), delivery charge, and final total will be confirmed on the next screen.
-        </p>
+            <input
+              type="text"
+              placeholder="Full Name *"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={inputStyle}
+            />
+            <input
+              type="tel"
+              placeholder="Mobile Number *"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              style={inputStyle}
+            />
+            <input
+              type="email"
+              placeholder="Email (optional)"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={inputStyle}
+            />
+            <textarea
+              placeholder="House / Flat No., Street / Area *"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              style={{ ...inputStyle, minHeight: "60px" }}
+            />
+
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="PIN Code * (auto-fills city/state)"
+              value={pinCode}
+              onChange={(e) => handlePinCodeChange(e.target.value)}
+              style={inputStyle}
+            />
+            {pinLookupMsg && (
+              <p style={{ fontSize: "0.75rem", color: "var(--astro-accent)", marginTop: "-0.5rem", marginBottom: "0.75rem" }}>
+                {pinLookupMsg}
+              </p>
+            )}
+
+            <input
+              type="text"
+              placeholder="City *"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              style={inputStyle}
+            />
+            <input
+              type="text"
+              placeholder="State *"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              style={inputStyle}
+            />
+            <input
+              type="text"
+              placeholder="Country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+
+          <div
+            style={{
+              backgroundColor: "var(--astro-card)",
+              border: "1px solid var(--astro-border)",
+              borderRadius: "8px",
+              padding: "1.5rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <h2 style={{ fontSize: "1.05rem", color: "var(--astro-text)", marginBottom: "1rem" }}>
+              Payment Method
+            </h2>
+
+            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+              <input
+                type="radio"
+                name="paymentMethod"
+                checked={paymentMethod === "online"}
+                onChange={() => setPaymentMethod("online")}
+              />
+              <span style={{ color: "var(--astro-text)" }}>Pay Full Amount Online</span>
+            </label>
+
+            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <input
+                type="radio"
+                name="paymentMethod"
+                checked={paymentMethod === "cod"}
+                onChange={() => setPaymentMethod("cod")}
+              />
+              <span style={{ color: "var(--astro-text)" }}>
+                Cash on Delivery — Pay ₹{advanceAmount} now, rest on delivery
+              </span>
+            </label>
+          </div>
+
+          {errorMsg && (
+            <p style={{ color: "#B00020", marginBottom: "1rem", fontWeight: "bold" }}>{errorMsg}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{
+              width: "100%",
+              padding: "0.9rem",
+              backgroundColor: "var(--astro-primary)",
+              color: "var(--astro-primary-text)",
+              border: "none",
+              borderRadius: "6px",
+              fontWeight: "bold",
+              fontSize: "1rem",
+              cursor: submitting ? "not-allowed" : "pointer",
+            }}
+          >
+            {submitting
+              ? "Placing Order..."
+              : paymentMethod === "cod"
+              ? `Pay ₹${advanceAmount} & Place Order`
+              : "Place Order"}
+          </button>
+        </form>
       </div>
-
-      <form onSubmit={handlePlaceOrder}>
-        <div
-          style={{
-            backgroundColor: "#FBF8F2",
-            border: "1px solid #D9CEC1",
-            borderRadius: "8px",
-            padding: "1.5rem",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <h2 style={{ fontSize: "1.05rem", color: "#3E2237", marginBottom: "1rem" }}>
-            Delivery Details
-          </h2>
-
-          <input
-            type="text"
-            placeholder="Full Name *"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="tel"
-            placeholder="Mobile Number *"
-            value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="email"
-            placeholder="Email (optional)"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={inputStyle}
-          />
-          <textarea
-            placeholder="House / Flat No., Street / Area *"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            style={{ ...inputStyle, minHeight: "60px" }}
-          />
-          <input
-            type="text"
-            placeholder="City *"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="text"
-            placeholder="State *"
-            value={state}
-            onChange={(e) => setState(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="text"
-            placeholder="PIN Code *"
-            value={pinCode}
-            onChange={(e) => setPinCode(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="text"
-            placeholder="Country"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            style={inputStyle}
-          />
-        </div>
-
-        <div
-          style={{
-            backgroundColor: "#FBF8F2",
-            border: "1px solid #D9CEC1",
-            borderRadius: "8px",
-            padding: "1.5rem",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <h2 style={{ fontSize: "1.05rem", color: "#3E2237", marginBottom: "1rem" }}>
-            Payment Method
-          </h2>
-
-          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-            <input
-              type="radio"
-              name="paymentMethod"
-              checked={paymentMethod === "online"}
-              onChange={() => setPaymentMethod("online")}
-            />
-            <span style={{ color: "#3E2237" }}>Pay Full Amount Online</span>
-          </label>
-
-          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <input
-              type="radio"
-              name="paymentMethod"
-              checked={paymentMethod === "cod"}
-              onChange={() => setPaymentMethod("cod")}
-            />
-            <span style={{ color: "#3E2237" }}>
-              Cash on Delivery — Pay ₹{advanceAmount} now, rest on delivery
-            </span>
-          </label>
-        </div>
-
-        {errorMsg && (
-          <p style={{ color: "#B00020", marginBottom: "1rem", fontWeight: "bold" }}>{errorMsg}</p>
-        )}
-
-        <button
-          type="submit"
-          disabled={submitting}
-          style={{
-            width: "100%",
-            padding: "0.9rem",
-            backgroundColor: "#5A3150",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            fontWeight: "bold",
-            fontSize: "1rem",
-            cursor: submitting ? "not-allowed" : "pointer",
-          }}
-        >
-          {submitting
-            ? "Placing Order..."
-            : paymentMethod === "cod"
-            ? `Pay ₹${advanceAmount} & Place Order`
-            : "Place Order"}
-        </button>
-      </form>
     </div>
   );
 }
@@ -324,7 +360,8 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.6rem",
   marginBottom: "0.75rem",
-  border: "1px solid #D9CEC1",
+  border: "1px solid var(--astro-border)",
   borderRadius: "4px",
   backgroundColor: "#fff",
+  color: "#241046",
 };
