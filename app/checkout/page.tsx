@@ -543,4 +543,45 @@ export default function CheckoutPage() {
               </label>
             </div>
 
-            {errorM
+            {errorMsg && (
+              <p style={{ color: "#B00020", marginBottom: "1rem", fontWeight: "bold" }}>{errorMsg}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              style={{
+                width: "100%",
+                padding: "0.9rem",
+                backgroundColor: "var(--astro-primary)",
+                color: "var(--astro-primary-text)",
+                border: "none",
+                borderRadius: "6px",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                cursor: submitting ? "not-allowed" : "pointer",
+              }}
+            >
+              {submitting
+                ? "Processing..."
+                : paymentMethod === "cod"
+                ? `Pay ₹${advanceAmount} & Place Order`
+                : `Pay ₹${amountAfterDiscount.toLocaleString("en-IN")} & Place Order`}
+            </button>
+          </form>
+        </div>
+      </div>
+    </>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  display: "block",
+  width: "100%",
+  padding: "0.6rem",
+  marginBottom: "0.75rem",
+  border: "1px solid var(--astro-border)",
+  borderRadius: "4px",
+  backgroundColor: "#fff",
+  color: "#241046",
+};
