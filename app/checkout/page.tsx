@@ -27,6 +27,9 @@ export default function CheckoutPage() {
   const [country, setCountry] = useState("India");
   const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("online");
   const [couponCode, setCouponCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [couponMsg, setCouponMsg] = useState("");
+  const [checkingCoupon, setCheckingCoupon] = useState(false);
 
   const [pinLookupMsg, setPinLookupMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -34,6 +37,7 @@ export default function CheckoutPage() {
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const advanceAmount = 100;
+  const amountAfterDiscount = Math.max(subtotal - appliedDiscount, 0);
 
   async function handlePinCodeChange(value: string) {
     const digitsOnly = value.replace(/\D/g, "").slice(0, 6);
@@ -60,6 +64,45 @@ export default function CheckoutPage() {
     }
   }
 
+  async function handleApplyCoupon() {
+    if (!couponCode.trim()) {
+      setCouponMsg("Please enter a coupon code.");
+      return;
+    }
+
+    setCheckingCoupon(true);
+    setCouponMsg("");
+
+    const { data, error } = await supabase.rpc("validate_coupon", {
+      p_coupon_code: couponCode,
+      p_subtotal: subtotal,
+    });
+
+    setCheckingCoupon(false);
+
+    if (error) {
+      setCouponMsg("Failed to check coupon: " + error.message);
+      setAppliedDiscount(0);
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+
+    if (result?.out_valid) {
+      setAppliedDiscount(Number(result.out_discount_amount));
+      setCouponMsg(result.out_message);
+    } else {
+      setAppliedDiscount(0);
+      setCouponMsg(result?.out_message || "Invalid coupon.");
+    }
+  }
+
+  function removeCoupon() {
+    setCouponCode("");
+    setAppliedDiscount(0);
+    setCouponMsg("");
+  }
+
   async function createOrderInDatabase(
     paymentStatus: string,
     razorpayPaymentId: string | null,
@@ -84,7 +127,7 @@ export default function CheckoutPage() {
       p_payment_method: paymentMethod,
       p_advance_paid: paymentMethod === "cod" ? advanceAmount : 0,
       p_items: items,
-      p_coupon_code: couponCode || null,
+      p_coupon_code: appliedDiscount > 0 ? couponCode : null,
       p_payment_status: paymentStatus,
       p_razorpay_payment_id: razorpayPaymentId,
       p_razorpay_order_id: razorpayOrderId,
@@ -214,7 +257,7 @@ export default function CheckoutPage() {
       if (paymentMethod === "cod") {
         await startRazorpayPayment(advanceAmount, true);
       } else {
-        await startRazorpayPayment(subtotal, false);
+        await startRazorpayPayment(amountAfterDiscount, false);
       }
     } catch (err) {
       setErrorMsg("Failed to start payment: " + (err instanceof Error ? err.message : "Unknown error"));
@@ -268,6 +311,7 @@ export default function CheckoutPage() {
                 <span>₹{(item.price * item.quantity).toLocaleString("en-IN")}</span>
               </div>
             ))}
+
             <div
               style={{
                 borderTop: "1px solid var(--astro-border)",
@@ -275,7 +319,6 @@ export default function CheckoutPage() {
                 paddingTop: "0.75rem",
                 display: "flex",
                 justifyContent: "space-between",
-                fontWeight: "bold",
                 color: "var(--astro-text)",
               }}
             >
@@ -283,22 +326,97 @@ export default function CheckoutPage() {
               <span>₹{subtotal.toLocaleString("en-IN")}</span>
             </div>
 
+            {appliedDiscount > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  color: "var(--astro-accent)",
+                  marginTop: "0.4rem",
+                  fontWeight: "bold",
+                }}
+              >
+                <span>Discount ({couponCode})</span>
+                <span>−₹{appliedDiscount.toLocaleString("en-IN")}</span>
+              </div>
+            )}
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontWeight: "bold",
+                color: "var(--astro-text)",
+                marginTop: "0.5rem",
+                fontSize: "1.05rem",
+              }}
+            >
+              <span>{paymentMethod === "cod" ? "Payable Now" : "Total"}</span>
+              <span>
+                ₹{(paymentMethod === "cod" ? advanceAmount : amountAfterDiscount).toLocaleString("en-IN")}
+              </span>
+            </div>
+
             <div style={{ marginTop: "1rem" }}>
               <label style={{ fontSize: "0.85rem", color: "var(--astro-text)", fontWeight: "bold" }}>
                 Have a coupon code?
               </label>
-              <input
-                type="text"
-                placeholder="Enter coupon code"
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                style={{ ...inputStyle, marginTop: "0.5rem", marginBottom: 0 }}
-              />
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                <input
+                  type="text"
+                  placeholder="Enter coupon code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  disabled={appliedDiscount > 0}
+                  style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+                />
+                {appliedDiscount > 0 ? (
+                  <button
+                    type="button"
+                    onClick={removeCoupon}
+                    style={{
+                      backgroundColor: "#B00020",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      padding: "0 1rem",
+                      fontSize: "0.85rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleApplyCoupon}
+                    disabled={checkingCoupon}
+                    style={{
+                      backgroundColor: "var(--astro-primary)",
+                      color: "var(--astro-primary-text)",
+                      border: "none",
+                      borderRadius: "4px",
+                      padding: "0 1rem",
+                      fontSize: "0.85rem",
+                      cursor: checkingCoupon ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {checkingCoupon ? "Checking..." : "Apply"}
+                  </button>
+                )}
+              </div>
+              {couponMsg && (
+                <p
+                  style={{
+                    fontSize: "0.75rem",
+                    marginTop: "0.5rem",
+                    color: appliedDiscount > 0 ? "var(--astro-accent)" : "#B00020",
+                  }}
+                >
+                  {couponMsg}
+                </p>
+              )}
             </div>
-
-            <p style={{ fontSize: "0.75rem", color: "var(--astro-mauve)", marginTop: "0.75rem" }}>
-              Discount (if applicable) is verified securely when payment is processed.
-            </p>
           </div>
 
           <form onSubmit={handlePlaceOrder}>
@@ -439,7 +557,7 @@ export default function CheckoutPage() {
                 ? "Processing..."
                 : paymentMethod === "cod"
                 ? `Pay ₹${advanceAmount} & Place Order`
-                : `Pay ₹${subtotal.toLocaleString("en-IN")} & Place Order`}
+                : `Pay ₹${amountAfterDiscount.toLocaleString("en-IN")} & Place Order`}
             </button>
           </form>
         </div>
