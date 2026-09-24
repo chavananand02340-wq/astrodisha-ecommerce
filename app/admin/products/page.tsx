@@ -15,6 +15,7 @@ type Product = {
   price: number;
   stock: number;
   is_active: boolean;
+  is_featured: boolean | null;
   category_id: string;
   short_description: string | null;
   categories?: { name: string } | null;
@@ -53,6 +54,7 @@ function ProductsContent() {
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [shortDescription, setShortDescription] = useState("");
+  const [isFeatured, setIsFeatured] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -61,6 +63,7 @@ function ProductsContent() {
   const [editPrice, setEditPrice] = useState("");
   const [editStock, setEditStock] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [editFeatured, setEditFeatured] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
 
   const [imagesForProduct, setImagesForProduct] = useState<string | null>(null);
@@ -79,12 +82,14 @@ function ProductsContent() {
 
     let query = supabase
       .from("products")
-      .select("id, name, price, stock, is_active, category_id, short_description, categories(name)");
+      .select("id, name, price, stock, is_active, is_featured, category_id, short_description, categories(name)");
 
     if (filterStatus === "active") {
       query = query.eq("is_active", true);
     } else if (filterStatus === "inactive") {
       query = query.eq("is_active", false);
+    } else if (filterStatus === "featured") {
+      query = query.eq("is_featured", true);
     }
 
     if (filterCategory !== "all") {
@@ -150,6 +155,7 @@ function ProductsContent() {
         stock: stock ? parseInt(stock, 10) : 0,
         short_description: shortDescription || null,
         is_active: true,
+        is_featured: isFeatured,
       })
       .select()
       .single();
@@ -165,6 +171,7 @@ function ProductsContent() {
     setPrice("");
     setStock("");
     setShortDescription("");
+    setIsFeatured(false);
     setStatusMsg("Product added successfully. Add images below.");
     await loadData();
 
@@ -194,6 +201,7 @@ function ProductsContent() {
     setEditPrice(String(product.price));
     setEditStock(String(product.stock));
     setEditDescription(product.short_description || "");
+    setEditFeatured(Boolean(product.is_featured));
     setStatusMsg("");
   }
 
@@ -217,6 +225,7 @@ function ProductsContent() {
         price: parseFloat(editPrice),
         stock: editStock ? parseInt(editStock, 10) : 0,
         short_description: editDescription || null,
+        is_featured: editFeatured,
       })
       .eq("id", productId);
 
@@ -442,6 +451,8 @@ function ProductsContent() {
             style={{ ...inputStyle, minHeight: "60px" }}
           />
 
+          <FeaturedCheckbox checked={isFeatured} onChange={setIsFeatured} />
+
           <button
             type="submit"
             disabled={submitting}
@@ -484,6 +495,7 @@ function ProductsContent() {
           <option value="all">All Status</option>
           <option value="active">Active Only</option>
           <option value="inactive">Inactive Only</option>
+          <option value="featured">Featured Only</option>
         </select>
 
         <select
@@ -521,7 +533,7 @@ function ProductsContent() {
             <div
               key={p.id}
               style={{
-                border: "1px solid #D9CEC1",
+                border: p.is_featured ? "1px solid #C6A15B" : "1px solid #D9CEC1",
                 borderRadius: "8px",
                 padding: "1rem",
                 backgroundColor: "#FBF8F2",
@@ -566,6 +578,9 @@ function ProductsContent() {
                     onChange={(e) => setEditDescription(e.target.value)}
                     style={{ ...inputStyle, minHeight: "60px" }}
                   />
+
+                  <FeaturedCheckbox checked={editFeatured} onChange={setEditFeatured} />
+
                   <div style={{ display: "flex", gap: "0.5rem" }}>
                     <button
                       onClick={() => saveEdit(p.id)}
@@ -599,13 +614,29 @@ function ProductsContent() {
               ) : (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
                   <div>
-                    <div style={{ fontWeight: "bold", color: "#3E2237" }}>{p.name}</div>
+                    <div style={{ fontWeight: "bold", color: "#3E2237", display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                      {p.name}
+                      {p.is_featured && (
+                        <span
+                          style={{
+                            backgroundColor: "#C6A15B",
+                            color: "#160828",
+                            fontSize: "0.65rem",
+                            fontWeight: "bold",
+                            padding: "0.15rem 0.5rem",
+                            borderRadius: "999px",
+                          }}
+                        >
+                          ★ Featured
+                        </span>
+                      )}
+                    </div>
                     <div style={{ fontSize: "0.85rem", color: "#8A607A" }}>
                       {p.categories?.name || "-"} • ₹{p.price} • Stock: {p.stock} •{" "}
                       {p.is_active ? "Active" : "Inactive"}
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                     <button
                       onClick={() => startEdit(p)}
                       style={{
@@ -754,6 +785,45 @@ function ProductsContent() {
         </div>
       )}
     </div>
+  );
+}
+
+function FeaturedCheckbox({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <label
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "0.6rem",
+        marginBottom: "1rem",
+        padding: "0.75rem",
+        border: checked ? "1px solid #C6A15B" : "1px solid #D9CEC1",
+        borderRadius: "6px",
+        backgroundColor: "#fff",
+        cursor: "pointer",
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        style={{ marginTop: "0.2rem", width: "18px", height: "18px", accentColor: "#5A3150" }}
+      />
+      <span>
+        <span style={{ display: "block", fontWeight: "bold", color: "#3E2237", fontSize: "0.9rem" }}>
+          ★ Show in homepage Featured Collection
+        </span>
+        <span style={{ display: "block", color: "#8A607A", fontSize: "0.75rem", marginTop: "0.15rem" }}>
+          Featured products appear first on the homepage (8 products shown in total).
+        </span>
+      </span>
+    </label>
   );
 }
 
