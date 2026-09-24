@@ -17,21 +17,25 @@ export default async function ProductPage({
       <>
         <Header />
 
-        <main className="flex min-h-[70vh] items-center justify-center bg-[#f7f3ec] px-5 text-center">
+        <main
+          style={{ backgroundColor: "var(--astro-bg)" }}
+          className="flex min-h-[70vh] items-center justify-center px-5 text-center"
+        >
           <div>
-            <h1 className="astro-serif text-4xl text-[#3e2237]">
+            <h1 style={{ color: "var(--astro-text)" }} className="astro-serif text-4xl">
               Product Not Found
             </h1>
 
-            <p className="mt-3 text-sm text-[#8a607a]">
+            <p style={{ color: "var(--astro-mauve)" }} className="mt-3 text-sm">
               This product may have been removed or is not available.
             </p>
 
             <Link
-              href="/"
-              className="mt-6 inline-block rounded-sm bg-[#5a3150] px-6 py-3 text-xs font-semibold text-white"
+              href="/shop"
+              style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+              className="mt-6 inline-flex h-12 items-center rounded-full px-7 text-sm font-semibold transition hover:opacity-90"
             >
-              Back to Home
+              Browse All Products
             </Link>
           </div>
         </main>
