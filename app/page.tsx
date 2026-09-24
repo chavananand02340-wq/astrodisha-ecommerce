@@ -6,15 +6,7 @@ import { categories } from "@/data/categories";
 import { getFeaturedProducts } from "@/lib/getProducts";
 import { getActiveBanner } from "@/lib/getBanner";
 import { getActiveTestimonials } from "@/lib/getTestimonials";
-
-const WHATSAPP_URL =
-  "https://wa.me/917756851026?text=" +
-  encodeURIComponent("Hi AstroDisha, I need help choosing a product.");
-
-const ALL_PRODUCTS_URL = "/shop";
-
-const WHATSAPP_ICON_PATH =
-  "M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 004.74 1.2h.01c5.46 0 9.91-4.45 9.91-9.91A9.88 9.88 0 0012.04 2zm0 18.15a8.2 8.2 0 01-4.19-1.15l-.3-.18-3.11.82.83-3.04-.2-.31a8.19 8.19 0 01-1.26-4.38c0-4.54 3.7-8.23 8.24-8.23a8.23 8.23 0 018.23 8.24c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.13-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z";
+import { WHATSAPP_URL, ALL_PRODUCTS_URL, WHATSAPP_ICON_PATH } from "@/lib/site";
 
 /* Simple line icons (gold via --astro-accent) */
 const ICONS = {
@@ -86,16 +78,19 @@ const TRUST_ITEMS = [
 
 const WHY_ITEMS = [
   {
+    slug: "authenticity",
     icon: ICONS.shield,
     title: "Authenticity First",
     text: "Products presented with clear information and quality-focused selection.",
   },
   {
+    slug: "expert-guidance",
     icon: ICONS.user,
     title: "Expert Guidance",
     text: "Get help understanding products before making your choice.",
   },
   {
+    slug: "premium-experience",
     icon: ICONS.gem,
     title: "Premium Experience",
     text: "A calm, elegant shopping experience designed around your journey.",
@@ -384,40 +379,45 @@ export default async function HomePage() {
       {/* WHY ASTRODISHA */}
       <section className="px-5 py-[55px] md:px-6 md:py-[70px] lg:py-[90px]">
         <div className="mx-auto max-w-[1100px] lg:px-8">
-          <p style={{ color: "var(--astro-accent)" }} className="mb-6 text-center text-[14px] font-semibold uppercase tracking-[3px]">
+          <p style={{ color: "var(--astro-accent)" }} className="mb-5 text-center text-[13px] font-semibold uppercase tracking-[3px] sm:text-[14px]">
             Why AstroDisha
           </p>
 
-          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mx-auto mb-[65px] max-w-[800px] text-center text-[42px] font-normal leading-[1.05] md:text-[52px] lg:text-[64px]">
+          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mx-auto mb-10 max-w-[800px] text-center text-[34px] font-normal leading-[1.08] sm:text-[42px] md:mb-[65px] md:text-[52px] lg:text-[64px]">
             Thoughtfully Chosen.
             <br />
             Simply Presented.
           </h2>
 
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 sm:gap-6">
             {WHY_ITEMS.map((item) => (
-              <div
-                key={item.title}
-                className="flex min-h-[150px] items-center gap-5 rounded-[22px] border border-[color:var(--astro-border)] bg-[color:var(--astro-card)] px-6 py-7 shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#b69bee] md:gap-7 md:p-8 lg:gap-8 lg:px-12 lg:py-10"
+              <Link
+                key={item.slug}
+                href={`/why/${item.slug}`}
+                className="flex items-center gap-4 rounded-[22px] border border-[color:var(--astro-border)] bg-[color:var(--astro-card)] px-5 py-6 shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#b69bee] sm:min-h-[150px] md:gap-7 md:p-8 lg:gap-8 lg:px-12 lg:py-10"
               >
                 <span
                   style={{ backgroundColor: "rgba(182, 155, 238, 0.15)" }}
-                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full md:h-[70px] md:w-[70px] lg:h-[76px] lg:w-[76px]"
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full sm:h-16 sm:w-16 md:h-[70px] md:w-[70px] lg:h-[76px] lg:w-[76px]"
                   aria-hidden="true"
                 >
-                  <LineIcon icon={item.icon} className="h-7 w-7 lg:h-8 lg:w-8" />
+                  <LineIcon icon={item.icon} className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />
                 </span>
 
-                <div>
-                  <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-[30px] font-normal leading-tight lg:text-[36px]">
+                <div className="min-w-0">
+                  <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-[22px] font-normal leading-tight sm:text-[28px] lg:text-[36px]">
                     {item.title}
                   </h3>
 
-                  <p style={{ color: "var(--astro-mauve)" }} className="mt-2 text-[16px] leading-[1.5] lg:text-[18px]">
+                  <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 text-[14px] leading-[1.5] sm:text-[16px] lg:text-[18px]">
                     {item.text}
                   </p>
+
+                  <span style={{ color: "var(--astro-primary)" }} className="mt-2 inline-block text-[11px] font-semibold uppercase tracking-[0.12em]">
+                    Learn more →
+                  </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
