@@ -11,6 +11,97 @@ const WHATSAPP_URL =
   "https://wa.me/917756851026?text=" +
   encodeURIComponent("Hi AstroDisha, I need help choosing a product.");
 
+const ALL_PRODUCTS_URL = "/shop";
+
+const WHATSAPP_ICON_PATH =
+  "M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 004.74 1.2h.01c5.46 0 9.91-4.45 9.91-9.91A9.88 9.88 0 0012.04 2zm0 18.15a8.2 8.2 0 01-4.19-1.15l-.3-.18-3.11.82.83-3.04-.2-.31a8.19 8.19 0 01-1.26-4.38c0-4.54 3.7-8.23 8.24-8.23a8.23 8.23 0 018.23 8.24c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.13-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z";
+
+/* Simple line icons (gold via --astro-accent) */
+const ICONS = {
+  shield: (
+    <>
+      <path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3z" />
+      <path d="M8.8 12.2l2.2 2.2 4.2-4.4" />
+    </>
+  ),
+  card: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 10h18M7 15h3" />
+    </>
+  ),
+  gem: (
+    <>
+      <path d="M6.5 4h11L21 9l-9 11L3 9l3.5-5z" />
+      <path d="M3 9h18M9.5 4L8 9l4 11M14.5 4L16 9l-4 11" />
+    </>
+  ),
+  user: (
+    <>
+      <circle cx="12" cy="8" r="3.6" />
+      <path d="M5 20c.8-3.6 3.6-5.6 7-5.6s6.2 2 7 5.6" />
+    </>
+  ),
+};
+
+function LineIcon({ icon, className }: { icon: React.ReactNode; className: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="var(--astro-accent)"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {icon}
+    </svg>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+function WhatsAppIcon({ className }: { className: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      <path d={WHATSAPP_ICON_PATH} />
+    </svg>
+  );
+}
+
+const TRUST_ITEMS = [
+  { icon: ICONS.shield, title: "Authentic Selection" },
+  { icon: ICONS.card, title: "Secure Checkout" },
+  { icon: ICONS.gem, title: "Quality Assured" },
+  { icon: ICONS.user, title: "Expert Guidance" },
+];
+
+const WHY_ITEMS = [
+  {
+    icon: ICONS.shield,
+    title: "Authenticity First",
+    text: "Products presented with clear information and quality-focused selection.",
+  },
+  {
+    icon: ICONS.user,
+    title: "Expert Guidance",
+    text: "Get help understanding products before making your choice.",
+  },
+  {
+    icon: ICONS.gem,
+    title: "Premium Experience",
+    text: "A calm, elegant shopping experience designed around your journey.",
+  },
+];
+
 export default async function HomePage() {
   const featuredProducts = await getFeaturedProducts(8);
   const activeBanner = await getActiveBanner();
@@ -30,6 +121,8 @@ export default async function HomePage() {
             <p style={{ color: "var(--astro-mauve)" }} className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em]">
               ASTRODISHA
             </p>
+
+            <span style={{ backgroundColor: "var(--astro-accent)" }} className="mb-5 block h-px w-12" aria-hidden="true" />
 
             <h1 style={{ color: "var(--astro-text)" }} className="astro-serif max-w-xl text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
               {activeBanner ? activeBanner.title : (
@@ -53,9 +146,7 @@ export default async function HomePage() {
                 className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold tracking-wide transition hover:opacity-90"
               >
                 {activeBanner?.button_text || "Explore Collection"}
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
+                <ArrowIcon />
               </Link>
 
               <a
@@ -65,9 +156,7 @@ export default async function HomePage() {
                 style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
                 className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold tracking-wide transition hover:opacity-90"
               >
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
-                  <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 004.74 1.2h.01c5.46 0 9.91-4.45 9.91-9.91A9.88 9.88 0 0012.04 2zm0 18.15a8.2 8.2 0 01-4.19-1.15l-.3-.18-3.11.82.83-3.04-.2-.31a8.19 8.19 0 01-1.26-4.38c0-4.54 3.7-8.23 8.24-8.23a8.23 8.23 0 018.23 8.24c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.13-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z" />
-                </svg>
+                <WhatsAppIcon className="h-5 w-5" />
                 Connect with Our Experts
               </a>
             </div>
@@ -88,14 +177,9 @@ export default async function HomePage() {
       {/* TRUST */}
       <section style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }} className="border-y">
         <div className="mx-auto grid max-w-7xl grid-cols-2 sm:grid-cols-4">
-          {[
-            ["✦", "Authentic Products"],
-            ["◇", "Secure Payments"],
-            ["✧", "Quality Assured"],
-            ["☼", "Expert Guidance"],
-          ].map(([icon, title], i) => (
+          {TRUST_ITEMS.map((item, i) => (
             <div
-              key={title}
+              key={item.title}
               style={{
                 borderColor: "var(--astro-border)",
                 borderLeftWidth: i % 2 === 0 ? 0 : "1px",
@@ -103,9 +187,9 @@ export default async function HomePage() {
               }}
               className="flex flex-col items-center px-3 py-5 text-center sm:border-l sm:border-t-0"
             >
-              <span style={{ color: "var(--astro-accent)" }} className="text-lg">{icon}</span>
+              <LineIcon icon={item.icon} className="h-6 w-6" />
               <span style={{ color: "var(--astro-text)", opacity: 0.85 }} className="mt-2 text-[9px] font-semibold uppercase tracking-[0.08em] sm:text-[10px]">
-                {title}
+                {item.title}
               </span>
             </div>
           ))}
@@ -113,26 +197,36 @@ export default async function HomePage() {
       </section>
 
       {/* CATEGORIES */}
-      <section className="px-4 py-12 sm:px-6 sm:py-16">
+      <section className="py-12 sm:py-16">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-7 flex items-end justify-between">
+          <div className="mb-7 flex items-center justify-between gap-4 px-4 sm:px-6">
             <div>
-              <p style={{ color: "var(--astro-mauve)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
+              <p style={{ color: "var(--astro-accent)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
                 Explore
               </p>
               <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mt-1 text-3xl sm:text-4xl">
                 Shop by Category
               </h2>
             </div>
+
+            <Link
+              href={ALL_PRODUCTS_URL}
+              style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-5 text-xs font-semibold uppercase tracking-wide transition hover:opacity-90"
+            >
+              View All
+              <ArrowIcon />
+            </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">
+          {/* Horizontal scroll row — add any number of categories */}
+          <div className="no-scrollbar flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:scroll-px-6 sm:gap-5 sm:px-6">
             {categories.map((category) => (
               <Link
                 key={category.slug}
                 href={`/${category.slug}`}
                 style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-                className="group overflow-hidden rounded-xl border"
+                className="group w-[44%] shrink-0 snap-start overflow-hidden rounded-xl border sm:w-[30%] lg:w-[23%]"
               >
                 <div className="h-36 overflow-hidden sm:h-52">
                   <SafeImage
@@ -163,9 +257,9 @@ export default async function HomePage() {
       {/* FEATURED PRODUCTS */}
       <section style={{ backgroundColor: "var(--astro-card)" }} className="px-4 py-12 sm:px-6 sm:py-16">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-7 flex items-end justify-between">
+          <div className="mb-7 flex items-center justify-between gap-4">
             <div>
-              <p style={{ color: "var(--astro-mauve)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
+              <p style={{ color: "var(--astro-accent)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
                 Curated For You
               </p>
 
@@ -175,11 +269,12 @@ export default async function HomePage() {
             </div>
 
             <Link
-              href="/crystals"
-              style={{ color: "var(--astro-primary)" }}
-              className="text-[10px] font-semibold uppercase tracking-wide"
+              href={ALL_PRODUCTS_URL}
+              style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-5 text-xs font-semibold uppercase tracking-wide transition hover:opacity-90"
             >
-              View All →
+              View All
+              <ArrowIcon />
             </Link>
           </div>
 
@@ -202,7 +297,7 @@ export default async function HomePage() {
         <section className="px-4 py-12 sm:px-6 sm:py-16">
           <div className="mx-auto max-w-7xl">
             <div className="text-center">
-              <p style={{ color: "var(--astro-mauve)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
+              <p style={{ color: "var(--astro-accent)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
                 Testimonials
               </p>
               <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mt-2 text-3xl sm:text-4xl">
@@ -273,102 +368,108 @@ export default async function HomePage() {
             Rudraksha and spiritual essentials.
           </p>
 
-          <Link
-            href="/consult"
-            style={{ backgroundColor: "var(--astro-accent)", color: "#fff" }}
-            className="mt-7 inline-block rounded-sm px-7 py-3.5 text-xs font-semibold transition hover:opacity-90"
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ backgroundColor: "var(--astro-bg)", color: "var(--astro-primary)" }}
+            className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-full px-7 text-sm font-semibold transition hover:opacity-90"
           >
+            <WhatsAppIcon className="h-5 w-5" />
             Consult an Expert
-          </Link>
+          </a>
         </div>
       </section>
 
       {/* WHY ASTRODISHA */}
-      <section className="px-4 pb-12 sm:px-6 sm:pb-16">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center">
-            <p style={{ color: "var(--astro-mauve)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
-              Why AstroDisha
-            </p>
+      <section className="px-5 py-[55px] md:px-6 md:py-[70px] lg:py-[90px]">
+        <div className="mx-auto max-w-[1100px] lg:px-8">
+          <p style={{ color: "var(--astro-accent)" }} className="mb-6 text-center text-[14px] font-semibold uppercase tracking-[3px]">
+            Why AstroDisha
+          </p>
 
-            <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mt-2 text-3xl">
-              Thoughtfully Chosen. Simply Presented.
-            </h2>
-          </div>
+          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mx-auto mb-[65px] max-w-[800px] text-center text-[42px] font-normal leading-[1.05] md:text-[52px] lg:text-[64px]">
+            Thoughtfully Chosen.
+            <br />
+            Simply Presented.
+          </h2>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            {[
-              {
-                title: "Authenticity First",
-                text: "Products presented with clear information and quality-focused selection.",
-              },
-              {
-                title: "Expert Guidance",
-                text: "Get help understanding products before making your choice.",
-              },
-              {
-                title: "Premium Experience",
-                text: "A calm, elegant shopping experience designed around your journey.",
-              },
-            ].map((item) => (
+          <div className="flex flex-col gap-6">
+            {WHY_ITEMS.map((item) => (
               <div
                 key={item.title}
-                style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-                className="rounded-xl border p-6"
+                className="flex min-h-[150px] items-center gap-5 rounded-[22px] border border-[color:var(--astro-border)] bg-[color:var(--astro-card)] px-6 py-7 shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#b69bee] md:gap-7 md:p-8 lg:gap-8 lg:px-12 lg:py-10"
               >
-                <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-xl">
-                  {item.title}
-                </h3>
+                <span
+                  style={{ backgroundColor: "rgba(182, 155, 238, 0.15)" }}
+                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full md:h-[70px] md:w-[70px] lg:h-[76px] lg:w-[76px]"
+                  aria-hidden="true"
+                >
+                  <LineIcon icon={item.icon} className="h-7 w-7 lg:h-8 lg:w-8" />
+                </span>
 
-                <p style={{ color: "var(--astro-mauve)" }} className="mt-3 text-xs leading-5">
-                  {item.text}
-                </p>
+                <div>
+                  <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-[30px] font-normal leading-tight lg:text-[36px]">
+                    {item.title}
+                  </h3>
+
+                  <p style={{ color: "var(--astro-mauve)" }} className="mt-2 text-[16px] leading-[1.5] lg:text-[18px]">
+                    {item.text}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }} className="px-5 py-10 sm:px-6">
-        <div className="mx-auto grid max-w-7xl gap-8 sm:grid-cols-3">
-          <div>
-            <div className="astro-serif text-2xl">ASTRODISHA</div>
-            <p style={{ color: "var(--astro-accent)" }} className="mt-2 text-[10px] tracking-[0.15em]">
-              GUIDANCE · HEALING · DIVINE ALIGNMENT
+      {/* FOOTER — always dark (client final spec: #160828) */}
+      <footer
+        style={{ backgroundColor: "#160828", color: "#f4effb", borderTop: "1px solid rgba(244, 239, 251, 0.08)" }}
+        className="px-5 py-[45px] sm:px-6 md:py-[55px]"
+      >
+        <div className="mx-auto max-w-7xl">
+          <div className="text-center">
+            <div className="astro-serif text-[40px] font-normal leading-none lg:text-[48px]">
+              ASTRODISHA
+            </div>
+            <p style={{ color: "#c6a15b" }} className="mt-3 text-[14px] font-medium tracking-[2.5px]">
+              GUIDANCE&nbsp;&nbsp;•&nbsp;&nbsp;HEALING&nbsp;&nbsp;•&nbsp;&nbsp;DIVINE ALIGNMENT
             </p>
           </div>
 
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider">
-              Explore
-            </p>
+          <div className="mt-10 grid grid-cols-2 gap-8 sm:mx-auto sm:max-w-md">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider">
+                Explore
+              </p>
 
-            <div className="mt-3 flex flex-col gap-2 text-xs opacity-75">
-              <Link href="/gemstones">Gemstones</Link>
-              <Link href="/crystals">Crystals</Link>
-              <Link href="/crystal-jewellery">Crystal Jewellery</Link>
-              <Link href="/rudraksha">Rudraksha</Link>
-              <Link href="/puja">Puja Essentials</Link>
+              <div className="mt-3 flex flex-col gap-2 text-xs opacity-75">
+                <Link href="/gemstones">Gemstones</Link>
+                <Link href="/crystals">Crystals</Link>
+                <Link href="/crystal-jewellery">Crystal Jewellery</Link>
+                <Link href="/rudraksha">Rudraksha</Link>
+                <Link href="/puja">Puja Essentials</Link>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider">
+                Support
+              </p>
+
+              <div className="mt-3 flex flex-col gap-2 text-xs opacity-75">
+                <Link href="/about">About Us</Link>
+                <Link href="/contact">Contact</Link>
+                <Link href="/consult">Consult an Expert</Link>
+                <Link href="/cart">Cart</Link>
+              </div>
             </div>
           </div>
 
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider">
-              Support
-            </p>
-
-            <div className="mt-3 flex flex-col gap-2 text-xs opacity-75">
-              <Link href="/about">About Us</Link>
-              <Link href="/contact">Contact</Link>
-              <Link href="/consult">Consult an Expert</Link>
-              <Link href="/cart">Cart</Link>
-            </div>
+          <div style={{ borderColor: "rgba(244, 239, 251, 0.15)" }} className="mt-8 border-t pt-5 text-center text-[9px] opacity-60">
+            © {new Date().getFullYear()} ASTRODISHA. All rights reserved.
           </div>
-        </div>
-
-        <div style={{ borderColor: "rgba(255,255,255,0.15)" }} className="mx-auto mt-8 max-w-7xl border-t pt-5 text-[9px] opacity-60">
-          © {new Date().getFullYear()} ASTRODISHA. All rights reserved.
         </div>
       </footer>
 
@@ -381,10 +482,8 @@ export default async function HomePage() {
         style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
         className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition hover:scale-105"
       >
-        <svg viewBox="0 0 24 24" className="h-7 w-7" fill="currentColor" aria-hidden="true">
-          <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 004.74 1.2h.01c5.46 0 9.91-4.45 9.91-9.91A9.88 9.88 0 0012.04 2zm0 18.15a8.2 8.2 0 01-4.19-1.15l-.3-.18-3.11.82.83-3.04-.2-.31a8.19 8.19 0 01-1.26-4.38c0-4.54 3.7-8.23 8.24-8.23a8.23 8.23 0 018.23 8.24c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.13-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z" />
-        </svg>
+        <WhatsAppIcon className="h-7 w-7" />
       </a>
     </main>
   );
-                  }
+              }
