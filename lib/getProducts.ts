@@ -13,6 +13,9 @@ type ProductRow = {
   product_images: { image_url: string; is_primary: boolean; sort_order: number }[] | null;
 };
 
+const PRODUCT_SELECT =
+  "id, slug, name, short_description, price, rating, review_count, categories(name), product_images(image_url, is_primary, sort_order)";
+
 function mapRowToProduct(row: ProductRow): Product {
   const sortedImages = [...(row.product_images || [])].sort((a, b) => {
     if (a.is_primary) return -1;
@@ -37,17 +40,35 @@ function mapRowToProduct(row: ProductRow): Product {
   };
 }
 
+// Homepage "Featured Collection":
+// products marked Featured in admin come first, remaining slots filled with newest products.
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("products")
-    .select(
-      "id, slug, name, short_description, price, rating, review_count, categories(name), product_images(image_url, is_primary, sort_order)"
-    )
+    .select(PRODUCT_SELECT)
     .eq("is_active", true)
+    .order("is_featured", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(limit);
+
+  if (error || !data) {
+    return [];
+  }
+
+  return (data as unknown as ProductRow[]).map(mapRowToProduct);
+}
+
+// "/shop" page: every active product, newest first.
+export async function getAllProducts(): Promise<Product[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_SELECT)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
 
   if (error || !data) {
     return [];
@@ -71,9 +92,7 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
 
   const { data, error } = await supabase
     .from("products")
-    .select(
-      "id, slug, name, short_description, price, rating, review_count, categories(name), product_images(image_url, is_primary, sort_order)"
-    )
+    .select(PRODUCT_SELECT)
     .eq("is_active", true)
     .eq("category_id", category.id)
     .order("created_at", { ascending: false });
@@ -90,9 +109,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 
   const { data, error } = await supabase
     .from("products")
-    .select(
-      "id, slug, name, short_description, price, rating, review_count, categories(name), product_images(image_url, is_primary, sort_order)"
-    )
+    .select(PRODUCT_SELECT)
     .eq("is_active", true)
     .eq("slug", slug)
     .maybeSingle();
@@ -102,4 +119,4 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   }
 
   return mapRowToProduct(data as unknown as ProductRow);
-}
+        }
