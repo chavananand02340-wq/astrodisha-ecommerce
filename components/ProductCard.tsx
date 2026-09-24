@@ -21,6 +21,9 @@ type ProductCardProps = {
   product: Product;
 };
 
+const HEART_PATH =
+  "M12 20s-7-4.4-9.2-8.6C1.2 8.2 3 4.8 6.4 4.5c2-.2 3.8.9 5.6 3 1.8-2.1 3.6-3.2 5.6-3 3.4.3 5.2 3.7 3.6 6.9C19 15.6 12 20 12 20z";
+
 export default function ProductCard({
   product
 }: ProductCardProps) {
@@ -33,6 +36,7 @@ export default function ProductCard({
   const [imageLoaded, setImageLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
+  // Cached images can finish loading before React attaches onLoad — check on mount
   useEffect(() => {
     const img = imgRef.current;
     if (img && img.complete && img.naturalWidth > 0) {
@@ -41,16 +45,19 @@ export default function ProductCard({
   }, []);
 
   const wishlisted = isWishlisted(product.id);
+  const stars = product.rating ? Math.round(Math.min(Math.max(product.rating, 0), 5)) : 0;
 
   return (
     <article
       style={{ backgroundColor: "var(--astro-card)", borderColor: "var(--astro-border)" }}
-      className="product-card group overflow-hidden rounded-sm border"
+      className="product-card group flex flex-col overflow-hidden rounded-2xl border shadow-[0_4px_20px_rgba(36,16,70,0.05)]"
     >
-      <div className="relative aspect-square overflow-hidden bg-[#eee5db]">
-
+      <div
+        style={{ backgroundColor: "var(--astro-border)" }}
+        className="relative aspect-[4/3] overflow-hidden"
+      >
         {!imageLoaded && (
-          <div className="absolute inset-0 animate-pulse bg-[#e8ddd2]" />
+          <div className="absolute inset-0 animate-pulse opacity-60" style={{ backgroundColor: "var(--astro-border)" }} />
         )}
 
         <Link
@@ -86,55 +93,79 @@ export default function ProductCard({
           }
           aria-pressed={wishlisted}
           onClick={() => toggleWishlist(product)}
-          style={{ color: wishlisted ? "var(--astro-primary)" : "var(--astro-mauve)" }}
-          className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-xl shadow-sm transition active:scale-90"
+          style={{
+            backgroundColor: "var(--astro-card)",
+            color: wishlisted ? "var(--astro-accent)" : "var(--astro-primary)",
+            borderColor: wishlisted ? "var(--astro-accent)" : "transparent",
+          }}
+          className="absolute right-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded-full border shadow-[0_2px_8px_rgba(36,16,70,0.12)] transition active:scale-90"
         >
-          {wishlisted ? "♥" : "♡"}
+          <svg
+            viewBox="0 0 24 24"
+            className="h-[18px] w-[18px]"
+            fill={wishlisted ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d={HEART_PATH} />
+          </svg>
         </button>
       </div>
 
-      <div className="p-3.5">
-        <p style={{ color: "var(--astro-mauve)" }} className="mb-1 text-[9px] uppercase tracking-[0.08em]">
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
+        <p style={{ color: "var(--astro-mauve)" }} className="text-[10px] font-medium uppercase tracking-[0.12em]">
           {product.category}
         </p>
 
         <Link href={`/product/${product.slug}`}>
           <h3
             style={{ color: "var(--astro-text)" }}
-            className="astro-serif line-clamp-2 min-h-[38px] text-[15px] leading-5 transition hover:opacity-80"
+            className="astro-serif mt-1 line-clamp-2 text-[16px] leading-[1.25] transition hover:opacity-80 sm:text-[18px]"
           >
             {product.name}
           </h3>
         </Link>
 
-        <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 line-clamp-1 text-[10px] leading-4">
-          {product.description}
-        </p>
+        {product.description && (
+          <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 line-clamp-2 text-[12px] leading-[1.45] sm:text-[13px]">
+            {product.description}
+          </p>
+        )}
 
-        <div className="mt-3 flex items-center justify-between">
-          <span style={{ color: "var(--astro-primary)" }} className="text-[15px] font-bold">
-            ₹{product.price.toLocaleString("en-IN")}
-          </span>
-
-          {product.rating && (
-            <span style={{ color: "var(--astro-mauve)" }} className="text-[9px]">
-              ★★★★★
-              {product.reviewCount
-                ? ` (${product.reviewCount})`
-                : ""}
+        <div className="mt-auto pt-3">
+          <div className="flex items-center justify-between gap-2">
+            <span style={{ color: "var(--astro-primary)" }} className="text-[17px] font-bold sm:text-[19px]">
+              ₹{product.price.toLocaleString("en-IN")}
             </span>
-          )}
-        </div>
 
-        <button
-          type="button"
-          onClick={() => addToCart(product)}
-          style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-          className="mt-3 w-full rounded-sm py-3 text-[10px] font-semibold tracking-wide transition hover:opacity-90 active:scale-[0.98] sm:text-xs"
-        >
-          Add to Cart
-        </button>
+            {stars > 0 && (
+              <span
+                style={{ color: "var(--astro-accent)" }}
+                className="text-[10px]"
+                aria-label={`Rated ${product.rating} out of 5`}
+              >
+                {"★".repeat(stars)}
+                <span style={{ color: "var(--astro-border)" }}>{"★".repeat(5 - stars)}</span>
+                {product.reviewCount ? (
+                  <span style={{ color: "var(--astro-mauve)" }}> ({product.reviewCount})</span>
+                ) : null}
+              </span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => addToCart(product)}
+            style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+            className="mt-3 h-12 w-full rounded-[10px] text-[14px] font-semibold transition duration-150 ease-in-out hover:opacity-90 active:scale-[0.98]"
+          >
+            Add to Cart
+          </button>
+        </div>
       </div>
     </article>
   );
-            }
+                }
