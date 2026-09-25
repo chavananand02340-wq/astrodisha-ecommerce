@@ -34,6 +34,13 @@ type StoreContextValue = {
 const StoreContext =
   createContext<StoreContextValue | null>(null);
 
+// Cart items saved in the browser before this update won't have a `stock`
+// field. Treat missing/invalid stock as "unknown, don't block" so we never
+// break someone's existing cart — freshly added items always have real stock.
+function stockLimitOf(entity: { stock?: number }): number {
+  return typeof entity.stock === "number" ? entity.stock : Infinity;
+}
+
 export function StoreProvider({
   children
 }: {
@@ -102,30 +109,37 @@ export function StoreProvider({
       wishlistCount: wishlist.length,
 
       addToCart: (product) => {
-        setCart((current) => {
-          const existing = current.find(
-            (item) => item.id === product.id
-          );
+        const limit = product.stock ?? 0;
 
-          if (existing) {
-            return current.map((item) =>
-              item.id === product.id
-                ? {
-                    ...item,
-                    quantity: item.quantity + 1
-                  }
-                : item
-            );
+        if (limit <= 0) {
+          setToast(`${product.name} is out of stock`);
+          return;
+        }
+
+        const existing = cart.find((item) => item.id === product.id);
+
+        if (existing) {
+          if (existing.quantity >= limit) {
+            setToast(`Only ${limit} of ${product.name} available`);
+            return;
           }
 
-          return [
+          setCart((current) =>
+            current.map((item) =>
+              item.id === product.id
+                ? { ...item, stock: product.stock, quantity: item.quantity + 1 }
+                : item
+            )
+          );
+        } else {
+          setCart((current) => [
             ...current,
             {
               ...product,
               quantity: 1
             }
-          ];
-        });
+          ]);
+        }
 
         setToast(`${product.name} added to cart`);
       },
@@ -150,14 +164,20 @@ export function StoreProvider({
         }
 
         setCart((current) =>
-          current.map((item) =>
-            item.id === productId
-              ? {
-                  ...item,
-                  quantity
-                }
-              : item
-          )
+          current.map((item) => {
+            if (item.id !== productId) return item;
+
+            const limit = stockLimitOf(item);
+
+            if (quantity >= limit) {
+              if (quantity > limit) {
+                setToast(`Only ${limit} of ${item.name} available`);
+              }
+              return { ...item, quantity: limit };
+            }
+
+            return { ...item, quantity };
+          })
         );
       },
 
@@ -209,7 +229,8 @@ export function StoreProvider({
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-5 left-1/2 z-[100] -translate-x-1/2 rounded-full bg-[#3e2237] px-5 py-3 text-xs font-medium text-white shadow-xl"
+          style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+          className="fixed bottom-5 left-1/2 z-[100] -translate-x-1/2 rounded-full px-5 py-3 text-xs font-medium shadow-xl"
         >
           {toast}
         </div>
