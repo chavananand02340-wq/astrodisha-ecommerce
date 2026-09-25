@@ -56,7 +56,6 @@ export default function ProductDetails({
   const [imageLoaded, setImageLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  // Cached images can finish loading before React attaches onLoad — check on mount and on image change
   useEffect(() => {
     const img = imgRef.current;
     if (img && img.complete && img.naturalWidth > 0) {
@@ -67,14 +66,20 @@ export default function ProductDetails({
   const wishlisted = isWishlisted(product.id);
   const stars = product.rating ? Math.round(Math.min(Math.max(product.rating, 0), 5)) : 0;
 
+  const stock = product.stock ?? 0;
+  const outOfStock = stock <= 0;
+  const lowStock = !outOfStock && stock <= 5;
+
   const matchedCategory = categories.find(
     (cat) => cat.name === product.category
   );
   const categoryHref = matchedCategory ? `/${matchedCategory.slug}` : "/shop";
 
-  const askUrl =
-    `https://wa.me/${WHATSAPP_NUMBER}?text=` +
-    encodeURIComponent(`Hi AstroDisha, I have a question about "${product.name}".`);
+  const askMessage = outOfStock
+    ? `Hi AstroDisha, "${product.name}" is out of stock — please let me know when it's back.`
+    : `Hi AstroDisha, I have a question about "${product.name}".`;
+
+  const askUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(askMessage)}`;
 
   const trustItems = [
     { icon: TRUST_ICONS.truck, text: `Free shipping on orders above ₹${FREE_SHIPPING_THRESHOLD.toLocaleString("en-IN")}` },
@@ -110,7 +115,7 @@ export default function ProductDetails({
                 alt={`${product.name} - ${product.category}`}
                 className={`h-full w-full object-cover transition-opacity duration-300 ${
                   imageLoaded ? "opacity-100" : "opacity-0"
-                }`}
+                } ${outOfStock ? "opacity-70 grayscale-[30%]" : ""}`}
                 onLoad={() => setImageLoaded(true)}
                 onError={(event) => {
                   const image = event.currentTarget;
@@ -122,6 +127,20 @@ export default function ProductDetails({
                   setImageLoaded(true);
                 }}
               />
+
+              {outOfStock && (
+                <div
+                  style={{ backgroundColor: "rgba(22,8,40,0.5)" }}
+                  className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                >
+                  <span
+                    style={{ backgroundColor: "var(--astro-card)", color: "var(--astro-text)" }}
+                    className="rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-wide"
+                  >
+                    Out of Stock
+                  </span>
+                </div>
+              )}
             </div>
 
             {galleryImages.length > 1 && (
@@ -179,6 +198,16 @@ export default function ProductDetails({
               ₹{product.price.toLocaleString("en-IN")}
             </p>
 
+            {outOfStock ? (
+              <p style={{ color: "var(--astro-accent)" }} className="mt-2 text-sm font-semibold uppercase tracking-wide">
+                Currently Out of Stock
+              </p>
+            ) : lowStock ? (
+              <p style={{ color: "var(--astro-accent)" }} className="mt-2 text-sm font-medium">
+                Only {stock} left in stock
+              </p>
+            ) : null}
+
             {product.description && (
               <p style={{ color: "var(--astro-mauve)" }} className="mt-4 text-[15px] leading-7">
                 {product.description}
@@ -189,11 +218,20 @@ export default function ProductDetails({
             <div className="mt-6 grid grid-cols-[1fr_auto] gap-3">
               <button
                 type="button"
-                onClick={() => addToCart(product)}
-                style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-                className="h-12 rounded-[10px] text-[15px] font-semibold transition duration-150 hover:opacity-90 active:scale-[0.99]"
+                disabled={outOfStock}
+                onClick={() => {
+                  if (!outOfStock) addToCart(product);
+                }}
+                style={
+                  outOfStock
+                    ? { backgroundColor: "var(--astro-border)", color: "var(--astro-mauve)" }
+                    : { backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }
+                }
+                className={`h-12 rounded-[10px] text-[15px] font-semibold transition duration-150 ${
+                  outOfStock ? "cursor-not-allowed" : "hover:opacity-90 active:scale-[0.99]"
+                }`}
               >
-                Add to Cart
+                {outOfStock ? "Out of Stock" : "Add to Cart"}
               </button>
 
               <button
@@ -233,7 +271,7 @@ export default function ProductDetails({
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
                 <path d={WHATSAPP_ICON_PATH} />
               </svg>
-              Ask an Expert About This Product
+              {outOfStock ? "Ask When It's Back in Stock" : "Ask an Expert About This Product"}
             </a>
 
             {/* TRUST BOX */}
@@ -266,4 +304,4 @@ export default function ProductDetails({
       </div>
     </main>
   );
-}
+                                              }
