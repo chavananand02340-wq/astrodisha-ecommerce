@@ -64,6 +64,10 @@ export default function CheckoutPage() {
     }
   }
 
+  function handleMobileChange(value: string) {
+    setMobile(value.replace(/\D/g, "").slice(0, 10));
+  }
+
   async function handleApplyCoupon() {
     if (!couponCode.trim()) {
       setCouponMsg("Please enter a coupon code.");
@@ -195,9 +199,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Server recalculates the total from real prices/stock — if it differs
-    // from what's shown on screen (coupon expired, stock changed, etc.),
-    // stop instead of silently charging a different amount.
     if (!isAdvanceForCod) {
       const serverTotal = Number(data.totalAmount);
       if (Math.abs(serverTotal - amountAfterDiscount) > 1) {
@@ -254,7 +255,7 @@ export default function CheckoutPage() {
         email: email || undefined,
       },
       theme: {
-        color: "#5A3150",
+        color: "#2D1155",
       },
     };
 
@@ -284,6 +285,16 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (mobile.length !== 10) {
+      setErrorMsg("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    if (pinCode.length !== 6) {
+      setErrorMsg("Please enter a valid 6-digit PIN code.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -301,7 +312,7 @@ export default function CheckoutPage() {
   if (cart.length === 0) {
     return (
       <div style={{ backgroundColor: "var(--astro-bg)", minHeight: "100vh", padding: "2rem", textAlign: "center" }}>
-        <h1 style={{ fontFamily: "Playfair Display, serif", color: "var(--astro-text)" }}>Your cart is empty</h1>
+        <h1 className="astro-serif" style={{ color: "var(--astro-text)" }}>Your cart is empty</h1>
         <p style={{ color: "var(--astro-mauve)" }}>Add some products before checking out.</p>
       </div>
     );
@@ -312,8 +323,8 @@ export default function CheckoutPage() {
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
       <div style={{ backgroundColor: "var(--astro-bg)", minHeight: "100vh" }}>
-        <div style={{ maxWidth: "700px", margin: "0 auto", padding: "2rem", fontFamily: "Inter, sans-serif" }}>
-          <h1 style={{ fontFamily: "Playfair Display, serif", color: "var(--astro-text)", marginBottom: "1.5rem" }}>
+        <div style={{ maxWidth: "700px", margin: "0 auto", padding: "2rem 1.25rem" }}>
+          <h1 className="astro-serif" style={{ color: "var(--astro-text)", fontSize: "2.1rem", marginBottom: "1.5rem" }}>
             Checkout
           </h1>
 
@@ -321,12 +332,12 @@ export default function CheckoutPage() {
             style={{
               backgroundColor: "var(--astro-card)",
               border: "1px solid var(--astro-border)",
-              borderRadius: "8px",
+              borderRadius: "16px",
               padding: "1.5rem",
               marginBottom: "1.5rem",
             }}
           >
-            <h2 style={{ fontSize: "1.05rem", color: "var(--astro-text)", marginBottom: "1rem" }}>Order Summary</h2>
+            <h2 className="astro-serif" style={{ fontSize: "1.2rem", color: "var(--astro-text)", marginBottom: "1rem" }}>Order Summary</h2>
             {cart.map((item) => (
               <div
                 key={item.id}
@@ -379,9 +390,9 @@ export default function CheckoutPage() {
                 display: "flex",
                 justifyContent: "space-between",
                 fontWeight: "bold",
-                color: "var(--astro-text)",
+                color: "var(--astro-primary)",
                 marginTop: "0.5rem",
-                fontSize: "1.05rem",
+                fontSize: "1.1rem",
               }}
             >
               <span>{paymentMethod === "cod" ? "Payable Now" : "Total"}</span>
@@ -390,7 +401,7 @@ export default function CheckoutPage() {
               </span>
             </div>
 
-            <div style={{ marginTop: "1rem" }}>
+            <div style={{ marginTop: "1.1rem" }}>
               <label style={{ fontSize: "0.85rem", color: "var(--astro-text)", fontWeight: "bold" }}>
                 Have a coupon code?
               </label>
@@ -411,9 +422,10 @@ export default function CheckoutPage() {
                       backgroundColor: "#B00020",
                       color: "#fff",
                       border: "none",
-                      borderRadius: "4px",
-                      padding: "0 1rem",
+                      borderRadius: "999px",
+                      padding: "0 1.1rem",
                       fontSize: "0.85rem",
+                      fontWeight: 600,
                       cursor: "pointer",
                     }}
                   >
@@ -428,9 +440,10 @@ export default function CheckoutPage() {
                       backgroundColor: "var(--astro-primary)",
                       color: "var(--astro-primary-text)",
                       border: "none",
-                      borderRadius: "4px",
-                      padding: "0 1rem",
+                      borderRadius: "999px",
+                      padding: "0 1.1rem",
                       fontSize: "0.85rem",
+                      fontWeight: 600,
                       cursor: checkingCoupon ? "not-allowed" : "pointer",
                     }}
                   >
@@ -458,12 +471,12 @@ export default function CheckoutPage() {
               style={{
                 backgroundColor: "var(--astro-card)",
                 border: "1px solid var(--astro-border)",
-                borderRadius: "8px",
+                borderRadius: "16px",
                 padding: "1.5rem",
                 marginBottom: "1.5rem",
               }}
             >
-              <h2 style={{ fontSize: "1.05rem", color: "var(--astro-text)", marginBottom: "1rem" }}>
+              <h2 className="astro-serif" style={{ fontSize: "1.2rem", color: "var(--astro-text)", marginBottom: "1rem" }}>
                 Delivery Details
               </h2>
 
@@ -476,9 +489,10 @@ export default function CheckoutPage() {
               />
               <input
                 type="tel"
-                placeholder="Mobile Number *"
+                inputMode="numeric"
+                placeholder="Mobile Number * (10 digits)"
                 value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
+                onChange={(e) => handleMobileChange(e.target.value)}
                 style={inputStyle}
               />
               <input
@@ -536,16 +550,27 @@ export default function CheckoutPage() {
               style={{
                 backgroundColor: "var(--astro-card)",
                 border: "1px solid var(--astro-border)",
-                borderRadius: "8px",
+                borderRadius: "16px",
                 padding: "1.5rem",
                 marginBottom: "1.5rem",
               }}
             >
-              <h2 style={{ fontSize: "1.05rem", color: "var(--astro-text)", marginBottom: "1rem" }}>
+              <h2 className="astro-serif" style={{ fontSize: "1.2rem", color: "var(--astro-text)", marginBottom: "1rem" }}>
                 Payment Method
               </h2>
 
-              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.6rem",
+                  marginBottom: "0.75rem",
+                  padding: "0.75rem",
+                  border: paymentMethod === "online" ? "1px solid var(--astro-primary)" : "1px solid var(--astro-border)",
+                  borderRadius: "10px",
+                  cursor: "pointer",
+                }}
+              >
                 <input
                   type="radio"
                   name="paymentMethod"
@@ -555,7 +580,17 @@ export default function CheckoutPage() {
                 <span style={{ color: "var(--astro-text)" }}>Pay Full Amount Online</span>
               </label>
 
-              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.6rem",
+                  padding: "0.75rem",
+                  border: paymentMethod === "cod" ? "1px solid var(--astro-primary)" : "1px solid var(--astro-border)",
+                  borderRadius: "10px",
+                  cursor: "pointer",
+                }}
+              >
                 <input
                   type="radio"
                   name="paymentMethod"
@@ -569,7 +604,7 @@ export default function CheckoutPage() {
             </div>
 
             {errorMsg && (
-              <p style={{ color: "#B00020", marginBottom: "1rem", fontWeight: "bold" }}>{errorMsg}</p>
+              <p style={{ color: "#B00020", marginBottom: "1rem", fontWeight: "bold", fontSize: "0.9rem" }}>{errorMsg}</p>
             )}
 
             <button
@@ -577,12 +612,12 @@ export default function CheckoutPage() {
               disabled={submitting}
               style={{
                 width: "100%",
-                padding: "0.9rem",
+                height: "52px",
                 backgroundColor: "var(--astro-primary)",
                 color: "var(--astro-primary-text)",
                 border: "none",
-                borderRadius: "6px",
-                fontWeight: "bold",
+                borderRadius: "999px",
+                fontWeight: 600,
                 fontSize: "1rem",
                 cursor: submitting ? "not-allowed" : "pointer",
               }}
@@ -603,10 +638,11 @@ export default function CheckoutPage() {
 const inputStyle: React.CSSProperties = {
   display: "block",
   width: "100%",
-  padding: "0.6rem",
+  padding: "0.7rem 0.9rem",
   marginBottom: "0.75rem",
   border: "1px solid var(--astro-border)",
-  borderRadius: "4px",
+  borderRadius: "10px",
   backgroundColor: "#fff",
   color: "#241046",
+  fontSize: "0.95rem",
 };
