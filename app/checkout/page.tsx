@@ -169,11 +169,22 @@ export default function CheckoutPage() {
     router.push(`/order-confirmation/${result.out_order_number}`);
   }
 
-  async function startRazorpayPayment(amountToCharge: number, isAdvanceForCod: boolean) {
+  async function startRazorpayPayment(isAdvanceForCod: boolean) {
+    const items = cart.map((item) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+    }));
+
     const res = await fetch("/api/create-razorpay-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: amountToCharge }),
+      body: JSON.stringify({
+        items,
+        couponCode: appliedDiscount > 0 ? couponCode : null,
+        isAdvanceForCod,
+      }),
     });
 
     const data = await res.json();
@@ -182,6 +193,20 @@ export default function CheckoutPage() {
       setErrorMsg("Failed to start payment: " + (data.error || "Please try again."));
       setSubmitting(false);
       return;
+    }
+
+    // Server recalculates the total from real prices/stock — if it differs
+    // from what's shown on screen (coupon expired, stock changed, etc.),
+    // stop instead of silently charging a different amount.
+    if (!isAdvanceForCod) {
+      const serverTotal = Number(data.totalAmount);
+      if (Math.abs(serverTotal - amountAfterDiscount) > 1) {
+        setErrorMsg(
+          `Your order total has changed to ₹${serverTotal.toLocaleString("en-IN")} (was ₹${amountAfterDiscount.toLocaleString("en-IN")}). Please review your cart and try again.`
+        );
+        setSubmitting(false);
+        return;
+      }
     }
 
     const options = {
@@ -263,9 +288,9 @@ export default function CheckoutPage() {
 
     try {
       if (paymentMethod === "cod") {
-        await startRazorpayPayment(advanceAmount, true);
+        await startRazorpayPayment(true);
       } else {
-        await startRazorpayPayment(amountAfterDiscount, false);
+        await startRazorpayPayment(false);
       }
     } catch (err) {
       setErrorMsg("Failed to start payment: " + (err instanceof Error ? err.message : "Unknown error"));
