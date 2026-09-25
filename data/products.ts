@@ -9,6 +9,7 @@ export const products: Product[] = [
     description:
       "Traditionally associated with love, harmony and emotional balance.",
     price: 499,
+    stock: 10,
     rating: 5,
     reviewCount: 128,
     image:
@@ -22,6 +23,7 @@ export const products: Product[] = [
     description:
       "A beautiful crystal traditionally associated with calm and clarity.",
     price: 599,
+    stock: 10,
     rating: 5,
     reviewCount: 94,
     image:
@@ -35,6 +37,7 @@ export const products: Product[] = [
     description:
       "Traditionally associated with confidence, grounding and protection.",
     price: 699,
+    stock: 10,
     rating: 5,
     reviewCount: 76,
     image:
@@ -48,6 +51,7 @@ export const products: Product[] = [
     description:
       "Traditionally associated with clarity and mindful practices.",
     price: 549,
+    stock: 10,
     rating: 5,
     reviewCount: 61,
     image:
@@ -61,6 +65,7 @@ export const products: Product[] = [
     description:
       "Sacred Rudraksha rooted in traditional Indian spiritual practices.",
     price: 799,
+    stock: 10,
     rating: 5,
     reviewCount: 54,
 
@@ -76,6 +81,7 @@ export const products: Product[] = [
     description:
       "A gemstone traditionally valued within Indian astrological practices.",
     price: 2499,
+    stock: 10,
     rating: 5,
     reviewCount: 31,
     image:
@@ -89,6 +95,7 @@ export const products: Product[] = [
     description:
       "A naturally beautiful crystal for mindful everyday practices.",
     price: 449,
+    stock: 10,
     rating: 5,
     reviewCount: 48,
     image:
@@ -102,6 +109,7 @@ export const products: Product[] = [
     description:
       "Traditional spiritual accessory for personal practices.",
     price: 399,
+    stock: 10,
     rating: 5,
     reviewCount: 29,
     image:
