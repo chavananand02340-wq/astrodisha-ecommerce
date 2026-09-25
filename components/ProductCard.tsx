@@ -11,6 +11,7 @@ export type Product = {
   category: string;
   description: string;
   price: number;
+  stock: number;
   image: string;
   images?: string[];
   rating?: number;
@@ -36,7 +37,6 @@ export default function ProductCard({
   const [imageLoaded, setImageLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  // Cached images can finish loading before React attaches onLoad — check on mount
   useEffect(() => {
     const img = imgRef.current;
     if (img && img.complete && img.naturalWidth > 0) {
@@ -46,6 +46,10 @@ export default function ProductCard({
 
   const wishlisted = isWishlisted(product.id);
   const stars = product.rating ? Math.round(Math.min(Math.max(product.rating, 0), 5)) : 0;
+
+  const stock = product.stock ?? 0;
+  const outOfStock = stock <= 0;
+  const lowStock = !outOfStock && stock <= 5;
 
   return (
     <article
@@ -70,7 +74,7 @@ export default function ProductCard({
             alt={`${product.name} - ${product.category}`}
             className={`product-image h-full w-full object-cover transition-opacity duration-300 ${
               imageLoaded ? "opacity-100" : "opacity-0"
-            }`}
+            } ${outOfStock ? "opacity-70 grayscale-[30%]" : ""}`}
             onLoad={() => setImageLoaded(true)}
             onError={(event) => {
               const image = event.currentTarget;
@@ -83,6 +87,20 @@ export default function ProductCard({
             }}
           />
         </Link>
+
+        {outOfStock && (
+          <div
+            style={{ backgroundColor: "rgba(22,8,40,0.5)" }}
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          >
+            <span
+              style={{ backgroundColor: "var(--astro-card)", color: "var(--astro-text)" }}
+              className="rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide"
+            >
+              Out of Stock
+            </span>
+          </div>
+        )}
 
         <button
           type="button"
@@ -156,16 +174,31 @@ export default function ProductCard({
             )}
           </div>
 
+          {lowStock && (
+            <p style={{ color: "var(--astro-accent)" }} className="mt-1 text-[11px] font-medium">
+              Only {stock} left
+            </p>
+          )}
+
           <button
             type="button"
-            onClick={() => addToCart(product)}
-            style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-            className="mt-3 h-12 w-full rounded-[10px] text-[14px] font-semibold transition duration-150 ease-in-out hover:opacity-90 active:scale-[0.98]"
+            disabled={outOfStock}
+            onClick={() => {
+              if (!outOfStock) addToCart(product);
+            }}
+            style={
+              outOfStock
+                ? { backgroundColor: "var(--astro-border)", color: "var(--astro-mauve)" }
+                : { backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }
+            }
+            className={`mt-3 h-12 w-full rounded-[10px] text-[14px] font-semibold transition duration-150 ease-in-out ${
+              outOfStock ? "cursor-not-allowed" : "hover:opacity-90 active:scale-[0.98]"
+            }`}
           >
-            Add to Cart
+            {outOfStock ? "Out of Stock" : "Add to Cart"}
           </button>
         </div>
       </div>
     </article>
   );
-                }
+}
