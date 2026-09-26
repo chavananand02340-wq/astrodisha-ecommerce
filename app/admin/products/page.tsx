@@ -9,6 +9,8 @@ type Category = {
   name: string;
 };
 
+type SpecRow = { key: string; value: string };
+
 type Product = {
   id: string;
   name: string;
@@ -18,6 +20,7 @@ type Product = {
   is_featured: boolean | null;
   category_id: string;
   short_description: string | null;
+  specifications: SpecRow[] | null;
   categories?: { name: string } | null;
 };
 
@@ -55,6 +58,7 @@ function ProductsContent() {
   const [stock, setStock] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
+  const [specs, setSpecs] = useState<SpecRow[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -64,6 +68,7 @@ function ProductsContent() {
   const [editStock, setEditStock] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editFeatured, setEditFeatured] = useState(false);
+  const [editSpecs, setEditSpecs] = useState<SpecRow[]>([]);
   const [savingEdit, setSavingEdit] = useState(false);
 
   const [imagesForProduct, setImagesForProduct] = useState<string | null>(null);
@@ -82,7 +87,7 @@ function ProductsContent() {
 
     let query = supabase
       .from("products")
-      .select("id, name, price, stock, is_active, is_featured, category_id, short_description, categories(name)");
+      .select("id, name, price, stock, is_active, is_featured, category_id, short_description, specifications, categories(name)");
 
     if (filterStatus === "active") {
       query = query.eq("is_active", true);
@@ -134,6 +139,12 @@ function ProductsContent() {
     );
   }
 
+  function cleanSpecs(rows: SpecRow[]) {
+    return rows
+      .map((r) => ({ key: r.key.trim(), value: r.value.trim() }))
+      .filter((r) => r.key && r.value);
+  }
+
   async function handleAddProduct(e: React.FormEvent) {
     e.preventDefault();
     setStatusMsg("");
@@ -156,6 +167,7 @@ function ProductsContent() {
         short_description: shortDescription || null,
         is_active: true,
         is_featured: isFeatured,
+        specifications: cleanSpecs(specs),
       })
       .select()
       .single();
@@ -172,6 +184,7 @@ function ProductsContent() {
     setStock("");
     setShortDescription("");
     setIsFeatured(false);
+    setSpecs([]);
     setStatusMsg("Product added successfully. Add images below.");
     await loadData();
 
@@ -202,6 +215,7 @@ function ProductsContent() {
     setEditStock(String(product.stock));
     setEditDescription(product.short_description || "");
     setEditFeatured(Boolean(product.is_featured));
+    setEditSpecs(product.specifications && product.specifications.length > 0 ? product.specifications : []);
     setStatusMsg("");
   }
 
@@ -226,6 +240,7 @@ function ProductsContent() {
         stock: editStock ? parseInt(editStock, 10) : 0,
         short_description: editDescription || null,
         is_featured: editFeatured,
+        specifications: cleanSpecs(editSpecs),
       })
       .eq("id", productId);
 
@@ -453,6 +468,8 @@ function ProductsContent() {
 
           <FeaturedCheckbox checked={isFeatured} onChange={setIsFeatured} />
 
+          <SpecsEditor specs={specs} onChange={setSpecs} />
+
           <button
             type="submit"
             disabled={submitting}
@@ -464,6 +481,7 @@ function ProductsContent() {
               padding: "0.6rem 1.2rem",
               fontWeight: "bold",
               cursor: submitting ? "not-allowed" : "pointer",
+              marginTop: "0.5rem",
             }}
           >
             {submitting ? "Adding..." : "Add Product"}
@@ -581,7 +599,9 @@ function ProductsContent() {
 
                   <FeaturedCheckbox checked={editFeatured} onChange={setEditFeatured} />
 
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <SpecsEditor specs={editSpecs} onChange={setEditSpecs} />
+
+                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <button
                       onClick={() => saveEdit(p.id)}
                       disabled={savingEdit}
@@ -634,6 +654,9 @@ function ProductsContent() {
                     <div style={{ fontSize: "0.85rem", color: "#8A607A" }}>
                       {p.categories?.name || "-"} • ₹{p.price} • Stock: {p.stock} •{" "}
                       {p.is_active ? "Active" : "Inactive"}
+                      {p.specifications && p.specifications.length > 0
+                        ? ` • ${p.specifications.length} spec${p.specifications.length === 1 ? "" : "s"}`
+                        : ""}
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
@@ -824,6 +847,96 @@ function FeaturedCheckbox({
         </span>
       </span>
     </label>
+  );
+}
+
+function SpecsEditor({
+  specs,
+  onChange,
+}: {
+  specs: SpecRow[];
+  onChange: (rows: SpecRow[]) => void;
+}) {
+  function updateRow(index: number, field: "key" | "value", value: string) {
+    const next = specs.map((row, i) => (i === index ? { ...row, [field]: value } : row));
+    onChange(next);
+  }
+
+  function addRow() {
+    onChange([...specs, { key: "", value: "" }]);
+  }
+
+  function removeRow(index: number) {
+    onChange(specs.filter((_, i) => i !== index));
+  }
+
+  return (
+    <div
+      style={{
+        marginBottom: "1rem",
+        padding: "0.75rem",
+        border: "1px solid #D9CEC1",
+        borderRadius: "6px",
+        backgroundColor: "#fff",
+      }}
+    >
+      <p style={{ fontWeight: "bold", color: "#3E2237", fontSize: "0.9rem", marginBottom: "0.6rem" }}>
+        Product Specifications
+      </p>
+      <p style={{ color: "#8A607A", fontSize: "0.75rem", marginBottom: "0.75rem" }}>
+        Shown on the product page as an expandable list (e.g. Origin, Planet, Colour, Shape, Cut).
+      </p>
+
+      {specs.map((row, i) => (
+        <div key={i} style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+          <input
+            type="text"
+            placeholder="Label (e.g. Origin)"
+            value={row.key}
+            onChange={(e) => updateRow(i, "key", e.target.value)}
+            style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+          />
+          <input
+            type="text"
+            placeholder="Value (e.g. Brazil)"
+            value={row.value}
+            onChange={(e) => updateRow(i, "value", e.target.value)}
+            style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+          />
+          <button
+            type="button"
+            onClick={() => removeRow(i)}
+            style={{
+              background: "none",
+              border: "1px solid #D9CEC1",
+              borderRadius: "4px",
+              color: "#B00020",
+              padding: "0 0.7rem",
+              cursor: "pointer",
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+
+      <button
+        type="button"
+        onClick={addRow}
+        style={{
+          marginTop: "0.25rem",
+          backgroundColor: "#8A607A",
+          color: "#fff",
+          border: "none",
+          borderRadius: "4px",
+          padding: "0.4rem 0.9rem",
+          fontSize: "0.8rem",
+          cursor: "pointer",
+        }}
+      >
+        + Add Specification
+      </button>
+    </div>
   );
 }
 
