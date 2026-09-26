@@ -16,6 +16,7 @@ export type Product = {
   images?: string[];
   rating?: number;
   reviewCount?: number;
+  specifications?: { key: string; value: string }[];
 };
 
 type ProductCardProps = {
