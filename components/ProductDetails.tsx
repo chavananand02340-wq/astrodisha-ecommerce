@@ -6,6 +6,7 @@ import type { Product } from "./ProductCard";
 import { useStore } from "./StoreProvider";
 import { categories } from "@/data/categories";
 import { WHATSAPP_NUMBER, WHATSAPP_ICON_PATH } from "@/lib/site";
+import { createClient } from "@/utils/supabase/client";
 
 // Keep same as Header.tsx and Supabase site_settings
 const FREE_SHIPPING_THRESHOLD = 999;
@@ -15,6 +16,9 @@ const HEART_PATH =
 
 const CART_ICON_PATH_1 = "M6 7h12l-1 13H7L6 7z";
 const CART_ICON_PATH_2 = "M9 7a3 3 0 0 1 6 0";
+
+const STAR_PATH =
+  "M12 2.5l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3l-6.2 3.5 1.6-6.8-5.2-4.6 6.9-.6z";
 
 const TRUST_ICONS = {
   truck: (
@@ -39,6 +43,30 @@ const TRUST_ICONS = {
   ),
 };
 
+type ReviewRow = {
+  id: string;
+  customer_name: string;
+  rating: number;
+  review_text: string | null;
+  created_at: string;
+};
+
+function Star({ filled, className }: { filled: boolean; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill={filled ? "var(--astro-accent)" : "none"}
+      stroke={filled ? "var(--astro-accent)" : "var(--astro-border)"}
+      strokeWidth={1.5}
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d={STAR_PATH} />
+    </svg>
+  );
+}
+
 export default function ProductDetails({
   product
 }: {
@@ -62,6 +90,15 @@ export default function ProductDetails({
   const [specsOpen, setSpecsOpen] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
 
+  // Reviews
+  const [reviews, setReviews] = useState<ReviewRow[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [reviewerName, setReviewerName] = useState("");
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewMsg, setReviewMsg] = useState("");
+
   useEffect(() => {
     const img = imgRef.current;
     if (img && img.complete && img.naturalWidth > 0) {
@@ -69,8 +106,76 @@ export default function ProductDetails({
     }
   }, [activeImage]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadReviews() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("id, customer_name, rating, review_text, created_at")
+        .eq("product_id", product.id)
+        .order("created_at", { ascending: false });
+
+      if (!cancelled) {
+        setReviews(!error && data ? (data as ReviewRow[]) : []);
+        setReviewsLoading(false);
+      }
+    }
+
+    loadReviews();
+    return () => {
+      cancelled = true;
+    };
+  }, [product.id]);
+
+  const liveCount = reviews.length;
+  const liveAverage =
+    liveCount > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / liveCount : 0;
+  const liveStars = Math.round(liveAverage);
+
+  async function handleSubmitReview(e: React.FormEvent) {
+    e.preventDefault();
+    setReviewMsg("");
+
+    if (!reviewerName.trim() || reviewRating === 0) {
+      setReviewMsg("Please add your name and a star rating.");
+      return;
+    }
+
+    setSubmittingReview(true);
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from("reviews")
+      .insert({
+        product_id: product.id,
+        customer_name: reviewerName.trim(),
+        rating: reviewRating,
+        review_text: reviewText.trim() || null,
+        is_approved: true,
+      })
+      .select("id, customer_name, rating, review_text, created_at")
+      .single();
+
+    setSubmittingReview(false);
+
+    if (error) {
+      setReviewMsg("Failed to submit: " + error.message);
+      return;
+    }
+
+    if (data) {
+      setReviews((current) => [data as ReviewRow, ...current]);
+    }
+
+    setReviewerName("");
+    setReviewRating(0);
+    setReviewText("");
+    setReviewMsg("Thank you! Your review has been posted.");
+  }
+
   const wishlisted = isWishlisted(product.id);
-  const stars = product.rating ? Math.round(Math.min(Math.max(product.rating, 0), 5)) : 0;
 
   const stock = product.stock ?? 0;
   const outOfStock = stock <= 0;
@@ -226,15 +331,14 @@ export default function ProductDetails({
               {product.name}
             </h1>
 
-            {stars > 0 && (
-              <p className="mt-3 text-sm" aria-label={`Rated ${product.rating} out of 5`}>
-                <span style={{ color: "var(--astro-accent)" }}>{"★".repeat(stars)}</span>
-                <span style={{ color: "var(--astro-border)" }}>{"★".repeat(5 - stars)}</span>
-                {product.reviewCount ? (
-                  <span style={{ color: "var(--astro-mauve)" }} className="ml-1 text-xs">
-                    ({product.reviewCount} reviews)
-                  </span>
-                ) : null}
+            {!reviewsLoading && liveCount > 0 && (
+              <p className="mt-3 flex items-center gap-1 text-sm">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <Star key={n} filled={n <= liveStars} className="h-4 w-4" />
+                ))}
+                <span style={{ color: "var(--astro-mauve)" }} className="ml-1 text-xs">
+                  {liveAverage.toFixed(1)} ({liveCount} review{liveCount === 1 ? "" : "s"})
+                </span>
               </p>
             )}
 
@@ -431,7 +535,7 @@ export default function ProductDetails({
           </div>
         </div>
 
-        {/* REVIEWS — shows the real average rating/count on file; no fabricated review text */}
+        {/* REVIEWS */}
         <section
           style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
           className="mt-10 rounded-2xl border p-6 sm:p-8"
@@ -440,32 +544,119 @@ export default function ProductDetails({
             Customer Reviews
           </h2>
 
-          {product.rating ? (
-            <div className="mt-4 flex items-center gap-4">
-              <span style={{ color: "var(--astro-primary)" }} className="text-4xl font-bold">
-                {product.rating.toFixed(1)}
-              </span>
-              <div>
-                <p style={{ color: "var(--astro-accent)" }} className="text-lg">
-                  {"★".repeat(stars)}
-                  <span style={{ color: "var(--astro-border)" }}>{"★".repeat(5 - stars)}</span>
-                </p>
-                <p style={{ color: "var(--astro-mauve)" }} className="text-xs">
-                  Based on {product.reviewCount || 0} review{product.reviewCount === 1 ? "" : "s"}
-                </p>
+          {reviewsLoading ? (
+            <p style={{ color: "var(--astro-mauve)" }} className="mt-3 text-sm">
+              Loading reviews...
+            </p>
+          ) : liveCount > 0 ? (
+            <>
+              <div className="mt-4 flex items-center gap-4">
+                <span style={{ color: "var(--astro-primary)" }} className="text-4xl font-bold">
+                  {liveAverage.toFixed(1)}
+                </span>
+                <div>
+                  <p className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <Star key={n} filled={n <= liveStars} className="h-4 w-4" />
+                    ))}
+                  </p>
+                  <p style={{ color: "var(--astro-mauve)" }} className="text-xs">
+                    Based on {liveCount} review{liveCount === 1 ? "" : "s"}
+                  </p>
+                </div>
               </div>
-            </div>
+
+              <div style={{ borderColor: "var(--astro-border)" }} className="mt-6 divide-y">
+                {reviews.map((r) => (
+                  <div key={r.id} className="py-4 first:pt-0">
+                    <div className="flex items-center justify-between gap-3">
+                      <p style={{ color: "var(--astro-text)" }} className="astro-serif text-sm">
+                        {r.customer_name}
+                      </p>
+                      <p style={{ color: "var(--astro-mauve)" }} className="text-[11px]">
+                        {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                      </p>
+                    </div>
+                    <p className="mt-1 flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Star key={n} filled={n <= r.rating} className="h-3.5 w-3.5" />
+                      ))}
+                    </p>
+                    {r.review_text && (
+                      <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 text-sm leading-6">
+                        {r.review_text}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
             <p style={{ color: "var(--astro-mauve)" }} className="mt-3 text-sm">
-              No reviews yet for this product. Have a question before buying?{" "}
-              <a href={askUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--astro-primary)" }} className="font-semibold underline">
-                Ask us on WhatsApp
-              </a>
-              .
+              No reviews yet. Be the first to review this product.
             </p>
           )}
+
+          {/* WRITE A REVIEW */}
+          <form
+            onSubmit={handleSubmitReview}
+            style={{ borderColor: "var(--astro-border)" }}
+            className="mt-8 border-t pt-6"
+          >
+            <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-lg">
+              Write a Review
+            </h3>
+
+            <div className="mt-3 flex gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  aria-label={`Rate ${n} star${n === 1 ? "" : "s"}`}
+                  onClick={() => setReviewRating(n)}
+                >
+                  <Star filled={n <= reviewRating} className="h-7 w-7" />
+                </button>
+              ))}
+            </div>
+
+            <input
+              type="text"
+              value={reviewerName}
+              onChange={(e) => setReviewerName(e.target.value)}
+              placeholder="Your name"
+              style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-bg)", color: "var(--astro-text)" }}
+              className="mt-3 h-11 w-full rounded-lg border px-3 text-sm outline-none"
+            />
+
+            <textarea
+              value={reviewText}
+              onChange={(e) => setReviewText(e.target.value)}
+              placeholder="Share your experience with this product (optional)"
+              style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-bg)", color: "var(--astro-text)" }}
+              className="mt-3 min-h-[80px] w-full rounded-lg border p-3 text-sm outline-none"
+            />
+
+            {reviewMsg && (
+              <p
+                style={{ color: reviewMsg.startsWith("Thank") ? "var(--astro-accent)" : "#B00020" }}
+                className="mt-2 text-xs font-semibold"
+              >
+                {reviewMsg}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={submittingReview}
+              style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+              className="mt-4 h-11 rounded-full px-6 text-sm font-semibold transition hover:opacity-90 disabled:opacity-60"
+            >
+              {submittingReview ? "Submitting..." : "Submit Review"}
+            </button>
+          </form>
         </section>
       </div>
     </main>
   );
-                                              }
+  }
