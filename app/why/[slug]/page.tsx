@@ -13,7 +13,7 @@ type WhyPage = {
   title: string;
   tagline: string;
   intro: string;
-  icon: "shield" | "user" | "gem";
+  icon: "shield" | "user" | "gem" | "lock";
   sections: Section[];
   note?: string;
 };
@@ -113,9 +113,70 @@ const PAGES: Record<string, WhyPage> = {
       },
     ],
   },
+
+  "secure-checkout": {
+    title: "Secure Checkout",
+    tagline: "Pay your way, safely.",
+    intro:
+      "Every payment on AstroDisha goes through trusted, secure channels, so you can check out with confidence.",
+    icon: "lock",
+    sections: [
+      {
+        heading: "Ways to pay",
+        points: [
+          "Pay online via UPI, cards or net banking, powered by Razorpay.",
+          "Or choose Cash on Delivery with a small ₹100 advance to confirm your order.",
+        ],
+      },
+      {
+        heading: "How your payment is protected",
+        points: [
+          "Card and UPI details are handled directly by Razorpay — we never see or store them.",
+          "Every payment is verified before your order is confirmed.",
+        ],
+      },
+      {
+        heading: "After you pay",
+        points: [
+          "You get an order confirmation with your order number right away.",
+          "Any question about a payment or order? Message us on WhatsApp.",
+        ],
+      },
+    ],
+  },
+
+  "quality-assured": {
+    title: "Quality Assured",
+    tagline: "Every product gets a closer look before it's listed.",
+    intro:
+      "We keep our catalogue focused rather than flooded, so each product gets real attention before it reaches you.",
+    icon: "gem",
+    sections: [
+      {
+        heading: "Before a product is listed",
+        points: [
+          "Products are added only once their details, pricing and photos are complete.",
+          "We keep the collection focused on gemstones, crystals, crystal jewellery, Rudraksha and puja essentials rather than listing everything.",
+        ],
+      },
+      {
+        heading: "If something isn't right",
+        points: [
+          "Received a product that's damaged or not as described? Message us on WhatsApp with photos.",
+          "We look into every report personally, rather than routing it through a generic ticket system.",
+        ],
+      },
+    ],
+  },
 };
 
 const ICONS = {
+  lock: (
+    <>
+      <rect x="4" y="10" width="16" height="11" rx="2" />
+      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+    </>
+  ),
   shield: (
     <>
       <path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3z" />
@@ -311,4 +372,4 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
       </article>
     </main>
   );
-}
+        }
