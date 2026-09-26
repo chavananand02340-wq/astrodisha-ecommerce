@@ -384,44 +384,44 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* WHY ASTRODISHA — horizontal scroll */}
-      <section className="px-5 py-[55px] md:px-6 md:py-[70px] lg:py-[90px]">
+      {/* WHY ASTRODISHA — horizontal scroll, compact on mobile */}
+      <section className="px-5 py-9 md:px-6 md:py-[70px] lg:py-[90px]">
         <div className="mx-auto max-w-[1100px] lg:px-8">
-          <p style={{ color: "var(--astro-accent)" }} className="mb-6 text-center text-[14px] font-semibold uppercase tracking-[3px]">
+          <p style={{ color: "var(--astro-accent)" }} className="mb-3 text-center text-[12px] font-semibold uppercase tracking-[3px] md:mb-6 md:text-[14px]">
             Why AstroDisha
           </p>
 
-          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mx-auto mb-10 max-w-[800px] text-center text-[42px] font-normal leading-[1.05] md:mb-[65px] md:text-[52px] lg:text-[64px]">
+          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mx-auto mb-6 max-w-[800px] text-center text-[30px] font-normal leading-[1.1] sm:text-[38px] md:mb-10 md:text-[52px] lg:mb-[65px] lg:text-[64px]">
             Thoughtfully Chosen.
             <br />
             Simply Presented.
           </h2>
 
-          <div className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 sm:gap-6 lg:px-0">
+          <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 sm:gap-6 lg:px-0">
             {WHY_ITEMS.map((item) => (
               <Link
                 key={item.slug}
                 href={`/why/${item.slug}`}
-                className="flex w-[82%] shrink-0 snap-start items-center gap-4 rounded-[22px] border border-[color:var(--astro-border)] bg-[color:var(--astro-card)] px-5 py-6 shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#b69bee] sm:w-[46%] sm:min-h-[150px] md:gap-7 md:p-8 lg:w-[31%] lg:px-12 lg:py-10"
+                className="flex w-[78%] shrink-0 snap-start items-center gap-3 rounded-[18px] border border-[color:var(--astro-border)] bg-[color:var(--astro-card)] px-4 py-4 shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#b69bee] sm:w-[46%] sm:gap-4 sm:rounded-[22px] sm:px-5 sm:py-5 md:gap-7 md:p-8 lg:w-[31%] lg:px-12 lg:py-10"
               >
                 <span
                   style={{ backgroundColor: "rgba(182, 155, 238, 0.15)" }}
-                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full sm:h-16 sm:w-16 md:h-[70px] md:w-[70px] lg:h-[76px] lg:w-[76px]"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full sm:h-16 sm:w-16 md:h-[70px] md:w-[70px] lg:h-[76px] lg:w-[76px]"
                   aria-hidden="true"
                 >
-                  <LineIcon icon={item.icon} className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />
+                  <LineIcon icon={item.icon} className="h-5 w-5 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />
                 </span>
 
                 <div className="min-w-0">
-                  <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-[20px] font-normal leading-tight sm:text-[26px] lg:text-[36px]">
+                  <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-[16px] font-normal leading-tight sm:text-[26px] lg:text-[36px]">
                     {item.title}
                   </h3>
 
-                  <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 text-[13px] leading-[1.5] sm:text-[15px] lg:text-[18px]">
+                  <p style={{ color: "var(--astro-mauve)" }} className="mt-1 line-clamp-2 text-[11px] leading-[1.4] sm:mt-1.5 sm:text-[15px] sm:leading-[1.5] lg:text-[18px]">
                     {item.text}
                   </p>
 
-                  <span style={{ color: "var(--astro-primary)" }} className="mt-2 inline-block text-[11px] font-semibold uppercase tracking-[0.12em]">
+                  <span style={{ color: "var(--astro-primary)" }} className="mt-1.5 inline-block text-[10px] font-semibold uppercase tracking-[0.1em] sm:mt-2 sm:text-[11px]">
                     Learn more →
                   </span>
                 </div>
@@ -509,4 +509,4 @@ export default async function HomePage() {
       </a>
     </main>
   );
-                  }
+              }
