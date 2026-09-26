@@ -10,8 +10,7 @@ export default async function CrystalJewelleryPage() {
       <Header />
 
       <CategoryPage
-        title="Crystal Jewellery"
-        description="Elegant crystal jewellery crafted for everyday wear and spiritual intention."
+        slug="crystal-jewellery"
         products={categoryProducts}
       />
     </>
