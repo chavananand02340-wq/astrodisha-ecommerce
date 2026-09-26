@@ -173,6 +173,18 @@ export default function Header() {
     return () => clearTimeout(timer);
   }, [search]);
 
+  // Lock background scroll while the mobile drawer is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
   const themeLabel = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
   const themeIcon = theme === "dark" ? "sun" : "moon";
 
@@ -210,25 +222,38 @@ export default function Header() {
       >
         <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6">
 
-          <Link href="/" className="flex min-w-0 items-center gap-2">
-            <Icon name="lotus" className="h-8 w-8 shrink-0" color="var(--astro-accent)" />
+          <div className="flex min-w-0 items-center gap-1.5">
+            <button
+              type="button"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((value) => !value)}
+              style={{ color: "var(--astro-primary)" }}
+              className={`${iconButtonClass} lg:hidden`}
+            >
+              <Icon name="menu" className="h-6 w-6" />
+            </button>
 
-            <div className="min-w-0">
-              <div
-                style={{ color: "var(--astro-primary)" }}
-                className="astro-serif text-[19px] leading-none sm:text-[21px]"
-              >
-                ASTRODISHA
-              </div>
+            <Link href="/" className="flex min-w-0 items-center gap-2">
+              <Icon name="lotus" className="h-8 w-8 shrink-0" color="var(--astro-accent)" />
 
-              <div
-                style={{ color: "var(--astro-accent)" }}
-                className="mt-1 whitespace-nowrap text-[6px] tracking-[0.12em] sm:text-[7px]"
-              >
-                GUIDANCE · HEALING · DIVINE ALIGNMENT
+              <div className="min-w-0">
+                <div
+                  style={{ color: "var(--astro-primary)" }}
+                  className="astro-serif text-[19px] leading-none sm:text-[21px]"
+                >
+                  ASTRODISHA
+                </div>
+
+                <div
+                  style={{ color: "var(--astro-accent)" }}
+                  className="mt-1 whitespace-nowrap text-[6px] tracking-[0.12em] sm:text-[7px]"
+                >
+                  GUIDANCE · HEALING · DIVINE ALIGNMENT
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </div>
 
           <nav className="hidden items-center gap-7 lg:flex">
             {navigation.map((item) => (
@@ -291,7 +316,7 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* MOBILE ICONS */}
+          {/* MOBILE ICONS (hamburger moved to the left, these stay on the right) */}
           <div style={{ color: "var(--astro-primary)" }} className="flex shrink-0 items-center gap-0.5 lg:hidden">
 
             <button
@@ -329,16 +354,6 @@ export default function Header() {
               <Icon name="bag" />
               <CountBadge count={cartCount} />
             </Link>
-
-            <button
-              type="button"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((value) => !value)}
-              className={iconButtonClass}
-            >
-              <Icon name={menuOpen ? "close" : "menu"} className="h-6 w-6" />
-            </button>
           </div>
         </div>
 
@@ -413,37 +428,66 @@ export default function Header() {
             </div>
           </div>
         )}
-
-        {menuOpen && (
-          <div
-            style={{ backgroundColor: "var(--astro-card)", borderColor: "var(--astro-border)" }}
-            className="border-t px-5 py-5 lg:hidden"
-          >
-            <nav className="flex flex-col">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setMenuOpen(false)}
-                  style={{ borderColor: "var(--astro-border)", color: "var(--astro-text)" }}
-                  className="border-b py-4 text-sm"
-                >
-                  {item.name}
-                </Link>
-              ))}
-
-              <Link
-                href="/consult"
-                onClick={() => setMenuOpen(false)}
-                style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-                className="mt-5 rounded-full px-5 py-3.5 text-center text-sm font-semibold"
-              >
-                Consult an Expert
-              </Link>
-            </nav>
-          </div>
-        )}
       </header>
+
+      {/* MOBILE DRAWER — slides in from the left */}
+      <div
+        onClick={() => setMenuOpen(false)}
+        aria-hidden="true"
+        className={`fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 lg:hidden ${
+          menuOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      />
+
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
+        style={{ backgroundColor: "var(--astro-bg)" }}
+        className={`fixed inset-y-0 left-0 z-50 w-[82%] max-w-xs transform overflow-y-auto shadow-2xl transition-transform duration-300 ease-in-out lg:hidden ${
+          menuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div
+          style={{ borderColor: "var(--astro-border)" }}
+          className="flex items-center justify-between border-b px-5 py-5"
+        >
+          <Icon name="lotus" className="h-7 w-7" color="var(--astro-accent)" />
+
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setMenuOpen(false)}
+            style={{ color: "var(--astro-primary)" }}
+            className={iconButtonClass}
+          >
+            <Icon name="close" className="h-6 w-6" />
+          </button>
+        </div>
+
+        <nav className="flex flex-col px-5 py-3">
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              onClick={() => setMenuOpen(false)}
+              style={{ borderColor: "var(--astro-border)", color: "var(--astro-text)" }}
+              className="border-b py-4 text-sm"
+            >
+              {item.name}
+            </Link>
+          ))}
+
+          <Link
+            href="/consult"
+            onClick={() => setMenuOpen(false)}
+            style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+            className="mt-5 rounded-full px-5 py-3.5 text-center text-sm font-semibold"
+          >
+            Consult an Expert
+          </Link>
+        </nav>
+      </div>
     </>
   );
-}
+              }
