@@ -391,4 +391,122 @@ export default async function HomePage() {
             Why AstroDisha
           </p>
 
-          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mx-auto mb-10 max-w
+          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mx-auto mb-10 max-w-[800px] text-center text-[42px] font-normal leading-[1.05] md:mb-[65px] md:text-[52px] lg:text-[64px]">
+            Thoughtfully Chosen.
+            <br />
+            Simply Presented.
+          </h2>
+
+          <div className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 sm:gap-6 lg:px-0">
+            {WHY_ITEMS.map((item) => (
+              <Link
+                key={item.slug}
+                href={`/why/${item.slug}`}
+                className="flex w-[82%] shrink-0 snap-start items-center gap-4 rounded-[22px] border border-[color:var(--astro-border)] bg-[color:var(--astro-card)] px-5 py-6 shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#b69bee] sm:w-[46%] sm:min-h-[150px] md:gap-7 md:p-8 lg:w-[31%] lg:px-12 lg:py-10"
+              >
+                <span
+                  style={{ backgroundColor: "rgba(182, 155, 238, 0.15)" }}
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full sm:h-16 sm:w-16 md:h-[70px] md:w-[70px] lg:h-[76px] lg:w-[76px]"
+                  aria-hidden="true"
+                >
+                  <LineIcon icon={item.icon} className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />
+                </span>
+
+                <div className="min-w-0">
+                  <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-[20px] font-normal leading-tight sm:text-[26px] lg:text-[36px]">
+                    {item.title}
+                  </h3>
+
+                  <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 text-[13px] leading-[1.5] sm:text-[15px] lg:text-[18px]">
+                    {item.text}
+                  </p>
+
+                  <span style={{ color: "var(--astro-primary)" }} className="mt-2 inline-block text-[11px] font-semibold uppercase tracking-[0.12em]">
+                    Learn more →
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER — always dark (client final spec: #160828) */}
+      <footer
+        style={{ backgroundColor: "#160828", color: "#f4effb", borderTop: "1px solid rgba(244, 239, 251, 0.08)" }}
+        className="px-5 py-[45px] sm:px-6 md:py-[55px]"
+      >
+        <div className="mx-auto max-w-7xl">
+          <div className="text-center">
+            <div className="astro-serif text-[40px] font-normal leading-none lg:text-[48px]">
+              ASTRODISHA
+            </div>
+            <p style={{ color: "#c6a15b" }} className="mt-3 text-[14px] font-medium tracking-[2.5px]">
+              GUIDANCE&nbsp;&nbsp;•&nbsp;&nbsp;HEALING&nbsp;&nbsp;•&nbsp;&nbsp;DIVINE ALIGNMENT
+            </p>
+          </div>
+
+          <div className="mt-10 grid grid-cols-2 gap-8 sm:grid-cols-3 sm:mx-auto sm:max-w-2xl">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider">
+                Explore
+              </p>
+
+              <div className="mt-3 flex flex-col gap-2 text-xs opacity-75">
+                <Link href="/gemstones">Gemstones</Link>
+                <Link href="/crystals">Crystals</Link>
+                <Link href="/crystal-jewellery">Crystal Jewellery</Link>
+                <Link href="/rudraksha">Rudraksha</Link>
+                <Link href="/puja">Puja Essentials</Link>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider">
+                Support
+              </p>
+
+              <div className="mt-3 flex flex-col gap-2 text-xs opacity-75">
+                <Link href="/about">About Us</Link>
+                <Link href="/contact">Contact</Link>
+                <Link href="/consult">Consult an Expert</Link>
+                <Link href="/cart">Cart</Link>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider">
+                Legal
+              </p>
+
+              <div className="mt-3 flex flex-col gap-2 text-xs opacity-75">
+                <Link href="/privacy-policy">Privacy Policy</Link>
+                <Link href="/terms">Terms & Conditions</Link>
+                <Link href="/disclaimer">Disclaimer</Link>
+                <Link href="/cancellation-refund">Cancellation & Refund</Link>
+                <Link href="/shipping-delivery">Shipping & Delivery</Link>
+                <Link href="/faq">FAQs</Link>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ borderColor: "rgba(244, 239, 251, 0.15)" }} className="mt-8 border-t pt-5 text-center text-[9px] opacity-60">
+            © {new Date().getFullYear()} ASTRODISHA. All rights reserved.
+          </div>
+        </div>
+      </footer>
+
+      {/* WHATSAPP */}
+      <a
+        href={WHATSAPP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat with AstroDisha on WhatsApp"
+        style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition hover:scale-105"
+      >
+        <WhatsAppIcon className="h-7 w-7" />
+      </a>
+    </main>
+  );
+                  }
