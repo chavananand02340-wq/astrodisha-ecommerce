@@ -10,12 +10,13 @@ type ProductRow = {
   stock: number | null;
   rating: number | null;
   review_count: number | null;
+  specifications: { key: string; value: string }[] | null;
   categories: { name: string } | null;
   product_images: { image_url: string; is_primary: boolean; sort_order: number }[] | null;
 };
 
 const PRODUCT_SELECT =
-  "id, slug, name, short_description, price, stock, rating, review_count, categories(name), product_images(image_url, is_primary, sort_order)";
+  "id, slug, name, short_description, price, stock, rating, review_count, specifications, categories(name), product_images(image_url, is_primary, sort_order)";
 
 function mapRowToProduct(row: ProductRow): Product {
   const sortedImages = [...(row.product_images || [])].sort((a, b) => {
@@ -39,6 +40,7 @@ function mapRowToProduct(row: ProductRow): Product {
     images: imageUrls.length > 0 ? imageUrls : [primaryImage],
     rating: row.rating ? Number(row.rating) : undefined,
     reviewCount: row.review_count ?? undefined,
+    specifications: Array.isArray(row.specifications) ? row.specifications : [],
   };
 }
 
@@ -121,4 +123,4 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   }
 
   return mapRowToProduct(data as unknown as ProductRow);
-}
+        }
