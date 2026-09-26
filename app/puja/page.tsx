@@ -10,8 +10,7 @@ export default async function PujaPage() {
       <Header />
 
       <CategoryPage
-        title="Puja Essentials"
-        description="Traditional essentials curated for your everyday spiritual practices."
+        slug="puja"
         products={categoryProducts}
       />
     </>
