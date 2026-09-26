@@ -70,10 +70,10 @@ function WhatsAppIcon({ className }: { className: string }) {
 }
 
 const TRUST_ITEMS = [
-  { icon: ICONS.shield, title: "Authentic Selection" },
-  { icon: ICONS.card, title: "Secure Checkout" },
-  { icon: ICONS.gem, title: "Quality Assured" },
-  { icon: ICONS.user, title: "Expert Guidance" },
+  { icon: ICONS.shield, title: "Authentic Selection", href: "/why/authenticity" },
+  { icon: ICONS.card, title: "Secure Checkout", href: "/why/secure-checkout" },
+  { icon: ICONS.gem, title: "Quality Assured", href: "/why/quality-assured" },
+  { icon: ICONS.user, title: "Expert Guidance", href: "/why/expert-guidance" },
 ];
 
 const WHY_ITEMS = [
@@ -169,24 +169,32 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* TRUST */}
-      <section style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }} className="border-y">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 sm:grid-cols-4">
-          {TRUST_ITEMS.map((item, i) => (
-            <div
+      {/* TRUST — now clickable cards with Learn More */}
+      <section className="px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">
+          {TRUST_ITEMS.map((item) => (
+            <Link
               key={item.title}
-              style={{
-                borderColor: "var(--astro-border)",
-                borderLeftWidth: i % 2 === 0 ? 0 : "1px",
-                borderTopWidth: i >= 2 ? "1px" : 0,
-              }}
-              className="flex flex-col items-center px-3 py-5 text-center sm:border-l sm:border-t-0"
+              href={item.href}
+              style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
+              className="flex flex-col items-center rounded-2xl border px-4 py-6 text-center shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#b69bee]"
             >
-              <LineIcon icon={item.icon} className="h-6 w-6" />
-              <span style={{ color: "var(--astro-text)", opacity: 0.85 }} className="mt-2 text-[9px] font-semibold uppercase tracking-[0.08em] sm:text-[10px]">
+              <span
+                style={{ backgroundColor: "rgba(182, 155, 238, 0.15)" }}
+                className="flex h-14 w-14 items-center justify-center rounded-full"
+                aria-hidden="true"
+              >
+                <LineIcon icon={item.icon} className="h-7 w-7" />
+              </span>
+
+              <span style={{ color: "var(--astro-text)" }} className="mt-3 text-[12px] font-semibold uppercase tracking-[0.06em] sm:text-[13px]">
                 {item.title}
               </span>
-            </div>
+
+              <span style={{ color: "var(--astro-primary)" }} className="mt-2 text-[10px] font-semibold uppercase tracking-[0.1em]">
+                Learn More →
+              </span>
+            </Link>
           ))}
         </div>
       </section>
@@ -376,25 +384,25 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* WHY ASTRODISHA */}
+      {/* WHY ASTRODISHA — now horizontal scroll */}
       <section className="px-5 py-[55px] md:px-6 md:py-[70px] lg:py-[90px]">
         <div className="mx-auto max-w-[1100px] lg:px-8">
-          <p style={{ color: "var(--astro-accent)" }} className="mb-5 text-center text-[13px] font-semibold uppercase tracking-[3px] sm:text-[14px]">
+          <p style={{ color: "var(--astro-accent)" }} className="mb-6 text-center text-[14px] font-semibold uppercase tracking-[3px]">
             Why AstroDisha
           </p>
 
-          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mx-auto mb-10 max-w-[800px] text-center text-[34px] font-normal leading-[1.08] sm:text-[42px] md:mb-[65px] md:text-[52px] lg:text-[64px]">
+          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mx-auto mb-10 max-w-[800px] text-center text-[42px] font-normal leading-[1.05] md:mb-[65px] md:text-[52px] lg:text-[64px]">
             Thoughtfully Chosen.
             <br />
             Simply Presented.
           </h2>
 
-          <div className="flex flex-col gap-4 sm:gap-6">
+          <div className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 sm:gap-6 lg:px-0">
             {WHY_ITEMS.map((item) => (
               <Link
                 key={item.slug}
                 href={`/why/${item.slug}`}
-                className="flex items-center gap-4 rounded-[22px] border border-[color:var(--astro-border)] bg-[color:var(--astro-card)] px-5 py-6 shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#b69bee] sm:min-h-[150px] md:gap-7 md:p-8 lg:gap-8 lg:px-12 lg:py-10"
+                className="flex w-[82%] shrink-0 snap-start items-center gap-4 rounded-[22px] border border-[color:var(--astro-border)] bg-[color:var(--astro-card)] px-5 py-6 shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#b69bee] sm:w-[46%] sm:min-h-[150px] md:gap-7 md:p-8 lg:w-[31%] lg:px-12 lg:py-10"
               >
                 <span
                   style={{ backgroundColor: "rgba(182, 155, 238, 0.15)" }}
@@ -405,11 +413,11 @@ export default async function HomePage() {
                 </span>
 
                 <div className="min-w-0">
-                  <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-[22px] font-normal leading-tight sm:text-[28px] lg:text-[36px]">
+                  <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-[20px] font-normal leading-tight sm:text-[26px] lg:text-[36px]">
                     {item.title}
                   </h3>
 
-                  <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 text-[14px] leading-[1.5] sm:text-[16px] lg:text-[18px]">
+                  <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 text-[13px] leading-[1.5] sm:text-[15px] lg:text-[18px]">
                     {item.text}
                   </p>
 
@@ -486,4 +494,4 @@ export default async function HomePage() {
       </a>
     </main>
   );
-              }
+                  }
