@@ -123,4 +123,4 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   }
 
   return mapRowToProduct(data as unknown as ProductRow);
-        }
+}
