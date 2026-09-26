@@ -14,7 +14,7 @@ export const categories: Category[] = [
     description:
       "Natural gemstones selected with traditional wisdom.",
     image:
-      "https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1000&q=85"
+      "https://images.unsplash.com/photo-1621329109234-d7657d2f3846?auto=format&fit=crop&w=1000&q=85"
   },
 
   {
@@ -24,7 +24,7 @@ export const categories: Category[] = [
     description:
       "Crystals for intention, mindfulness & everyday energy practices.",
     image:
-      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1000&q=85"
+      "https://images.unsplash.com/photo-1637060786011-b6529a57a5e7?auto=format&fit=crop&w=1000&q=85"
   },
 
   {
