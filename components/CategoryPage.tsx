@@ -37,10 +37,13 @@ export default function CategoryPage({
         <div className="mx-auto max-w-7xl">
           <Link
             href="/"
-            style={{ color: "var(--astro-mauve)" }}
-            className="text-[11px] font-semibold uppercase tracking-[0.15em]"
+            style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+            className="inline-flex h-10 items-center gap-2 rounded-full px-5 text-xs font-semibold transition hover:opacity-90"
           >
-            ← Back to Home
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M19 12H5M11 6l-6 6 6 6" />
+            </svg>
+            Back to Home
           </Link>
 
           <div className="mt-7 grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
