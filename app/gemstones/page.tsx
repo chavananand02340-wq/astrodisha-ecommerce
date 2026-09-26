@@ -10,8 +10,7 @@ export default async function GemstonesPage() {
       <Header />
 
       <CategoryPage
-        title="Gemstones"
-        description="Natural gemstones selected with traditional wisdom and presented with clarity."
+        slug="gemstones"
         products={categoryProducts}
       />
     </>
