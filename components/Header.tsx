@@ -222,14 +222,14 @@ export default function Header() {
       >
         <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6">
 
-          <div className="flex min-w-0 items-center gap-1.5">
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
             <button
               type="button"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((value) => !value)}
               style={{ color: "var(--astro-primary)" }}
-              className={`${iconButtonClass} lg:hidden`}
+              className={`${iconButtonClass} shrink-0 lg:hidden`}
             >
               <Icon name="menu" className="h-6 w-6" />
             </button>
@@ -240,14 +240,14 @@ export default function Header() {
               <div className="min-w-0">
                 <div
                   style={{ color: "var(--astro-primary)" }}
-                  className="astro-serif text-[19px] leading-none sm:text-[21px]"
+                  className="astro-serif truncate text-[19px] leading-none sm:text-[21px]"
                 >
                   ASTRODISHA
                 </div>
 
                 <div
                   style={{ color: "var(--astro-accent)" }}
-                  className="mt-1 whitespace-nowrap text-[6px] tracking-[0.12em] sm:text-[7px]"
+                  className="mt-1 truncate text-[6px] tracking-[0.12em] sm:text-[7px]"
                 >
                   GUIDANCE · HEALING · DIVINE ALIGNMENT
                 </div>
@@ -490,4 +490,4 @@ export default function Header() {
       </div>
     </>
   );
-              }
+    }
