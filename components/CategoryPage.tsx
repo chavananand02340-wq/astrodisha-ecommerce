@@ -36,7 +36,7 @@ export default function CategoryPage({
       {/* HERO — text overlaid on the category image, one merged banner */}
       <section
         style={{ borderColor: "var(--astro-border)" }}
-        className="relative min-h-[420px] overflow-hidden border-b sm:min-h-[460px] lg:min-h-[520px]"
+        className="relative min-h-[340px] overflow-hidden border-b sm:min-h-[400px] lg:min-h-[460px]"
       >
         {resolvedImage && (
           <div className="absolute inset-0">
