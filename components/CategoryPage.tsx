@@ -66,7 +66,7 @@ export default function CategoryPage({
             {resolvedImage && (
               <div
                 style={{ backgroundColor: "var(--astro-card)" }}
-                className="h-[220px] overflow-hidden rounded-2xl sm:h-[300px] lg:h-[340px]"
+                className="-mx-5 h-[260px] overflow-hidden rounded-none sm:mx-0 sm:h-[300px] sm:rounded-2xl lg:h-[340px]"
               >
                 <SafeImage src={resolvedImage} alt={resolvedTitle} />
               </div>
