@@ -239,7 +239,12 @@ export default function CheckoutPage() {
 
           await createOrderInDatabase("Paid", response.razorpay_payment_id, response.razorpay_order_id);
         } catch (err) {
-          setErrorMsg("Something went wrong after payment. Please contact support with your payment ID: " + response.razorpay_payment_id);
+          console.error("Order creation failed after payment:", err);
+          const detail = err instanceof Error ? err.message : "Unknown error";
+          setErrorMsg(
+            `Something went wrong after payment (${detail}). Please contact support with your payment ID: ` +
+              response.razorpay_payment_id
+          );
           setSubmitting(false);
         }
       },
