@@ -473,11 +473,12 @@ function ProductsContent() {
           <button
             type="submit"
             disabled={submitting}
+            className="transition hover:opacity-85 active:scale-95"
             style={{
               backgroundColor: "#5A3150",
               color: "#fff",
               border: "none",
-              borderRadius: "4px",
+              borderRadius: "6px",
               padding: "0.6rem 1.2rem",
               fontWeight: "bold",
               cursor: submitting ? "not-allowed" : "pointer",
@@ -550,10 +551,11 @@ function ProductsContent() {
           {products.map((p) => (
             <div
               key={p.id}
+              className="transition hover:border-[#5A3150]"
               style={{
                 border: p.is_featured ? "1px solid #C6A15B" : "1px solid #D9CEC1",
-                borderRadius: "8px",
-                padding: "1rem",
+                borderRadius: "10px",
+                padding: "1.15rem",
                 backgroundColor: "#FBF8F2",
               }}
             >
@@ -605,11 +607,12 @@ function ProductsContent() {
                     <button
                       onClick={() => saveEdit(p.id)}
                       disabled={savingEdit}
+                      className="transition hover:opacity-85 active:scale-95"
                       style={{
                         backgroundColor: "#5A3150",
                         color: "#fff",
                         border: "none",
-                        borderRadius: "4px",
+                        borderRadius: "6px",
                         padding: "0.5rem 1rem",
                         cursor: savingEdit ? "not-allowed" : "pointer",
                       }}
@@ -618,11 +621,12 @@ function ProductsContent() {
                     </button>
                     <button
                       onClick={cancelEdit}
+                      className="transition hover:opacity-85 active:scale-95"
                       style={{
                         backgroundColor: "#D9CEC1",
                         color: "#3E2237",
                         border: "none",
-                        borderRadius: "4px",
+                        borderRadius: "6px",
                         padding: "0.5rem 1rem",
                         cursor: "pointer",
                       }}
@@ -662,12 +666,13 @@ function ProductsContent() {
                   <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                     <button
                       onClick={() => startEdit(p)}
+                      className="transition hover:opacity-85 active:scale-95"
                       style={{
                         backgroundColor: "#5A3150",
                         color: "#fff",
                         border: "none",
-                        borderRadius: "4px",
-                        padding: "0.4rem 0.8rem",
+                        borderRadius: "6px",
+                        padding: "0.45rem 0.9rem",
                         fontSize: "0.8rem",
                         cursor: "pointer",
                       }}
@@ -676,12 +681,13 @@ function ProductsContent() {
                     </button>
                     <button
                       onClick={() => toggleExpand(p.id)}
+                      className="transition hover:opacity-85 active:scale-95"
                       style={{
                         backgroundColor: "#8A607A",
                         color: "#fff",
                         border: "none",
-                        borderRadius: "4px",
-                        padding: "0.4rem 0.8rem",
+                        borderRadius: "6px",
+                        padding: "0.45rem 0.9rem",
                         fontSize: "0.8rem",
                         cursor: "pointer",
                       }}
@@ -690,12 +696,13 @@ function ProductsContent() {
                     </button>
                     <button
                       onClick={() => handleToggleActive(p)}
+                      className="transition hover:opacity-85 active:scale-95"
                       style={{
                         backgroundColor: p.is_active ? "#B00020" : "#5A3150",
                         color: "#fff",
                         border: "none",
-                        borderRadius: "4px",
-                        padding: "0.4rem 0.8rem",
+                        borderRadius: "6px",
+                        padding: "0.45rem 0.9rem",
                         fontSize: "0.8rem",
                         cursor: "pointer",
                       }}
@@ -923,6 +930,7 @@ function SpecsEditor({
       <button
         type="button"
         onClick={addRow}
+        className="transition hover:opacity-85"
         style={{
           marginTop: "0.25rem",
           backgroundColor: "#8A607A",
