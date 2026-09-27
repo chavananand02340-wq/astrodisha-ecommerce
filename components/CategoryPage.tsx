@@ -33,12 +33,36 @@ export default function CategoryPage({
 
   return (
     <main style={{ backgroundColor: "var(--astro-bg)" }} className="min-h-screen">
-      <section style={{ borderColor: "var(--astro-border)" }} className="border-b px-5 py-10 sm:px-8 sm:py-14">
-        <div className="mx-auto max-w-7xl">
+      {/* HERO — text overlaid on the category image, one merged banner */}
+      <section
+        style={{ borderColor: "var(--astro-border)" }}
+        className="relative min-h-[420px] overflow-hidden border-b sm:min-h-[460px] lg:min-h-[520px]"
+      >
+        {resolvedImage && (
+          <div className="absolute inset-0">
+            <SafeImage src={resolvedImage} alt={resolvedTitle} />
+          </div>
+        )}
+
+        {/* Left-to-right fade: solid page background on the left (behind text),
+            fading to fully transparent so the photo shows clearly on the right —
+            works in both light and dark theme since it uses --astro-bg. */}
+        {resolvedImage && (
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to right, var(--astro-bg) 0%, var(--astro-bg) 48%, rgba(0,0,0,0) 88%)",
+            }}
+            aria-hidden="true"
+          />
+        )}
+
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-5 py-10 sm:px-8 sm:py-14">
           <Link
             href="/"
             style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-            className="inline-flex h-10 items-center gap-2 rounded-full px-5 text-xs font-semibold transition hover:opacity-90"
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-full px-5 text-xs font-semibold transition hover:opacity-90"
           >
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M19 12H5M11 6l-6 6 6 6" />
@@ -46,30 +70,19 @@ export default function CategoryPage({
             Back to Home
           </Link>
 
-          <div className="mt-7 grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
-            <div>
-              <p style={{ color: "var(--astro-accent)" }} className="text-[10px] font-semibold uppercase tracking-[0.2em]">
-                ASTRODISHA Collection
+          <div className="mt-7 max-w-[70%] sm:max-w-sm lg:max-w-md">
+            <p style={{ color: "var(--astro-accent)" }} className="text-[10px] font-semibold uppercase tracking-[0.2em]">
+              ASTRODISHA Collection
+            </p>
+
+            <h1 style={{ color: "var(--astro-text)" }} className="astro-serif mt-3 text-4xl sm:text-5xl">
+              {resolvedTitle}
+            </h1>
+
+            {resolvedDescription && (
+              <p style={{ color: "var(--astro-text)", opacity: 0.75 }} className="mt-4 text-sm leading-7">
+                {resolvedDescription}
               </p>
-
-              <h1 style={{ color: "var(--astro-text)" }} className="astro-serif mt-3 text-4xl sm:text-5xl">
-                {resolvedTitle}
-              </h1>
-
-              {resolvedDescription && (
-                <p style={{ color: "var(--astro-text)", opacity: 0.75 }} className="mt-4 max-w-lg text-sm leading-7">
-                  {resolvedDescription}
-                </p>
-              )}
-            </div>
-
-            {resolvedImage && (
-              <div
-                style={{ backgroundColor: "var(--astro-card)" }}
-                className="-mx-5 h-[260px] overflow-hidden rounded-none sm:mx-0 sm:h-[300px] sm:rounded-2xl lg:h-[340px]"
-              >
-                <SafeImage src={resolvedImage} alt={resolvedTitle} />
-              </div>
             )}
           </div>
         </div>
