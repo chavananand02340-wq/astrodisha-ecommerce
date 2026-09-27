@@ -12,6 +12,7 @@ const navItems = [
   { name: "Coupons", href: "/admin/coupons", icon: "🏷️" },
   { name: "Banners", href: "/admin/banners", icon: "🎉" },
   { name: "Testimonials", href: "/admin/testimonials", icon: "💬" },
+  { name: "Reviews", href: "/admin/reviews", icon: "⭐" },
 ];
 
 export default function AdminLayout({
@@ -65,19 +66,20 @@ export default function AdminLayout({
           </div>
         </div>
 
-        <nav style={{ display: "flex", flexDirection: "column", gap: "0.25rem", flex: 1 }}>
+        <nav style={{ display: "flex", flexDirection: "column", gap: "0.3rem", flex: 1 }}>
           {navItems.map((item) => {
             const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                className="transition hover:bg-[#5A3150]"
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "0.6rem",
-                  padding: "0.65rem 0.75rem",
-                  borderRadius: "6px",
+                  gap: "0.65rem",
+                  padding: "0.7rem 0.8rem",
+                  borderRadius: "8px",
                   backgroundColor: active ? "#5A3150" : "transparent",
                   color: active ? "#fff" : "#D9CEC1",
                   fontSize: "0.85rem",
@@ -93,13 +95,14 @@ export default function AdminLayout({
 
         <button
           onClick={handleLogout}
+          className="transition hover:bg-[#5A3150]"
           style={{
             marginTop: "1rem",
             backgroundColor: "transparent",
             border: "1px solid #8A607A",
             color: "#D9CEC1",
-            borderRadius: "6px",
-            padding: "0.6rem",
+            borderRadius: "8px",
+            padding: "0.65rem",
             fontSize: "0.8rem",
             cursor: "pointer",
           }}
@@ -118,10 +121,11 @@ export default function AdminLayout({
           zIndex: 50,
           backgroundColor: "#3E2237",
           color: "#fff",
-          padding: "0.85rem 1rem",
+          padding: "0.85rem 1.1rem",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
         }}
         className="flex md:hidden"
       >
@@ -130,11 +134,22 @@ export default function AdminLayout({
         </div>
         <button
           onClick={() => setMobileMenuOpen((v) => !v)}
-          style={{ background: "none", border: "none", color: "#fff", fontSize: "1.4rem" }}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          style={{ background: "none", border: "none", color: "#fff", fontSize: "1.5rem", lineHeight: 1, padding: "0.25rem" }}
         >
           {mobileMenuOpen ? "×" : "☰"}
         </button>
       </div>
+
+      {/* Backdrop — tap outside to close */}
+      {mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+          className="md:hidden"
+          style={{ position: "fixed", inset: 0, top: "52px", zIndex: 48, backgroundColor: "rgba(0,0,0,0.35)" }}
+        />
+      )}
 
       {mobileMenuOpen && (
         <div
@@ -146,10 +161,13 @@ export default function AdminLayout({
             zIndex: 49,
             backgroundColor: "#3E2237",
             padding: "1rem",
+            borderBottomLeftRadius: "14px",
+            borderBottomRightRadius: "14px",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.25)",
           }}
           className="md:hidden"
         >
-          <nav style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+          <nav style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
             {navItems.map((item) => {
               const active = pathname === item.href;
               return (
@@ -157,15 +175,16 @@ export default function AdminLayout({
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
+                  className="transition active:scale-[0.98]"
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "0.6rem",
-                    padding: "0.65rem 0.75rem",
-                    borderRadius: "6px",
+                    gap: "0.65rem",
+                    padding: "0.75rem 0.8rem",
+                    borderRadius: "8px",
                     backgroundColor: active ? "#5A3150" : "transparent",
                     color: active ? "#fff" : "#D9CEC1",
-                    fontSize: "0.85rem",
+                    fontSize: "0.9rem",
                     textDecoration: "none",
                   }}
                 >
@@ -181,9 +200,9 @@ export default function AdminLayout({
                 backgroundColor: "transparent",
                 border: "1px solid #8A607A",
                 color: "#D9CEC1",
-                borderRadius: "6px",
-                padding: "0.6rem",
-                fontSize: "0.8rem",
+                borderRadius: "8px",
+                padding: "0.65rem",
+                fontSize: "0.85rem",
                 cursor: "pointer",
               }}
             >
@@ -199,4 +218,4 @@ export default function AdminLayout({
       </main>
     </div>
   );
-              }
+}
