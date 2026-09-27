@@ -2,11 +2,11 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
 import SafeImage from "@/components/SafeImage";
-import { categories } from "@/data/categories";
 import { getFeaturedProducts } from "@/lib/getProducts";
 import { getActiveBanner } from "@/lib/getBanner";
 import { getActiveTestimonials } from "@/lib/getTestimonials";
 import { WHATSAPP_URL, ALL_PRODUCTS_URL, WHATSAPP_ICON_PATH } from "@/lib/site";
+import { createClient } from "@/utils/supabase/server";
 
 /* Simple line icons (gold via --astro-accent) */
 const ICONS = {
@@ -102,6 +102,20 @@ export default async function HomePage() {
   const activeBanner = await getActiveBanner();
   const testimonials = await getActiveTestimonials(6);
 
+  const supabase = await createClient();
+  const { data: categoriesData } = await supabase
+    .from("categories")
+    .select("name, slug, description, image_url")
+    .eq("is_active", true)
+    .order("display_order", { ascending: true });
+
+  const categories = (categoriesData || []).map((c) => ({
+    name: c.name,
+    slug: c.slug,
+    description: c.description || "",
+    image: c.image_url || "/images/placeholder-product.svg",
+  }));
+
   return (
     <main style={{ backgroundColor: "var(--astro-bg)" }} className="min-h-screen">
       <Header />
@@ -169,19 +183,24 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* TRUST — clickable cards with Learn More */}
+      {/* TRUST — clickable cards with Learn More, gold pulse ring + hover glow */}
       <section className="px-4 py-12 sm:px-6 sm:py-16">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">
-          {TRUST_ITEMS.map((item) => (
+          {TRUST_ITEMS.map((item, i) => (
             <Link
               key={item.title}
               href={item.href}
-              style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-              className="flex flex-col items-center rounded-2xl border px-4 py-6 text-center shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#b69bee]"
+              className="astro-fade-up group flex flex-col items-center rounded-2xl border px-4 py-6 text-center shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-300 ease-in-out hover:-translate-y-1 hover:border-[#b69bee] hover:shadow-[0_8px_28px_rgba(198,161,91,0.18)]"
+              style={{
+                borderColor: "var(--astro-border)",
+                backgroundColor: "var(--astro-card)",
+                animationDelay: `${i * 100}ms`,
+                animationFillMode: "backwards",
+              }}
             >
               <span
-                style={{ backgroundColor: "rgba(182, 155, 238, 0.15)" }}
-                className="flex h-14 w-14 items-center justify-center rounded-full"
+                className="astro-pulse-ring flex h-14 w-14 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110"
+                style={{ backgroundColor: "rgba(182, 155, 238, 0.15)", animationDelay: `${i * 250}ms` }}
                 aria-hidden="true"
               >
                 <LineIcon icon={item.icon} className="h-7 w-7" />
@@ -191,7 +210,10 @@ export default async function HomePage() {
                 {item.title}
               </span>
 
-              <span style={{ color: "var(--astro-primary)" }} className="mt-2 text-[10px] font-semibold uppercase tracking-[0.1em]">
+              <span
+                style={{ color: "var(--astro-primary)" }}
+                className="mt-2 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.1em] transition-transform duration-300 group-hover:translate-x-0.5"
+              >
                 Learn More →
               </span>
             </Link>
@@ -222,7 +244,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {/* Horizontal scroll row — add any number of categories */}
+          {/* Horizontal scroll row — categories now come live from Supabase */}
           <div className="no-scrollbar flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:scroll-px-6 sm:gap-5 sm:px-6">
             {categories.map((category) => (
               <Link
@@ -509,4 +531,4 @@ export default async function HomePage() {
       </a>
     </main>
   );
-              }
+                              }
