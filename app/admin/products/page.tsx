@@ -555,3 +555,419 @@ function ProductsContent() {
       {loading ? (
         <p>Loading...</p>
       ) : products.length === 0 ? (
+        <p>No products yet.</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          {products.map((p) => (
+            <div
+              key={p.id}
+              className="transition hover:border-[#5A3150]"
+              style={{
+                border: p.is_featured ? "1px solid #C6A15B" : "1px solid #D9CEC1",
+                borderRadius: "10px",
+                padding: "1.15rem",
+                backgroundColor: "#FBF8F2",
+              }}
+            >
+              {editingId === p.id ? (
+                <div>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    style={inputStyle}
+                  />
+                  <select
+                    value={editCategoryId}
+                    onChange={(e) => setEditCategoryId(e.target.value)}
+                    style={inputStyle}
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    placeholder="Price"
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    style={inputStyle}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Stock"
+                    value={editStock}
+                    onChange={(e) => setEditStock(e.target.value)}
+                    style={inputStyle}
+                  />
+                  <textarea
+                    placeholder="Short description"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    style={{ ...inputStyle, minHeight: "60px" }}
+                  />
+
+                  <FeaturedCheckbox checked={editFeatured} onChange={setEditFeatured} />
+
+                  <SpecsEditor specs={editSpecs} onChange={setEditSpecs} />
+
+                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                    <button
+                      onClick={() => saveEdit(p.id)}
+                      disabled={savingEdit}
+                      className="transition hover:opacity-85 active:scale-95"
+                      style={{
+                        backgroundColor: "#5A3150",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "0.5rem 1rem",
+                        cursor: savingEdit ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {savingEdit ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="transition hover:opacity-85 active:scale-95"
+                      style={{
+                        backgroundColor: "#D9CEC1",
+                        color: "#3E2237",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "0.5rem 1rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
+                  <div>
+                    <div style={{ fontWeight: "bold", color: "#3E2237", display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                      {p.name}
+                      {p.is_featured && (
+                        <span
+                          style={{
+                            backgroundColor: "#C6A15B",
+                            color: "#160828",
+                            fontSize: "0.65rem",
+                            fontWeight: "bold",
+                            padding: "0.15rem 0.5rem",
+                            borderRadius: "999px",
+                          }}
+                        >
+                          ★ Featured
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: "0.85rem", color: "#8A607A" }}>
+                      {p.categories?.name || "-"} • ₹{p.price} • Stock: {p.stock} •{" "}
+                      {p.is_active ? "Active" : "Inactive"}
+                      {p.specifications && p.specifications.length > 0
+                        ? ` • ${p.specifications.length} spec${p.specifications.length === 1 ? "" : "s"}`
+                        : ""}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                    <button
+                      onClick={() => startEdit(p)}
+                      className="transition hover:opacity-85 active:scale-95"
+                      style={{
+                        backgroundColor: "#5A3150",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "0.45rem 0.9rem",
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => toggleExpand(p.id)}
+                      className="transition hover:opacity-85 active:scale-95"
+                      style={{
+                        backgroundColor: "#8A607A",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "0.45rem 0.9rem",
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Images
+                    </button>
+                    <button
+                      onClick={() => handleToggleActive(p)}
+                      className="transition hover:opacity-85 active:scale-95"
+                      style={{
+                        backgroundColor: p.is_active ? "#B00020" : "#5A3150",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "0.45rem 0.9rem",
+                        fontSize: "0.8rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {p.is_active ? "Deactivate" : "Activate"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {imagesForProduct === p.id && (
+                <div
+                  style={{
+                    marginTop: "1rem",
+                    borderTop: "1px solid #D9CEC1",
+                    paddingTop: "1rem",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <h3 style={{ fontSize: "0.95rem", color: "#3E2237", margin: 0 }}>
+                      Product Images ({images.length})
+                    </h3>
+                    <button
+                      onClick={closeImages}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#8A607A",
+                        cursor: "pointer",
+                        fontSize: "0.85rem",
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "0.75rem",
+                      marginTop: "0.75rem",
+                    }}
+                  >
+                    {images.map((img) => (
+                      <div
+                        key={img.id}
+                        style={{
+                          border: img.is_primary ? "2px solid #C6A15B" : "1px solid #D9CEC1",
+                          borderRadius: "6px",
+                          padding: "0.3rem",
+                          width: "100px",
+                        }}
+                      >
+                        <img
+                          src={img.image_url}
+                          alt=""
+                          style={{ width: "100%", height: "80px", objectFit: "cover", borderRadius: "4px" }}
+                        />
+                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.3rem" }}>
+                          <button
+                            onClick={() => handleSetPrimary(img)}
+                            title="Set as primary"
+                            style={{
+                              fontSize: "0.65rem",
+                              background: "none",
+                              border: "none",
+                              color: img.is_primary ? "#C6A15B" : "#8A607A",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {img.is_primary ? "★ Primary" : "☆ Set"}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteImage(img)}
+                            title="Delete"
+                            style={{
+                              fontSize: "0.65rem",
+                              background: "none",
+                              border: "none",
+                              color: "#B00020",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ marginTop: "1rem" }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleUploadImages}
+                      disabled={uploading}
+                    />
+                    <p style={{ fontSize: "0.75rem", color: "#8A607A", marginTop: "0.3rem" }}>
+                      Tip: tap and select up to 10 photos at once (Ctrl/Cmd or long-press to multi-select).
+                    </p>
+                    {uploading && <p style={{ fontSize: "0.85rem" }}>Uploading...</p>}
+                    {imageMsg && (
+                      <p style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#3E2237" }}>
+                        {imageMsg}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FeaturedCheckbox({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <label
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "0.6rem",
+        marginBottom: "1rem",
+        padding: "0.75rem",
+        border: checked ? "1px solid #C6A15B" : "1px solid #D9CEC1",
+        borderRadius: "6px",
+        backgroundColor: "#fff",
+        cursor: "pointer",
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        style={{ marginTop: "0.2rem", width: "18px", height: "18px", accentColor: "#5A3150" }}
+      />
+      <span>
+        <span style={{ display: "block", fontWeight: "bold", color: "#3E2237", fontSize: "0.9rem" }}>
+          ★ Show in homepage Featured Collection
+        </span>
+        <span style={{ display: "block", color: "#8A607A", fontSize: "0.75rem", marginTop: "0.15rem" }}>
+          Featured products appear first on the homepage (8 products shown in total).
+        </span>
+      </span>
+    </label>
+  );
+}
+
+function SpecsEditor({
+  specs,
+  onChange,
+}: {
+  specs: SpecRow[];
+  onChange: (rows: SpecRow[]) => void;
+}) {
+  function updateRow(index: number, field: "key" | "value", value: string) {
+    const next = specs.map((row, i) => (i === index ? { ...row, [field]: value } : row));
+    onChange(next);
+  }
+
+  function addRow() {
+    onChange([...specs, { key: "", value: "" }]);
+  }
+
+  function removeRow(index: number) {
+    onChange(specs.filter((_, i) => i !== index));
+  }
+
+  return (
+    <div
+      style={{
+        marginBottom: "1rem",
+        padding: "0.75rem",
+        border: "1px solid #D9CEC1",
+        borderRadius: "6px",
+        backgroundColor: "#fff",
+      }}
+    >
+      <p style={{ fontWeight: "bold", color: "#3E2237", fontSize: "0.9rem", marginBottom: "0.6rem" }}>
+        Product Specifications
+      </p>
+      <p style={{ color: "#8A607A", fontSize: "0.75rem", marginBottom: "0.75rem" }}>
+        Shown on the product page as an expandable list (e.g. Origin, Planet, Colour, Shape, Cut).
+      </p>
+
+      {specs.map((row, i) => (
+        <div key={i} style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+          <input
+            type="text"
+            placeholder="Label (e.g. Origin)"
+            value={row.key}
+            onChange={(e) => updateRow(i, "key", e.target.value)}
+            style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+          />
+          <input
+            type="text"
+            placeholder="Value (e.g. Brazil)"
+            value={row.value}
+            onChange={(e) => updateRow(i, "value", e.target.value)}
+            style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
+          />
+          <button
+            type="button"
+            onClick={() => removeRow(i)}
+            style={{
+              background: "none",
+              border: "1px solid #D9CEC1",
+              borderRadius: "4px",
+              color: "#B00020",
+              padding: "0 0.7rem",
+              cursor: "pointer",
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+
+      <button
+        type="button"
+        onClick={addRow}
+        className="transition hover:opacity-85"
+        style={{
+          marginTop: "0.25rem",
+          backgroundColor: "#8A607A",
+          color: "#fff",
+          border: "none",
+          borderRadius: "4px",
+          padding: "0.4rem 0.9rem",
+          fontSize: "0.8rem",
+          cursor: "pointer",
+        }}
+      >
+        + Add Specification
+      </button>
+    </div>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  display: "block",
+  width: "100%",
+  padding: "0.6rem",
+  marginBottom: "0.75rem",
+  border: "1px solid #D9CEC1",
+  borderRadius: "4px",
+  backgroundColor: "#fff",
+};
