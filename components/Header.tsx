@@ -9,16 +9,9 @@ import { useTheme } from "./ThemeProvider";
 // Must match the free-shipping threshold in Supabase site_settings
 const FREE_SHIPPING_THRESHOLD = 999;
 
-const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Shop All", href: "/shop" },
-  { name: "Gemstones", href: "/gemstones" },
-  { name: "Crystals", href: "/crystals" },
-  { name: "Crystal Jewellery", href: "/crystal-jewellery" },
-  { name: "Rudraksha", href: "/rudraksha" },
-  { name: "Puja", href: "/puja" },
+const STATIC_NAV_END = [
   { name: "About Us", href: "/about" },
-  { name: "Contact", href: "/contact" }
+  { name: "Contact", href: "/contact" },
 ];
 
 type SearchResult = {
@@ -27,6 +20,11 @@ type SearchResult = {
   name: string;
   price: number;
   categories: { name: string } | null;
+};
+
+type CategoryNavItem = {
+  name: string;
+  slug: string;
 };
 
 /* ---------- Line icons ---------- */
@@ -127,12 +125,17 @@ function CountBadge({ count }: { count: number }) {
 const iconButtonClass =
   "relative flex h-9 w-9 items-center justify-center rounded-full transition hover:opacity-70";
 
+// Slightly smaller on mobile so the logo/wordmark/tagline have more room
+const mobileIconButtonClass =
+  "relative flex h-8 w-8 items-center justify-center rounded-full transition hover:opacity-70";
+
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+  const [categories, setCategories] = useState<CategoryNavItem[]>([]);
 
   const { theme, toggleTheme } = useTheme();
 
@@ -140,6 +143,37 @@ export default function Header() {
     cartCount,
     wishlistCount
   } = useStore();
+
+  // Live categories for the nav menu — new categories added via
+  // /admin/categories show up here automatically, no code changes needed.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCategories() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("categories")
+        .select("name, slug")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (!cancelled && !error && data) {
+        setCategories(data as CategoryNavItem[]);
+      }
+    }
+
+    loadCategories();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const navigation = [
+    { name: "Home", href: "/" },
+    { name: "Shop All", href: "/shop" },
+    ...categories.map((c) => ({ name: c.name, href: `/${c.slug}` })),
+    ...STATIC_NAV_END,
+  ];
 
   useEffect(() => {
     const query = search.trim();
@@ -222,32 +256,32 @@ export default function Header() {
       >
         <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6">
 
-          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          <div className="flex min-w-0 flex-1 items-center gap-1">
             <button
               type="button"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((value) => !value)}
               style={{ color: "var(--astro-primary)" }}
-              className={`${iconButtonClass} shrink-0 lg:hidden`}
+              className={`${mobileIconButtonClass} shrink-0 lg:hidden lg:h-9 lg:w-9`}
             >
-              <Icon name="menu" className="h-6 w-6" />
+              <Icon name="menu" className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
 
-            <Link href="/" className="flex min-w-0 items-center gap-2">
-              <Icon name="lotus" className="h-8 w-8 shrink-0" color="var(--astro-accent)" />
+            <Link href="/" className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+              <Icon name="lotus" className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" color="var(--astro-accent)" />
 
               <div className="min-w-0">
                 <div
                   style={{ color: "var(--astro-primary)" }}
-                  className="astro-serif truncate text-[19px] leading-none sm:text-[21px]"
+                  className="astro-serif truncate text-[17px] leading-none sm:text-[21px]"
                 >
                   ASTRODISHA
                 </div>
 
                 <div
                   style={{ color: "var(--astro-accent)" }}
-                  className="mt-1 truncate text-[6px] tracking-[0.12em] sm:text-[7px]"
+                  className="mt-1 hidden min-[340px]:block truncate text-[8px] tracking-[0.1em] opacity-90 sm:text-[9px] sm:tracking-[0.12em] sm:opacity-100"
                 >
                   GUIDANCE · HEALING · DIVINE ALIGNMENT
                 </div>
@@ -258,7 +292,7 @@ export default function Header() {
           <nav className="hidden items-center gap-7 lg:flex">
             {navigation.map((item) => (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
                 style={{ color: "var(--astro-text)" }}
                 className="text-[12px] opacity-80 transition hover:opacity-100"
@@ -316,42 +350,42 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* MOBILE ICONS (hamburger moved to the left, these stay on the right) */}
-          <div style={{ color: "var(--astro-primary)" }} className="flex shrink-0 items-center gap-0.5 lg:hidden">
+          {/* MOBILE ICONS (smaller, hamburger moved to the left) */}
+          <div style={{ color: "var(--astro-primary)" }} className="flex shrink-0 items-center gap-0 lg:hidden">
 
             <button
               type="button"
               aria-label={themeLabel}
               onClick={toggleTheme}
-              className={iconButtonClass}
+              className={mobileIconButtonClass}
             >
-              <Icon name={themeIcon} />
+              <Icon name={themeIcon} className="h-[18px] w-[18px]" />
             </button>
 
             <button
               type="button"
               aria-label="Open search"
               onClick={() => setSearchOpen((value) => !value)}
-              className={iconButtonClass}
+              className={mobileIconButtonClass}
             >
-              <Icon name="search" />
+              <Icon name="search" className="h-[18px] w-[18px]" />
             </button>
 
             <Link
               href="/wishlist"
               aria-label="Wishlist"
-              className={iconButtonClass}
+              className={mobileIconButtonClass}
             >
-              <Icon name="heart" />
+              <Icon name="heart" className="h-[18px] w-[18px]" />
               {wishlistCount > 0 && <CountBadge count={wishlistCount} />}
             </Link>
 
             <Link
               href="/cart"
               aria-label="Cart"
-              className={iconButtonClass}
+              className={mobileIconButtonClass}
             >
-              <Icon name="bag" />
+              <Icon name="bag" className="h-[18px] w-[18px]" />
               <CountBadge count={cartCount} />
             </Link>
           </div>
@@ -468,7 +502,7 @@ export default function Header() {
         <nav className="flex flex-col px-5 py-3">
           {navigation.map((item) => (
             <Link
-              key={item.name}
+              key={item.href}
               href={item.href}
               onClick={() => setMenuOpen(false)}
               style={{ borderColor: "var(--astro-border)", color: "var(--astro-text)" }}
