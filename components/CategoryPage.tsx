@@ -46,13 +46,14 @@ export default function CategoryPage({
 
         {/* Left-to-right fade: solid page background on the left (behind text),
             fading to fully transparent so the photo shows clearly on the right —
-            works in both light and dark theme since it uses --astro-bg. */}
+            works in both light and dark theme since it uses --astro-bg.
+            Solid zone kept to ~1/3 of the width so more of the photo is visible. */}
         {resolvedImage && (
           <div
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to right, var(--astro-bg) 0%, var(--astro-bg) 48%, rgba(0,0,0,0) 88%)",
+                "linear-gradient(to right, var(--astro-bg) 0%, var(--astro-bg) 30%, rgba(0,0,0,0) 65%)",
             }}
             aria-hidden="true"
           />
