@@ -173,3 +173,12 @@ img {
     transform: scale(0.98);
   }
 }
+/* PDP: Buy Now button colours */
+:root {
+  --astro-buy-bg: #E8B23F;
+  --astro-buy-text: #160828;
+}
+[data-theme="dark"] {
+  --astro-buy-bg: #B69BEE;
+  --astro-buy-text: #160828;
+}
