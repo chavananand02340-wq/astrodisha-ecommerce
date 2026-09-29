@@ -3,169 +3,82 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import { WHATSAPP_URL, ALL_PRODUCTS_URL, WHATSAPP_ICON_PATH } from "@/lib/site";
 
-type Section = {
-  heading: string;
-  points: string[];
-  numbered?: boolean;
-};
-
 type WhyPage = {
   title: string;
-  tagline: string;
-  intro: string;
-  icon: "shield" | "user" | "gem" | "lock";
-  sections: Section[];
-  note?: string;
+  subtitle: string;
+  description: string;
+  icon: "shield" | "user" | "gem" | "lock" | "sparkle";
+  points: string[];
 };
 
 const PAGES: Record<string, WhyPage> = {
   authenticity: {
-    title: "Authenticity First",
-    tagline: "Know exactly what you are choosing.",
-    intro:
-      "Every product on AstroDisha is presented with clear, honest information, so you can choose with confidence and without confusion.",
+    title: "Authenticity",
+    subtitle: "Know what you are choosing.",
+    description:
+      "Every gemstone, crystal and Rudraksha is selected with attention to authenticity, quality and source.",
     icon: "shield",
-    sections: [
-      {
-        heading: "What you will see on every product",
-        points: [
-          "A clear product name and category.",
-          "Real product photos, so you know what you are getting.",
-          "A simple description of the product and its traditional significance.",
-          "Transparent pricing, with delivery charges shown before you pay.",
-        ],
-      },
-      {
-        heading: "How we choose our products",
-        points: [
-          "We focus on quality over quantity.",
-          "Our collection stays focused on gemstones, crystals, crystal jewellery, Rudraksha and puja essentials.",
-          "Products are added only when their details are complete and clear.",
-        ],
-      },
-      {
-        heading: "Have a question about a product?",
-        points: [
-          "Ask us before you buy: size, weight, origin or any other detail.",
-          "We would rather answer every question than have you guess.",
-        ],
-      },
-    ],
-  },
-
-  "expert-guidance": {
-    title: "Expert Guidance",
-    tagline: "Talk to us before you decide.",
-    intro:
-      "Not sure which gemstone, crystal or Rudraksha is right for you? Message us and we will help you understand your options.",
-    icon: "user",
-    sections: [
-      {
-        heading: "How it works",
-        numbered: true,
-        points: [
-          "Message us on WhatsApp.",
-          "Tell us what you are looking for: your intention, budget, or a product you are considering.",
-          "We help you understand the options, so you can make your own choice.",
-        ],
-      },
-      {
-        heading: "What you can ask us",
-        points: [
-          "The difference between similar products.",
-          "How to wear, use or care for a product.",
-          "Which category may suit your purpose.",
-          "Questions about your order or delivery.",
-        ],
-      },
-    ],
-    note:
-      "Our guidance is based on traditional practices and product knowledge. It is not a substitute for medical, legal or financial advice.",
-  },
-
-  "premium-experience": {
-    title: "Premium Experience",
-    tagline: "Calm and simple, from browsing to delivery.",
-    intro:
-      "We have designed every step of shopping with AstroDisha to feel simple, secure and unhurried.",
-    icon: "gem",
-    sections: [
-      {
-        heading: "Easy browsing",
-        points: [
-          "Clean categories, so you find what you need quickly.",
-          "Save products to your wishlist and come back to them anytime.",
-        ],
-      },
-      {
-        heading: "Secure payments",
-        points: [
-          "Online payments are processed securely through Razorpay (UPI, cards and net banking).",
-          "Cash on Delivery is available with a small ₹100 advance booking amount.",
-        ],
-      },
-      {
-        heading: "After you order",
-        points: [
-          "You receive an order confirmation email with your order details.",
-          "Any question about your order? We are one WhatsApp message away.",
-        ],
-      },
+    points: [
+      "Authentic product selection",
+      "Quality and source verification",
+      "Clear product details and transparency",
+      "Built on customer trust",
     ],
   },
 
   "secure-checkout": {
     title: "Secure Checkout",
-    tagline: "Pay your way, safely.",
-    intro:
-      "Every payment on AstroDisha goes through trusted, secure channels, so you can check out with confidence.",
+    subtitle: "Simple, safe and seamless.",
+    description:
+      "Your shopping experience is designed to keep every step simple, secure and transparent.",
     icon: "lock",
-    sections: [
-      {
-        heading: "Ways to pay",
-        points: [
-          "Pay online via UPI, cards or net banking, powered by Razorpay.",
-          "Or choose Cash on Delivery with a small ₹100 advance to confirm your order.",
-        ],
-      },
-      {
-        heading: "How your payment is protected",
-        points: [
-          "Card and UPI details are handled directly by Razorpay — we never see or store them.",
-          "Every payment is verified before your order is confirmed.",
-        ],
-      },
-      {
-        heading: "After you pay",
-        points: [
-          "You get an order confirmation with your order number right away.",
-          "Any question about a payment or order? Message us on WhatsApp.",
-        ],
-      },
+    points: [
+      "Secure payment processing",
+      "A safe, straightforward checkout",
+      "Order confirmation for every purchase",
+      "Full transparency on payments and orders",
     ],
   },
 
   "quality-assured": {
     title: "Quality Assured",
-    tagline: "Every product gets a closer look before it's listed.",
-    intro:
-      "We keep our catalogue focused rather than flooded, so each product gets real attention before it reaches you.",
+    subtitle: "Quality you can choose with confidence.",
+    description:
+      "We focus on carefully selected products and clear information so you can make an informed choice.",
     icon: "gem",
-    sections: [
-      {
-        heading: "Before a product is listed",
-        points: [
-          "Products are added only once their details, pricing and photos are complete.",
-          "We keep the collection focused on gemstones, crystals, crystal jewellery, Rudraksha and puja essentials rather than listing everything.",
-        ],
-      },
-      {
-        heading: "If something isn't right",
-        points: [
-          "Received a product that's damaged or not as described? Message us on WhatsApp with photos.",
-          "We look into every report personally, rather than routing it through a generic ticket system.",
-        ],
-      },
+    points: [
+      "Careful, quality-first selection",
+      "Every product inspected before listing",
+      "Clear, honest product information",
+      "Careful packaging for every order",
+    ],
+  },
+
+  "expert-guidance": {
+    title: "Expert Guidance",
+    subtitle: "Talk to us before you decide.",
+    description:
+      "Not sure which gemstone, crystal or Rudraksha is right for you? Message us and we will help you understand your options.",
+    icon: "user",
+    points: [
+      "Message us anytime on WhatsApp",
+      "Tell us your intention, budget or requirement",
+      "Get guidance on suitable options",
+      "Make your decision with confidence",
+    ],
+  },
+
+  "premium-experience": {
+    title: "Premium Experience",
+    subtitle: "A calm, elegant experience designed for you.",
+    description:
+      "From discovering the right product to receiving it with care, every step is designed to feel thoughtful, simple and premium.",
+    icon: "sparkle",
+    points: [
+      "A curated, focused collection",
+      "An easy, unhurried shopping experience",
+      "Premium presentation, start to finish",
+      "Careful packaging, delivery and support when needed",
     ],
   },
 };
@@ -195,6 +108,12 @@ const ICONS = {
       <path d="M3 9h18M9.5 4L8 9l4 11M14.5 4L16 9l-4 11" />
     </>
   ),
+  sparkle: (
+    <>
+      <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" />
+      <path d="M19 16l.7 1.8L21.5 18.5l-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7L19 16z" />
+    </>
+  ),
 };
 
 export function generateStaticParams() {
@@ -207,7 +126,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!page) return {};
   return {
     title: `${page.title} | ASTRODISHA`,
-    description: page.intro,
+    description: page.description,
   };
 }
 
@@ -222,21 +141,28 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
     <main style={{ backgroundColor: "var(--astro-bg)" }} className="min-h-screen">
       <Header />
 
-      <article className="mx-auto max-w-3xl px-5 py-10 sm:px-6 sm:py-14">
-        <Link href="/" style={{ color: "var(--astro-mauve)" }} className="text-xs font-semibold">
-          ← Back to Home
+      <article className="mx-auto max-w-2xl px-5 pb-14 pt-6 sm:px-6 sm:pt-8">
+        <Link
+          href="/"
+          style={{ color: "var(--astro-mauve)" }}
+          className="inline-flex items-center gap-1.5 text-[13px] font-semibold transition hover:opacity-70"
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M19 12H5M11 6l-6 6 6 6" />
+          </svg>
+          Back to Home
         </Link>
 
         {/* Intro */}
-        <div className="mt-8 flex flex-col items-center text-center">
+        <div className="mt-6 flex flex-col items-center text-center sm:mt-8">
           <span
             style={{ backgroundColor: "rgba(182, 155, 238, 0.15)" }}
-            className="flex h-16 w-16 items-center justify-center rounded-full"
+            className="flex h-14 w-14 items-center justify-center rounded-full sm:h-16 sm:w-16"
             aria-hidden="true"
           >
             <svg
               viewBox="0 0 24 24"
-              className="h-7 w-7"
+              className="h-6 w-6 sm:h-7 sm:w-7"
               fill="none"
               stroke="var(--astro-accent)"
               strokeWidth={1.8}
@@ -247,84 +173,61 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
             </svg>
           </span>
 
-          <p style={{ color: "var(--astro-accent)" }} className="mt-5 text-[12px] font-semibold uppercase tracking-[3px]">
+          <p style={{ color: "var(--astro-accent)" }} className="mt-4 text-[11px] font-semibold uppercase tracking-[3px] sm:mt-5 sm:text-[12px]">
             Why AstroDisha
           </p>
 
-          <h1 style={{ color: "var(--astro-text)" }} className="astro-serif mt-3 text-[34px] leading-[1.1] sm:text-[48px]">
+          <h1 style={{ color: "var(--astro-text)" }} className="astro-serif mt-3 text-[30px] leading-[1.1] sm:text-[42px]">
             {page.title}
           </h1>
 
-          <p style={{ color: "var(--astro-text)" }} className="astro-serif mt-2 text-lg italic opacity-80 sm:text-xl">
-            {page.tagline}
+          <p style={{ color: "var(--astro-text)" }} className="astro-serif mt-2 text-base italic opacity-80 sm:text-lg">
+            {page.subtitle}
           </p>
 
-          <p style={{ color: "var(--astro-mauve)" }} className="mt-5 max-w-xl text-[15px] leading-[1.6] sm:text-base">
-            {page.intro}
+          <p style={{ color: "var(--astro-mauve)" }} className="mt-4 max-w-md text-[14px] leading-[1.6] sm:text-[15px]">
+            {page.description}
           </p>
         </div>
 
-        {/* Sections */}
-        <div className="mt-10 flex flex-col gap-5">
-          {page.sections.map((section) => (
-            <section
-              key={section.heading}
-              style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-              className="rounded-[18px] border p-6 sm:p-8"
-            >
-              <h2 style={{ color: "var(--astro-text)" }} className="astro-serif text-[22px] sm:text-[26px]">
-                {section.heading}
-              </h2>
+        {/* Single detailed content card */}
+        <section
+          style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
+          className="mt-8 w-full rounded-[18px] border p-6 sm:mt-10 sm:p-8"
+        >
+          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif text-[19px] sm:text-[22px]">
+            How it works
+          </h2>
 
-              <ul className="mt-4 flex flex-col gap-3">
-                {section.points.map((point, i) => (
-                  <li key={point} className="flex gap-3">
-                    {section.numbered ? (
-                      <span
-                        style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
-                      >
-                        {i + 1}
-                      </span>
-                    ) : (
-                      <span
-                        style={{ backgroundColor: "var(--astro-accent)" }}
-                        className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full"
-                        aria-hidden="true"
-                      />
-                    )}
-                    <span style={{ color: "var(--astro-mauve)" }} className="text-[15px] leading-[1.6]">
-                      {point}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-
-        {page.note && (
-          <p
-            style={{ color: "var(--astro-mauve)", borderColor: "var(--astro-border)" }}
-            className="mt-5 rounded-xl border border-dashed p-4 text-xs leading-5"
-          >
-            {page.note}
-          </p>
-        )}
+          <ul className="mt-4 flex flex-col gap-3">
+            {page.points.map((point) => (
+              <li key={point} className="flex gap-3">
+                <span
+                  style={{ backgroundColor: "var(--astro-accent)" }}
+                  className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full"
+                  aria-hidden="true"
+                />
+                <span style={{ color: "var(--astro-mauve)" }} className="text-[14px] leading-[1.6] sm:text-[15px]">
+                  {point}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {/* CTA */}
         <div
           style={{ backgroundColor: "var(--astro-primary)" }}
-          className="mt-10 rounded-2xl px-6 py-10 text-center"
+          className="mt-8 rounded-2xl px-6 py-9 text-center sm:mt-10 sm:py-10"
         >
-          <h2 style={{ color: "var(--astro-primary-text)" }} className="astro-serif text-[26px] sm:text-[32px]">
+          <h2 style={{ color: "var(--astro-primary-text)" }} className="astro-serif text-[22px] sm:text-[28px]">
             Have a question?
           </h2>
-          <p style={{ color: "var(--astro-primary-text)", opacity: 0.8 }} className="mx-auto mt-3 max-w-md text-sm leading-6">
+          <p style={{ color: "var(--astro-primary-text)", opacity: 0.8 }} className="mx-auto mt-2.5 max-w-md text-[13px] leading-6 sm:text-sm">
             Our team is happy to help you before you choose.
           </p>
 
-          <div className="mx-auto mt-7 flex max-w-xs flex-col gap-3">
+          <div className="mx-auto mt-6 flex max-w-xs flex-col gap-3">
             <a
               href={WHATSAPP_URL}
               target="_blank"
@@ -349,8 +252,8 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
         </div>
 
         {/* Other pages */}
-        <div className="mt-10">
-          <p style={{ color: "var(--astro-accent)" }} className="text-center text-[12px] font-semibold uppercase tracking-[3px]">
+        <div className="mt-8 sm:mt-10">
+          <p style={{ color: "var(--astro-accent)" }} className="text-center text-[11px] font-semibold uppercase tracking-[3px] sm:text-[12px]">
             Also Read
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -361,7 +264,7 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
                 style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
                 className="flex items-center justify-between rounded-xl border px-5 py-4 transition hover:opacity-90"
               >
-                <span style={{ color: "var(--astro-text)" }} className="astro-serif text-lg">
+                <span style={{ color: "var(--astro-text)" }} className="astro-serif text-base sm:text-lg">
                   {other.title}
                 </span>
                 <span style={{ color: "var(--astro-primary)" }} aria-hidden="true">→</span>
@@ -372,4 +275,4 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
       </article>
     </main>
   );
-        }
+                }
