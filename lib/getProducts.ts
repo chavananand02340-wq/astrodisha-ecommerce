@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
-import type { Product } from "@/components/ProductCard";
+import type { Product, PdpBenefit, PdpStep, PdpDetail, PdpCertificate } from "@/components/ProductCard";
 
 type ProductRow = {
   id: string;
@@ -11,12 +11,24 @@ type ProductRow = {
   rating: number | null;
   review_count: number | null;
   specifications: { key: string; value: string }[] | null;
-  categories: { name: string } | null;
+  categories: { name: string; slug: string } | null;
   product_images: { image_url: string; is_primary: boolean; sort_order: number }[] | null;
 };
 
+// Extra columns only needed on the single product page
+type ProductDetailRow = ProductRow & {
+  benefits: PdpBenefit[] | null;
+  how_to_wear: PdpStep[] | null;
+  product_details: PdpDetail[] | null;
+  certificate: PdpCertificate | null;
+  certificate_image_url: string | null;
+};
+
 const PRODUCT_SELECT =
-  "id, slug, name, short_description, price, stock, rating, review_count, specifications, categories(name), product_images(image_url, is_primary, sort_order)";
+  "id, slug, name, short_description, price, stock, rating, review_count, specifications, categories(name, slug), product_images(image_url, is_primary, sort_order)";
+
+const PRODUCT_DETAIL_SELECT =
+  PRODUCT_SELECT + ", benefits, how_to_wear, product_details, certificate, certificate_image_url";
 
 function mapRowToProduct(row: ProductRow): Product {
   const sortedImages = [...(row.product_images || [])].sort((a, b) => {
@@ -33,6 +45,7 @@ function mapRowToProduct(row: ProductRow): Product {
     slug: row.slug,
     name: row.name,
     category: row.categories?.name || "Uncategorized",
+    categorySlug: row.categories?.slug || undefined,
     description: row.short_description || "",
     price: Number(row.price),
     stock: typeof row.stock === "number" ? row.stock : Number(row.stock) || 0,
@@ -41,6 +54,17 @@ function mapRowToProduct(row: ProductRow): Product {
     rating: row.rating ? Number(row.rating) : undefined,
     reviewCount: row.review_count ?? undefined,
     specifications: Array.isArray(row.specifications) ? row.specifications : [],
+  };
+}
+
+function mapRowToProductDetail(row: ProductDetailRow): Product {
+  return {
+    ...mapRowToProduct(row),
+    benefits: Array.isArray(row.benefits) ? row.benefits : [],
+    howToWear: Array.isArray(row.how_to_wear) ? row.how_to_wear : [],
+    productDetails: Array.isArray(row.product_details) ? row.product_details : [],
+    certificate: row.certificate && typeof row.certificate === "object" ? row.certificate : {},
+    certificateImageUrl: row.certificate_image_url || undefined,
   };
 }
 
@@ -108,12 +132,13 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
   return (data as unknown as ProductRow[]).map(mapRowToProduct);
 }
 
+// Single product page: also loads Benefits, How to Wear, Product Details and Certificate.
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("products")
-    .select(PRODUCT_SELECT)
+    .select(PRODUCT_DETAIL_SELECT)
     .eq("is_active", true)
     .eq("slug", slug)
     .maybeSingle();
@@ -122,5 +147,5 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     return null;
   }
 
-  return mapRowToProduct(data as unknown as ProductRow);
+  return mapRowToProductDetail(data as unknown as ProductDetailRow);
 }
