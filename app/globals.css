@@ -122,6 +122,51 @@ img {
   animation: astroFadeUp 0.7s ease forwards;
 }
 
+/* Gold pulse ring — used behind trust-badge icons for a subtle premium glow */
+@keyframes astroPulseRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(198, 161, 91, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(198, 161, 91, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(198, 161, 91, 0);
+  }
+}
+
+.astro-pulse-ring {
+  animation: astroPulseRing 2.6s ease-out infinite;
+}
+
+/* Announcement bar — continuous full-width marquee.
+   The track holds two identical halves; moving it by -50% loops seamlessly. */
+@keyframes astroMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.astro-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: astroMarquee 55s linear infinite;
+  will-change: transform;
+}
+
+.astro-marquee:hover .astro-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .astro-marquee-track {
+    animation: none;
+  }
+}
+
 /* Mobile tap feedback */
 @media (max-width: 767px) {
   button:active {
