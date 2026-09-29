@@ -224,25 +224,19 @@ export default async function HomePage() {
           }}
         />
 
-        <div className="relative mx-auto flex min-h-[600px] max-w-7xl flex-col justify-between px-5 pb-8 pt-10 sm:min-h-[640px] md:min-h-[560px] md:justify-center md:px-8 lg:min-h-[640px]">
-          <div className="astro-fade-up max-w-[80%] sm:max-w-md lg:max-w-lg">
-            <p style={{ color: "var(--astro-mauve)" }} className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em]">
-              ASTRODISHA
-            </p>
-
-            <span style={{ backgroundColor: "var(--astro-accent)" }} className="mb-5 block h-px w-12" aria-hidden="true" />
-
-            <h1 style={{ color: "var(--astro-text)" }} className="astro-serif text-[40px] leading-[1.05] sm:text-5xl lg:text-6xl">
+        <div className="relative mx-auto flex min-h-[600px] max-w-7xl flex-col justify-start px-5 pb-8 pt-7 sm:min-h-[640px] md:min-h-[560px] md:justify-center md:pt-10 md:px-8 lg:min-h-[640px]">
+          <div className="astro-fade-up max-w-[64%] md:max-w-lg">
+            <h1 style={{ color: "var(--astro-text)" }} className="astro-serif text-[32px] leading-[1.1] md:text-5xl lg:text-6xl">
               {activeBanner ? activeBanner.title : "Discover What Aligns With You."}
             </h1>
 
-            <p style={{ color: "var(--astro-text)", opacity: 0.78 }} className="mt-5 text-[15px] leading-7 sm:text-base">
+            <p style={{ color: "var(--astro-text)", opacity: 0.78 }} className="mt-4 text-[15px] leading-7 sm:text-base">
               {activeBanner?.subtitle ||
                 "Explore authentic gemstones, crystals, Rudraksha and Puja essentials selected for your spiritual journey."}
             </p>
           </div>
 
-          <div className="mt-8 flex w-full max-w-sm flex-col gap-3 md:mt-8">
+          <div className="mt-5 flex w-full max-w-sm flex-col gap-3 md:mt-8">
             <Link
               href={activeBanner?.button_link || "/gemstones"}
               style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
@@ -271,7 +265,7 @@ export default async function HomePage() {
       </section>
 
       {/* JOURNEY — 6 steps, one connected flow (swipe on mobile, one row on desktop) */}
-      <section className="px-5 pb-10 pt-12 sm:px-6 sm:pb-14 sm:pt-16">
+      <section className="px-5 pb-8 pt-9 sm:px-6 sm:pb-10 sm:pt-12">
         <div className="mx-auto max-w-7xl">
           <Reveal className="text-center">
             <span style={{ color: "var(--astro-accent)" }} className="text-sm" aria-hidden="true">
@@ -288,7 +282,7 @@ export default async function HomePage() {
 
           <SwipeRow
             ariaLabel="Our process"
-            className="-mx-5 mt-10 scroll-px-5 px-5 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:justify-between lg:overflow-visible lg:px-0"
+            className="-mx-5 mt-10 scroll-px-5 px-5 pt-6 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:justify-between lg:overflow-visible lg:px-0"
             itemClassName="w-[150px] sm:w-[172px] lg:w-auto lg:flex-1"
             separatorClassName="flex w-7 justify-center pt-[104px] sm:pt-[117px] lg:pt-[113px]"
             dotsClassName="lg:hidden"
@@ -345,9 +339,9 @@ export default async function HomePage() {
       </section>
 
       {/* CATEGORIES */}
-      <section className="py-12 sm:py-16">
+      <section className="pb-8 pt-2 sm:pb-10">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-7 flex items-center justify-between gap-4 px-4 sm:px-6">
+          <div className="mb-5 flex items-center justify-between gap-4 px-4 sm:mb-7 sm:px-6">
             <div>
               <p style={{ color: "var(--astro-accent)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
                 Explore
@@ -374,16 +368,16 @@ export default async function HomePage() {
                 key={category.slug}
                 href={`/${category.slug}`}
                 style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-                className="group w-[44%] shrink-0 snap-start overflow-hidden rounded-xl border sm:w-[30%] lg:w-[23%]"
+                className="group flex w-[44%] shrink-0 snap-start flex-col overflow-hidden rounded-xl border sm:w-[30%] lg:w-[23%]"
               >
-                <div className="h-36 overflow-hidden sm:h-52">
+                <div className="h-36 shrink-0 overflow-hidden sm:h-52">
                   <SafeImage
                     src={category.image}
                     alt={category.name}
                   />
                 </div>
 
-                <div className="p-4">
+                <div className="flex flex-1 flex-col p-4">
                   <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-lg">
                     {category.name}
                   </h3>
@@ -392,7 +386,7 @@ export default async function HomePage() {
                     {category.description}
                   </p>
 
-                  <span style={{ color: "var(--astro-primary)" }} className="mt-3 inline-block text-[9px] font-semibold uppercase tracking-[0.12em]">
+                  <span style={{ color: "var(--astro-primary)" }} className="mt-auto inline-block pt-3 text-[9px] font-semibold uppercase tracking-[0.12em]">
                     Explore →
                   </span>
                 </div>
@@ -403,9 +397,9 @@ export default async function HomePage() {
       </section>
 
       {/* FEATURED PRODUCTS — same background as Shop by Category (--astro-bg) */}
-      <section className="px-4 py-12 sm:px-6 sm:py-16">
+      <section className="px-4 pb-8 pt-2 sm:px-6 sm:pb-10">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-7 flex items-center justify-between gap-4">
+          <div className="mb-5 flex items-center justify-between gap-4 sm:mb-7">
             <div>
               <p style={{ color: "var(--astro-accent)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
                 Curated For You
@@ -444,7 +438,7 @@ export default async function HomePage() {
       <TestimonialsSection testimonials={testimonials} />
 
       {/* CONSULTATION */}
-      <section id="consult" className="px-4 pb-6 pt-10 sm:px-6 sm:pb-8 sm:pt-14">
+      <section id="consult" className="px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-8">
         <div
           style={{ backgroundColor: "var(--astro-primary)" }}
           className="mx-auto max-w-7xl overflow-hidden rounded-2xl px-6 py-10 text-center sm:px-10 sm:py-14"
@@ -476,7 +470,7 @@ export default async function HomePage() {
       </section>
 
       {/* WHY ASTRODISHA — 5 swipeable cards */}
-      <section className="px-5 pb-10 pt-8 sm:px-6 md:pb-16 md:pt-12">
+      <section className="px-5 pb-8 pt-4 sm:px-6 md:pb-12 md:pt-6">
         <div className="mx-auto max-w-[1100px] lg:px-8">
           <p style={{ color: "var(--astro-accent)" }} className="mb-3 text-center text-[12px] font-semibold uppercase tracking-[3px] md:mb-5 md:text-[14px]">
             Why AstroDisha
@@ -603,4 +597,4 @@ export default async function HomePage() {
       </a>
     </main>
   );
-      }
+        }
