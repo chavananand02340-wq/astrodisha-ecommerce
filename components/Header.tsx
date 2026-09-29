@@ -9,6 +9,15 @@ import { useTheme } from "./ThemeProvider";
 // Must match the free-shipping threshold in Supabase site_settings
 const FREE_SHIPPING_THRESHOLD = 999;
 
+const ANNOUNCEMENTS = [
+  {
+    icon: "truck",
+    text: `Free Shipping on Orders Above ₹${FREE_SHIPPING_THRESHOLD.toLocaleString("en-IN")}`,
+  },
+  { icon: "gem", text: "Authentic Products" },
+  { icon: "pin", text: "Pan India Delivery" },
+];
+
 const STATIC_NAV_END = [
   { name: "About Us", href: "/about" },
   { name: "Contact", href: "/contact" },
@@ -125,9 +134,9 @@ function CountBadge({ count }: { count: number }) {
 const iconButtonClass =
   "relative flex h-9 w-9 items-center justify-center rounded-full transition hover:opacity-70";
 
-// Slightly smaller on mobile so the logo/wordmark/tagline have more room
+// Compact on phones so the brand name + full tagline get the width they need
 const mobileIconButtonClass =
-  "relative flex h-8 w-8 items-center justify-center rounded-full transition hover:opacity-70";
+  "relative flex h-[30px] w-[30px] items-center justify-center rounded-full transition hover:opacity-70 sm:h-9 sm:w-9";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -224,26 +233,33 @@ export default function Header() {
 
   return (
     <>
-      {/* ANNOUNCEMENT BAR — always dark cosmos */}
+      {/* ANNOUNCEMENT BAR — full-width continuous marquee, always dark cosmos */}
       <div
         style={{ backgroundColor: "#160828", color: "#f4effb" }}
-        className="no-scrollbar overflow-x-auto px-4 py-2"
+        className="astro-marquee w-full overflow-hidden py-2"
       >
-        <div className="mx-auto flex w-max items-center gap-3 whitespace-nowrap text-[10px] tracking-[0.04em] sm:gap-5 sm:text-xs">
-          <span className="flex items-center gap-1.5">
-            <Icon name="truck" className="h-3.5 w-3.5" color="#c6a15b" />
-            Free Shipping on Orders Above ₹{FREE_SHIPPING_THRESHOLD.toLocaleString("en-IN")}
-          </span>
-          <span className="opacity-40">|</span>
-          <span className="flex items-center gap-1.5">
-            <Icon name="gem" className="h-3.5 w-3.5" color="#c6a15b" />
-            Authentic Products
-          </span>
-          <span className="opacity-40">|</span>
-          <span className="flex items-center gap-1.5">
-            <Icon name="pin" className="h-3.5 w-3.5" color="#c6a15b" />
-            Pan India Delivery
-          </span>
+        <div className="astro-marquee-track text-[10px] tracking-[0.04em] sm:text-xs">
+          {[0, 1].map((half) => (
+            <div
+              key={half}
+              className="flex shrink-0 items-center"
+              aria-hidden={half === 1 ? true : undefined}
+            >
+              {[0, 1, 2, 3].map((copy) => (
+                <div key={copy} className="flex shrink-0 items-center">
+                  {ANNOUNCEMENTS.map((item) => (
+                    <div key={item.text} className="flex shrink-0 items-center">
+                      <span className="flex items-center gap-1.5 whitespace-nowrap px-5">
+                        <Icon name={item.icon} className="h-3.5 w-3.5" color="#c6a15b" />
+                        {item.text}
+                      </span>
+                      <span className="opacity-40">|</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -254,7 +270,7 @@ export default function Header() {
         }}
         className="sticky top-0 z-50 border-b backdrop-blur-md"
       >
-        <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-3 sm:px-6">
 
           <div className="flex min-w-0 flex-1 items-center gap-1">
             <button
@@ -263,25 +279,34 @@ export default function Header() {
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((value) => !value)}
               style={{ color: "var(--astro-primary)" }}
-              className={`${mobileIconButtonClass} shrink-0 lg:hidden lg:h-9 lg:w-9`}
+              className={`${mobileIconButtonClass} shrink-0 lg:hidden`}
             >
               <Icon name="menu" className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
 
-            <Link href="/" className="flex min-w-0 items-center gap-1.5 sm:gap-2">
-              <Icon name="lotus" className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" color="var(--astro-accent)" />
+            {/* Brand: name + full tagline together, never truncated */}
+            <Link
+              href="/"
+              aria-label="ASTRODISHA home"
+              className="flex shrink-0 items-center gap-1.5 sm:gap-2"
+            >
+              <Icon
+                name="lotus"
+                className="hidden h-6 w-6 shrink-0 min-[350px]:block sm:h-8 sm:w-8"
+                color="var(--astro-accent)"
+              />
 
-              <div className="min-w-0">
+              <div className="shrink-0">
                 <div
                   style={{ color: "var(--astro-primary)" }}
-                  className="astro-serif truncate text-[17px] leading-none sm:text-[21px]"
+                  className="astro-serif whitespace-nowrap text-[19px] leading-none sm:text-[21px]"
                 >
                   ASTRODISHA
                 </div>
 
                 <div
                   style={{ color: "var(--astro-accent)" }}
-                  className="mt-1 hidden min-[340px]:block truncate text-[8px] tracking-[0.1em] opacity-90 sm:text-[9px] sm:tracking-[0.12em] sm:opacity-100"
+                  className="mt-1 whitespace-nowrap text-[clamp(6px,1.95vw,9px)] font-medium tracking-[0.06em] sm:tracking-[0.12em] lg:text-[10px]"
                 >
                   GUIDANCE · HEALING · DIVINE ALIGNMENT
                 </div>
@@ -350,7 +375,7 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* MOBILE ICONS (smaller, hamburger moved to the left) */}
+          {/* MOBILE ICONS — order: Moon, Search, (Heart on 640px+), Cart */}
           <div style={{ color: "var(--astro-primary)" }} className="flex shrink-0 items-center gap-0 lg:hidden">
 
             <button
@@ -374,7 +399,7 @@ export default function Header() {
             <Link
               href="/wishlist"
               aria-label="Wishlist"
-              className={mobileIconButtonClass}
+              className={`${mobileIconButtonClass} hidden sm:flex`}
             >
               <Icon name="heart" className="h-[18px] w-[18px]" />
               {wishlistCount > 0 && <CountBadge count={wishlistCount} />}
@@ -482,11 +507,25 @@ export default function Header() {
           menuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
+        {/* Drawer header: logo + brand name on one line, close button on the right */}
         <div
           style={{ borderColor: "var(--astro-border)" }}
-          className="flex items-center justify-between border-b px-5 py-5"
+          className="flex items-center justify-between border-b px-5 py-4"
         >
-          <Icon name="lotus" className="h-7 w-7" color="var(--astro-accent)" />
+          <Link
+            href="/"
+            onClick={() => setMenuOpen(false)}
+            aria-label="ASTRODISHA home"
+            className="flex items-center gap-2"
+          >
+            <Icon name="lotus" className="h-7 w-7 shrink-0" color="var(--astro-accent)" />
+            <span
+              style={{ color: "var(--astro-primary)" }}
+              className="astro-serif text-[20px] leading-none"
+            >
+              ASTRODISHA
+            </span>
+          </Link>
 
           <button
             type="button"
@@ -512,6 +551,16 @@ export default function Header() {
             </Link>
           ))}
 
+          {/* Wishlist lives here on small phones (its top-bar icon is hidden below 640px) */}
+          <Link
+            href="/wishlist"
+            onClick={() => setMenuOpen(false)}
+            style={{ borderColor: "var(--astro-border)", color: "var(--astro-text)" }}
+            className="border-b py-4 text-sm sm:hidden"
+          >
+            Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
+          </Link>
+
           <Link
             href="/consult"
             onClick={() => setMenuOpen(false)}
@@ -524,4 +573,4 @@ export default function Header() {
       </div>
     </>
   );
-    }
+              }
