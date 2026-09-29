@@ -118,7 +118,7 @@ const JOURNEY_STEPS = [
   { n: "03", title: "PURIFY", text: "Cleansed with traditional shuddhi process.", icon: ICONS.droplet, img: "/images/journey-3-purify.jpg" },
   { n: "04", title: "CONSECRATE", text: "Energised with mantra and sankalp.", icon: ICONS.flame, img: "/images/journey-4-consecrate.jpg" },
   { n: "05", title: "DELIVER", text: "Carefully packed and delivered to your doorstep.", icon: ICONS.truck, img: "/images/journey-5-deliver.jpg" },
-  { n: "06", title: "ALIGN", text: "Guidance on how to wear and use for best results.", icon: ICONS.book, img: "/images/journey-6-align.jpg" },
+  { n: "06", title: "ALIGN", text: "Guidance on how to wear and use for best results.", icon: ICONS.book, img: "/images/journey-6-align-ring.jpg" },
 ];
 
 const WHY_ITEMS = [
@@ -597,4 +597,4 @@ export default async function HomePage() {
       </a>
     </main>
   );
-    }
+      }
