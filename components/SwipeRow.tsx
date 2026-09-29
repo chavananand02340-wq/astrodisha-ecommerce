@@ -83,11 +83,14 @@ export default function SwipeRow({
 
   return (
     <div>
+      {/* overflow-y-hidden: overflow-x-auto alone makes the browser treat the
+          y-axis as implicitly "auto" too, which was clipping the icon circles
+          that sit above each card via negative margin/translate. */}
       <div
         ref={scrollerRef}
         role="region"
         aria-label={ariaLabel}
-        className={`no-scrollbar relative flex snap-x snap-mandatory overflow-x-auto ${className}`}
+        className={`no-scrollbar relative flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden ${className}`}
       >
         {items.map((item, i) => (
           <Fragment key={i}>
