@@ -107,7 +107,7 @@ function WhatsAppIcon({ className }: { className: string }) {
 
 /* Hero photos: drop these files into public/images/ — until then the
    cream/gold gradient below shows (a missing file simply falls through). */
-const HERO_MOBILE = "/images/hero-mobile-1.jpg";
+const HERO_MOBILE = "/images/hero-mobile-2-1.jpg";
 const HERO_DESKTOP = "/images/hero-desktop.jpg";
 const HERO_FALLBACK = "linear-gradient(150deg, #f7efe3 0%, #f0dcc2 55%, #e7cba7 100%)";
 
@@ -189,7 +189,7 @@ export default async function HomePage() {
           style={{
             backgroundImage: `url("${heroMobileImage}"), ${HERO_FALLBACK}`,
             backgroundSize: "cover",
-            backgroundPosition: "72% center, center",
+            backgroundPosition: "right bottom, center",
             backgroundRepeat: "no-repeat",
           }}
         />
@@ -224,7 +224,7 @@ export default async function HomePage() {
           }}
         />
 
-        <div className="relative mx-auto flex min-h-[600px] max-w-7xl flex-col justify-start px-5 pb-8 pt-7 sm:min-h-[640px] md:min-h-[560px] md:justify-center md:pt-10 md:px-8 lg:min-h-[640px]">
+        <div className="relative mx-auto flex max-w-7xl flex-col justify-start px-5 pb-10 pt-7 sm:min-h-[640px] md:min-h-[560px] md:justify-center md:pt-10 md:px-8 lg:min-h-[640px]">
           <div className="astro-fade-up max-w-[64%] md:max-w-lg">
             <h1 style={{ color: "var(--astro-text)" }} className="astro-serif text-[32px] leading-[1.1] md:text-5xl lg:text-6xl">
               {activeBanner ? activeBanner.title : "Discover What Aligns With You."}
