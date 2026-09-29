@@ -9,6 +9,7 @@ export type Product = {
   slug: string;
   name: string;
   category: string;
+  categorySlug?: string;
   description: string;
   price: number;
   stock: number;
@@ -202,4 +203,4 @@ export default function ProductCard({
       </div>
     </article>
   );
-}
+      }
