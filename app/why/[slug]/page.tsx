@@ -142,10 +142,11 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
       <Header />
 
       <article className="mx-auto max-w-2xl px-5 pb-14 pt-6 sm:px-6 sm:pt-8">
+        {/* Back button — same style as the product page's "Back to Collection" */}
         <Link
           href="/"
-          style={{ color: "var(--astro-mauve)" }}
-          className="inline-flex items-center gap-1.5 text-[13px] font-semibold transition hover:opacity-70"
+          style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+          className="inline-flex h-10 items-center gap-2 rounded-full px-5 text-xs font-semibold transition hover:opacity-90"
         >
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M19 12H5M11 6l-6 6 6 6" />
@@ -154,10 +155,10 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
         </Link>
 
         {/* Intro */}
-        <div className="mt-6 flex flex-col items-center text-center sm:mt-8">
+        <div className="mt-7 flex flex-col items-center text-center sm:mt-8">
           <span
-            style={{ backgroundColor: "rgba(182, 155, 238, 0.15)" }}
-            className="flex h-14 w-14 items-center justify-center rounded-full sm:h-16 sm:w-16"
+            style={{ backgroundColor: "var(--astro-primary)", borderColor: "var(--astro-accent)" }}
+            className="flex h-14 w-14 items-center justify-center rounded-full border sm:h-16 sm:w-16"
             aria-hidden="true"
           >
             <svg
@@ -173,9 +174,13 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
             </svg>
           </span>
 
-          <p style={{ color: "var(--astro-accent)" }} className="mt-4 text-[11px] font-semibold uppercase tracking-[3px] sm:mt-5 sm:text-[12px]">
-            Why AstroDisha
-          </p>
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <span aria-hidden="true" className="h-px w-6 sm:w-8" style={{ backgroundColor: "var(--astro-accent)" }} />
+            <p style={{ color: "var(--astro-accent)" }} className="text-[11px] font-semibold uppercase tracking-[3px] sm:text-[12px]">
+              Why AstroDisha
+            </p>
+            <span aria-hidden="true" className="h-px w-6 sm:w-8" style={{ backgroundColor: "var(--astro-accent)" }} />
+          </div>
 
           <h1 style={{ color: "var(--astro-text)" }} className="astro-serif mt-3 text-[30px] leading-[1.1] sm:text-[42px]">
             {page.title}
@@ -185,7 +190,7 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
             {page.subtitle}
           </p>
 
-          <p style={{ color: "var(--astro-mauve)" }} className="mt-4 max-w-md text-[14px] leading-[1.6] sm:text-[15px]">
+          <p style={{ color: "var(--astro-mauve)" }} className="mt-3 max-w-xs text-[14px] leading-[1.6] sm:max-w-sm sm:text-[15px]">
             {page.description}
           </p>
         </div>
@@ -200,13 +205,15 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
           </h2>
 
           <ul className="mt-4 flex flex-col gap-3">
-            {page.points.map((point) => (
-              <li key={point} className="flex gap-3">
+            {page.points.map((point, i) => (
+              <li key={point} className="flex items-start gap-3">
                 <span
-                  style={{ backgroundColor: "var(--astro-accent)" }}
-                  className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full"
+                  style={{ borderColor: "var(--astro-accent)", color: "var(--astro-accent)" }}
+                  className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold"
                   aria-hidden="true"
-                />
+                >
+                  {i + 1}
+                </span>
                 <span style={{ color: "var(--astro-mauve)" }} className="text-[14px] leading-[1.6] sm:text-[15px]">
                   {point}
                 </span>
@@ -275,4 +282,4 @@ export default async function WhyDetailPage({ params }: { params: Promise<{ slug
       </article>
     </main>
   );
-                }
+                  }
