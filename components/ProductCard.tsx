@@ -4,6 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useStore } from "./StoreProvider";
 
+export type PdpBenefit = { title: string; description: string };
+export type PdpStep = { title: string; description: string; icon: string };
+export type PdpDetail = { label: string; value: string; icon: string };
+export type PdpCertificate = {
+  lab_name?: string;
+  report_number?: string;
+  weight?: string;
+  shape?: string;
+  dimensions?: string;
+  colour?: string;
+  species?: string;
+  variety?: string;
+  treatment?: string;
+  comments?: string;
+};
+
 export type Product = {
   id: string;
   slug: string;
@@ -18,6 +34,12 @@ export type Product = {
   rating?: number;
   reviewCount?: number;
   specifications?: { key: string; value: string }[];
+  // Product page only (loaded by getProductBySlug)
+  benefits?: PdpBenefit[];
+  howToWear?: PdpStep[];
+  productDetails?: PdpDetail[];
+  certificate?: PdpCertificate;
+  certificateImageUrl?: string;
 };
 
 type ProductCardProps = {
@@ -203,4 +225,4 @@ export default function ProductCard({
       </div>
     </article>
   );
-      }
+}
