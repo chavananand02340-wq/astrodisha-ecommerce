@@ -1,166 +1,127 @@
 import { createClient } from "@/utils/supabase/server";
+import type { Product } from "@/components/ProductCard";
 
-export type ProductInput = {
-  category_id: string;
-  name: string;
+type ProductRow = {
+  id: string;
   slug: string;
-  short_description?: string | null;
-  description?: string | null;
+  name: string;
+  short_description: string | null;
   price: number;
-  compare_at_price?: number | null;
-  stock?: number;
-  sku?: string | null;
-  rating?: number | null;
-  review_count?: number;
-  is_active?: boolean;
-  is_featured?: boolean;
-  is_bestseller?: boolean;
-  seo_title?: string | null;
-  seo_description?: string | null;
+  stock: number | null;
+  rating: number | null;
+  review_count: number | null;
+  specifications: { key: string; value: string }[] | null;
+  categories: { name: string; slug: string } | null;
+  product_images: { image_url: string; is_primary: boolean; sort_order: number }[] | null;
 };
 
-export type ProductUpdate = Partial<ProductInput>;
+const PRODUCT_SELECT =
+  "id, slug, name, short_description, price, stock, rating, review_count, specifications, categories(name, slug), product_images(image_url, is_primary, sort_order)";
 
-export async function getProducts() {
+function mapRowToProduct(row: ProductRow): Product {
+  const sortedImages = [...(row.product_images || [])].sort((a, b) => {
+    if (a.is_primary) return -1;
+    if (b.is_primary) return 1;
+    return a.sort_order - b.sort_order;
+  });
+
+  const imageUrls = sortedImages.map((img) => img.image_url);
+  const primaryImage = imageUrls[0] || "/images/placeholder-product.svg";
+
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    category: row.categories?.name || "Uncategorized",
+    categorySlug: row.categories?.slug || undefined,
+    description: row.short_description || "",
+    price: Number(row.price),
+    stock: typeof row.stock === "number" ? row.stock : Number(row.stock) || 0,
+    image: primaryImage,
+    images: imageUrls.length > 0 ? imageUrls : [primaryImage],
+    rating: row.rating ? Number(row.rating) : undefined,
+    reviewCount: row.review_count ?? undefined,
+    specifications: Array.isArray(row.specifications) ? row.specifications : [],
+  };
+}
+
+// Homepage "Featured Collection":
+// products marked Featured in admin come first, remaining slots filled with newest products.
+export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("products")
-    .select(`
-      id,
-      category_id,
-      name,
-      slug,
-      short_description,
-      description,
-      price,
-      compare_at_price,
-      stock,
-      sku,
-      rating,
-      review_count,
-      is_active,
-      is_featured,
-      is_bestseller,
-      seo_title,
-      seo_description,
-      created_at,
-      updated_at
-    `)
+    .select(PRODUCT_SELECT)
+    .eq("is_active", true)
+    .order("is_featured", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error || !data) {
+    return [];
+  }
+
+  return (data as unknown as ProductRow[]).map(mapRowToProduct);
+}
+
+// "/shop" page: every active product, newest first.
+export async function getAllProducts(): Promise<Product[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_SELECT)
     .eq("is_active", true)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    throw new Error(`Failed to fetch products: ${error.message}`);
+  if (error || !data) {
+    return [];
   }
 
-  return data ?? [];
+  return (data as unknown as ProductRow[]).map(mapRowToProduct);
 }
 
-export async function getProductById(id: string) {
+export async function getProductsByCategory(categorySlug: string): Promise<Product[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("products")
-    .select(`
-      id,
-      category_id,
-      name,
-      slug,
-      short_description,
-      description,
-      price,
-      compare_at_price,
-      stock,
-      sku,
-      rating,
-      review_count,
-      is_active,
-      is_featured,
-      is_bestseller,
-      seo_title,
-      seo_description,
-      created_at,
-      updated_at
-    `)
-    .eq("id", id)
+  const { data: category } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("slug", categorySlug)
     .maybeSingle();
 
-  if (error) {
-    throw new Error(`Failed to fetch product: ${error.message}`);
+  if (!category) {
+    return [];
   }
 
-  return data;
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_SELECT)
+    .eq("is_active", true)
+    .eq("category_id", category.id)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) {
+    return [];
+  }
+
+  return (data as unknown as ProductRow[]).map(mapRowToProduct);
 }
 
-export async function createProduct(input: ProductInput) {
+export async function getProductBySlug(slug: string): Promise<Product | null> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("products")
-    .insert({
-      category_id: input.category_id,
-      name: input.name,
-      slug: input.slug,
-      short_description: input.short_description ?? null,
-      description: input.description ?? null,
-      price: input.price,
-      compare_at_price: input.compare_at_price ?? null,
-      stock: input.stock ?? 0,
-      sku: input.sku ?? null,
-      rating: input.rating ?? null,
-      review_count: input.review_count ?? 0,
-      is_active: input.is_active ?? true,
-      is_featured: input.is_featured ?? false,
-      is_bestseller: input.is_bestseller ?? false,
-      seo_title: input.seo_title ?? null,
-      seo_description: input.seo_description ?? null,
-    })
-    .select()
-    .single();
+    .select(PRODUCT_SELECT)
+    .eq("is_active", true)
+    .eq("slug", slug)
+    .maybeSingle();
 
-  if (error) {
-    throw new Error(`Failed to create product: ${error.message}`);
+  if (error || !data) {
+    return null;
   }
 
-  return data;
-}
-
-export async function updateProduct(
-  id: string,
-  updates: ProductUpdate
-) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("products")
-    .update(updates)
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to update product: ${error.message}`);
-  }
-
-  return data;
-}
-
-export async function deleteProduct(id: string) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("products")
-    .update({
-      is_active: false,
-    })
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to deactivate product: ${error.message}`);
-  }
-
-  return data;
+  return mapRowToProduct(data as unknown as ProductRow);
 }
