@@ -17,7 +17,7 @@ export default function TestimonialsSection({
   if (testimonials.length === 0) return null;
 
   return (
-    <section className="px-4 py-12 sm:px-6 sm:py-16">
+    <section className="px-4 pb-8 pt-2 sm:px-6 sm:pb-10">
       <div className="mx-auto max-w-7xl">
         <div className="text-center">
           <p style={{ color: "var(--astro-accent)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
