@@ -60,18 +60,35 @@ export default function CategoryPage({
         )}
 
         <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-5 py-10 sm:px-8 sm:py-14">
-          <Link
-            href="/"
-            style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-            className="inline-flex h-10 w-fit items-center gap-2 rounded-full px-5 text-xs font-semibold transition hover:opacity-90"
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M19 12H5M11 6l-6 6 6 6" />
-            </svg>
-            Back to Home
-          </Link>
+          {/* BREADCRUMB — same style as the product page */}
+          <nav aria-label="Breadcrumb">
+            <ol className="flex items-center gap-1.5 whitespace-nowrap text-[12px] sm:text-[13px]">
+              <li>
+                <Link href="/" style={{ color: "var(--astro-mauve)" }} className="transition hover:opacity-75">
+                  Home
+                </Link>
+              </li>
+              <li aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-3 w-3 opacity-60"
+                  style={{ color: "var(--astro-mauve)" }}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 6l6 6-6 6" />
+                </svg>
+              </li>
+              <li style={{ color: "var(--astro-text)" }} className="font-medium" aria-current="page">
+                {resolvedTitle}
+              </li>
+            </ol>
+          </nav>
 
-          <div className="mt-7 max-w-[70%] sm:max-w-sm lg:max-w-md">
+          <div className="mt-6 max-w-[70%] sm:max-w-sm lg:max-w-md">
             <p style={{ color: "var(--astro-accent)" }} className="text-[10px] font-semibold uppercase tracking-[0.2em]">
               ASTRODISHA Collection
             </p>
@@ -113,7 +130,7 @@ export default function CategoryPage({
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
                 <path d={WHATSAPP_ICON_PATH} />
               </svg>
-              Ask When It's Available
+              Ask When It&apos;s Available
             </a>
           </div>
         ) : (
