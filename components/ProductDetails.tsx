@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import ProductCard from "./ProductCard";
 import type { Product, PdpCertificate } from "./ProductCard";
 import { useStore } from "./StoreProvider";
 import { WHATSAPP_NUMBER, WHATSAPP_ICON_PATH } from "@/lib/site";
@@ -413,7 +414,7 @@ const CERT_LABELS: { key: keyof PdpCertificate; label: string }[] = [
   { key: "comments", label: "Comments" },
 ];
 
-export default function ProductDetails({ product }: { product: Product }) {
+export default function ProductDetails({ product, related = [] }: { product: Product; related?: Product[] }) {
   const router = useRouter();
   const { cart, addToCart, updateQuantity, showToast, toggleWishlist, isWishlisted } = useStore();
 
@@ -447,6 +448,8 @@ export default function ProductDetails({ product }: { product: Product }) {
   const [reviewText, setReviewText] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewMsg, setReviewMsg] = useState("");
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
 
   useEffect(() => {
     const img = imgRef.current;
@@ -1297,127 +1300,216 @@ export default function ProductDetails({ product }: { product: Product }) {
         </div>
 
         {/* REVIEWS */}
-        <section
-          id="reviews"
-          style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)", scrollMarginTop: "90px" }}
-          className="mt-10 rounded-2xl border p-6 sm:p-8"
-        >
-          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif text-2xl">
-            Customer Reviews
-          </h2>
+        <section id="reviews" style={{ scrollMarginTop: "90px" }} className="mt-10">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <h2 style={{ color: "var(--astro-text)" }} className="astro-serif text-2xl sm:text-[28px]">
+                Customer Reviews
+              </h2>
+              {!reviewsLoading && liveCount > 0 && (
+                <p className="mt-1 flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star key={n} filled={n <= liveStars} className="h-4 w-4" />
+                  ))}
+                  <span style={{ color: "var(--astro-mauve)" }} className="ml-1 text-xs">
+                    {liveAverage.toFixed(1)} · {liveCount} review{liveCount === 1 ? "" : "s"}
+                  </span>
+                </p>
+              )}
+            </div>
+            {liveCount > 1 && (
+              <button
+                type="button"
+                onClick={() => setShowAllReviews((v) => !v)}
+                style={{ color: "var(--astro-primary)" }}
+                className="flex shrink-0 items-center gap-1 text-[13px] font-semibold"
+              >
+                {showAllReviews ? "Show Less" : "See All"}
+                <ChevronIcon direction="right" className={`h-3.5 w-3.5 transition-transform ${showAllReviews ? "-rotate-90" : ""}`} />
+              </button>
+            )}
+          </div>
 
           {reviewsLoading ? (
-            <p style={{ color: "var(--astro-mauve)" }} className="mt-3 text-sm">
+            <p style={{ color: "var(--astro-mauve)" }} className="mt-4 text-sm">
               Loading reviews...
             </p>
           ) : liveCount > 0 ? (
-            <>
-              <div className="mt-4 flex items-center gap-4">
-                <span style={{ color: "var(--astro-primary)" }} className="text-4xl font-bold">
-                  {liveAverage.toFixed(1)}
-                </span>
-                <div>
-                  <p className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <Star key={n} filled={n <= liveStars} className="h-4 w-4" />
-                    ))}
-                  </p>
-                  <p style={{ color: "var(--astro-mauve)" }} className="text-xs">
-                    Based on {liveCount} review{liveCount === 1 ? "" : "s"}
-                  </p>
-                </div>
-              </div>
-
-              <div style={{ borderColor: "var(--astro-border)" }} className="mt-6 divide-y">
-                {reviews.map((r) => (
-                  <div key={r.id} className="py-4 first:pt-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <p style={{ color: "var(--astro-text)" }} className="astro-serif text-sm">
-                        {r.customer_name}
-                      </p>
-                      <p style={{ color: "var(--astro-mauve)" }} className="text-[11px]">
-                        {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+            <div
+              className={
+                showAllReviews
+                  ? "mt-4 space-y-3"
+                  : "no-scrollbar -mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0"
+              }
+            >
+              {reviews.map((r) => (
+                <article
+                  key={r.id}
+                  style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
+                  className={`rounded-2xl border p-4 ${showAllReviews ? "" : "w-[86%] shrink-0 snap-start sm:w-[380px]"}`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      style={{ backgroundColor: "rgba(182,155,238,0.28)", color: "var(--astro-primary)" }}
+                      className="astro-serif flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base font-semibold"
+                      aria-hidden="true"
+                    >
+                      {(r.customer_name.trim()[0] || "A").toUpperCase()}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <p style={{ color: "var(--astro-text)" }} className="truncate text-sm font-semibold">
+                          {r.customer_name}
+                        </p>
+                        <p style={{ color: "var(--astro-mauve)" }} className="shrink-0 text-[11px]">
+                          {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                        </p>
+                      </div>
+                      <p className="mt-0.5 flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <Star key={n} filled={n <= r.rating} className="h-3.5 w-3.5" />
+                        ))}
+                        <span style={{ color: "var(--astro-mauve)" }} className="ml-1 text-[11px]">
+                          {r.rating.toFixed(1)}
+                        </span>
                       </p>
                     </div>
-                    <p className="mt-1 flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <Star key={n} filled={n <= r.rating} className="h-3.5 w-3.5" />
-                      ))}
-                    </p>
-                    {r.review_text && (
-                      <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 text-sm leading-6">
+                  </div>
+
+                  {r.review_text && (
+                    <div className="mt-3 flex items-start gap-3">
+                      <p
+                        style={{ color: "var(--astro-mauve)" }}
+                        className={`min-w-0 flex-1 text-[13.5px] leading-[1.55] ${showAllReviews ? "" : "line-clamp-4"}`}
+                      >
                         {r.review_text}
                       </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p style={{ color: "var(--astro-mauve)" }} className="mt-3 text-sm">
-              No reviews yet. Be the first to review this product.
-            </p>
-          )}
-
-          {/* WRITE A REVIEW */}
-          <form
-            onSubmit={handleSubmitReview}
-            style={{ borderColor: "var(--astro-border)" }}
-            className="mt-8 border-t pt-6"
-          >
-            <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-lg">
-              Write a Review
-            </h3>
-
-            <div className="mt-3 flex gap-1">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  aria-label={`Rate ${n} star${n === 1 ? "" : "s"}`}
-                  onClick={() => setReviewRating(n)}
-                >
-                  <Star filled={n <= reviewRating} className="h-7 w-7" />
-                </button>
+                      <img
+                        src={product.image}
+                        alt=""
+                        loading="lazy"
+                        className="h-14 w-14 shrink-0 rounded-lg object-cover"
+                      />
+                    </div>
+                  )}
+                </article>
               ))}
             </div>
-
-            <input
-              type="text"
-              value={reviewerName}
-              onChange={(e) => setReviewerName(e.target.value)}
-              placeholder="Your name"
-              style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-bg)", color: "var(--astro-text)" }}
-              className="mt-3 h-11 w-full rounded-lg border px-3 text-sm outline-none"
-            />
-
-            <textarea
-              value={reviewText}
-              onChange={(e) => setReviewText(e.target.value)}
-              placeholder="Share your experience with this product (optional)"
-              style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-bg)", color: "var(--astro-text)" }}
-              className="mt-3 min-h-[80px] w-full rounded-lg border p-3 text-sm outline-none"
-            />
-
-            {reviewMsg && (
-              <p
-                style={{ color: reviewMsg.startsWith("Thank") ? "var(--astro-accent)" : "#B00020" }}
-                className="mt-2 text-xs font-semibold"
-              >
-                {reviewMsg}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={submittingReview}
-              style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-              className="mt-4 h-11 rounded-full px-6 text-sm font-semibold transition hover:opacity-90 disabled:opacity-60"
+          ) : (
+            <div
+              style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
+              className="mt-4 rounded-2xl border p-5 text-center"
             >
-              {submittingReview ? "Submitting..." : "Submit Review"}
+              <p style={{ color: "var(--astro-mauve)" }} className="text-sm">
+                No reviews yet. Be the first to review this product.
+              </p>
+            </div>
+          )}
+
+          {/* WRITE A REVIEW — opens on tap */}
+          <div
+            style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
+            className="mt-4 overflow-hidden rounded-2xl border"
+          >
+            <button
+              type="button"
+              onClick={() => setShowReviewForm((v) => !v)}
+              aria-expanded={showReviewForm}
+              className="flex w-full items-center justify-between px-4 py-3.5 text-left sm:px-5"
+            >
+              <span style={{ color: "var(--astro-text)" }} className="astro-serif text-[17px]">
+                Write a Review
+              </span>
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5 transition-transform duration-200"
+                style={{ color: "var(--astro-primary)", transform: showReviewForm ? "rotate(180deg)" : "rotate(0deg)" }}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
             </button>
-          </form>
+
+            {showReviewForm && (
+              <form onSubmit={handleSubmitReview} className="px-4 pb-5 sm:px-5">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      aria-label={`Rate ${n} star${n === 1 ? "" : "s"}`}
+                      onClick={() => setReviewRating(n)}
+                    >
+                      <Star filled={n <= reviewRating} className="h-7 w-7" />
+                    </button>
+                  ))}
+                </div>
+
+                <input
+                  type="text"
+                  value={reviewerName}
+                  onChange={(e) => setReviewerName(e.target.value)}
+                  placeholder="Your name"
+                  style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-bg)", color: "var(--astro-text)" }}
+                  className="mt-3 h-11 w-full rounded-lg border px-3 text-sm outline-none"
+                />
+
+                <textarea
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  placeholder="Share your experience with this product (optional)"
+                  style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-bg)", color: "var(--astro-text)" }}
+                  className="mt-3 min-h-[80px] w-full rounded-lg border p-3 text-sm outline-none"
+                />
+
+                <button
+                  type="submit"
+                  disabled={submittingReview}
+                  style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+                  className="mt-4 h-11 rounded-full px-6 text-sm font-semibold transition hover:opacity-90 disabled:opacity-60"
+                >
+                  {submittingReview ? "Submitting..." : "Submit Review"}
+                </button>
+              </form>
+            )}
+          </div>
+
+          {reviewMsg && (
+            <p
+              style={{ color: reviewMsg.startsWith("Thank") ? "var(--astro-accent)" : "#B00020" }}
+              className="mt-2 text-xs font-semibold"
+            >
+              {reviewMsg}
+            </p>
+          )}
         </section>
+
+        {/* YOU MAY ALSO LIKE */}
+        {related.length > 0 && (
+          <section className="mt-10">
+            <div className="flex items-end justify-between gap-3">
+              <h2 style={{ color: "var(--astro-text)" }} className="astro-serif text-2xl sm:text-[28px]">
+                You May Also Like
+              </h2>
+              <Link href={categoryHref} style={{ color: "var(--astro-primary)" }} className="flex shrink-0 items-center gap-1 text-[13px] font-semibold">
+                View All
+                <ChevronIcon direction="right" className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+            <div className="no-scrollbar -mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+              {related.map((item) => (
+                <div key={item.id} className="flex w-[62%] shrink-0 snap-start sm:w-[260px]">
+                  <ProductCard product={item} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       {/* LIGHTBOX — full-screen viewer with swipe + tap-to-zoom */}
@@ -1507,4 +1599,4 @@ export default function ProductDetails({ product }: { product: Product }) {
       )}
     </main>
   );
-}
+      }
