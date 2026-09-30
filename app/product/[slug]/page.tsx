@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductDetails from "@/components/ProductDetails";
-import { getProductBySlug } from "@/lib/getProducts";
+import { getProductBySlug, getRelatedProducts } from "@/lib/getProducts";
 
 export default async function ProductPage({
   params
@@ -43,11 +43,13 @@ export default async function ProductPage({
     );
   }
 
+  const related = await getRelatedProducts(product);
+
   return (
     <>
       <Header />
 
-      <ProductDetails product={product} />
+      <ProductDetails product={product} related={related} />
     </>
   );
 }
