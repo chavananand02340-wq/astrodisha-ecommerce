@@ -526,8 +526,6 @@ function ProductsContent() {
 
           <FeaturedCheckbox checked={isFeatured} onChange={setIsFeatured} />
 
-          <SpecsEditor specs={specs} onChange={setSpecs} />
-
           <PdpEditor
             value={pdp}
             onChange={setPdp}
@@ -666,8 +664,6 @@ function ProductsContent() {
                   />
 
                   <FeaturedCheckbox checked={editFeatured} onChange={setEditFeatured} />
-
-                  <SpecsEditor specs={editSpecs} onChange={setEditSpecs} />
 
                   <PdpEditor
                     value={editPdp}
@@ -932,97 +928,6 @@ function FeaturedCheckbox({
         </span>
       </span>
     </label>
-  );
-}
-
-function SpecsEditor({
-  specs,
-  onChange,
-}: {
-  specs: SpecRow[];
-  onChange: (rows: SpecRow[]) => void;
-}) {
-  function updateRow(index: number, field: "key" | "value", value: string) {
-    const next = specs.map((row, i) => (i === index ? { ...row, [field]: value } : row));
-    onChange(next);
-  }
-
-  function addRow() {
-    onChange([...specs, { key: "", value: "" }]);
-  }
-
-  function removeRow(index: number) {
-    onChange(specs.filter((_, i) => i !== index));
-  }
-
-  return (
-    <div
-      style={{
-        marginBottom: "1rem",
-        padding: "0.75rem",
-        border: "1px solid #D9CEC1",
-        borderRadius: "6px",
-        backgroundColor: "#fff",
-      }}
-    >
-      <p style={{ fontWeight: "bold", color: "#3E2237", fontSize: "0.9rem", marginBottom: "0.6rem" }}>
-        Product Specifications
-      </p>
-      <p style={{ color: "#8A607A", fontSize: "0.75rem", marginBottom: "0.75rem" }}>
-        Shown on the product page as an expandable list (e.g. Origin, Planet, Colour, Shape, Cut).
-      </p>
-
-      {specs.map((row, i) => (
-        <div key={i} style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
-          <input
-            type="text"
-            placeholder="Label (e.g. Origin)"
-            value={row.key}
-            onChange={(e) => updateRow(i, "key", e.target.value)}
-            style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
-          />
-          <input
-            type="text"
-            placeholder="Value (e.g. Brazil)"
-            value={row.value}
-            onChange={(e) => updateRow(i, "value", e.target.value)}
-            style={{ ...inputStyle, marginBottom: 0, flex: 1 }}
-          />
-          <button
-            type="button"
-            onClick={() => removeRow(i)}
-            style={{
-              background: "none",
-              border: "1px solid #D9CEC1",
-              borderRadius: "4px",
-              color: "#B00020",
-              padding: "0 0.7rem",
-              cursor: "pointer",
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      ))}
-
-      <button
-        type="button"
-        onClick={addRow}
-        className="transition hover:opacity-85"
-        style={{
-          marginTop: "0.25rem",
-          backgroundColor: "#8A607A",
-          color: "#fff",
-          border: "none",
-          borderRadius: "4px",
-          padding: "0.4rem 0.9rem",
-          fontSize: "0.8rem",
-          cursor: "pointer",
-        }}
-      >
-        + Add Specification
-      </button>
-    </div>
   );
 }
 
