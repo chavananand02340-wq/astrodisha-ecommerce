@@ -149,3 +149,45 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 
   return mapRowToProductDetail(data as unknown as ProductDetailRow);
 }
+
+// "You May Also Like": same category first, topped up with newest products if the category is small.
+export async function getRelatedProducts(product: Product, limit = 8): Promise<Product[]> {
+  const supabase = await createClient();
+  let items: Product[] = [];
+
+  if (product.categorySlug) {
+    const { data: category } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("slug", product.categorySlug)
+      .maybeSingle();
+
+    if (category) {
+      const { data } = await supabase
+        .from("products")
+        .select(PRODUCT_SELECT)
+        .eq("is_active", true)
+        .eq("category_id", category.id)
+        .neq("id", product.id)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+
+      items = ((data || []) as unknown as ProductRow[]).map(mapRowToProduct);
+    }
+  }
+
+  if (items.length < 4) {
+    const excludeIds = [product.id, ...items.map((p) => p.id)];
+    const { data } = await supabase
+      .from("products")
+      .select(PRODUCT_SELECT)
+      .eq("is_active", true)
+      .not("id", "in", `(${excludeIds.join(",")})`)
+      .order("created_at", { ascending: false })
+      .limit(limit - items.length);
+
+    items = [...items, ...((data || []) as unknown as ProductRow[]).map(mapRowToProduct)];
+  }
+
+  return items;
+}
