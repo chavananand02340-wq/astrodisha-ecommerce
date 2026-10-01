@@ -5,6 +5,7 @@ import {
   REGISTERED_ADDRESS,
   SUPPORT_EMAIL,
   SUPPORT_WHATSAPP_DISPLAY,
+  WEBSITE_DOMAIN,
 } from "@/lib/legal-info";
 
 export const metadata: Metadata = {
@@ -26,10 +27,10 @@ function Section({ heading, children }: { heading: string; children: React.React
 
 export default function PrivacyPolicyPage() {
   return (
-    <LegalPageLayout title="Privacy Policy" lastUpdated="26 September 2026">
+    <LegalPageLayout title="Privacy Policy" lastUpdated="1 October 2026">
       <p style={{ color: "var(--astro-mauve)" }} className="mb-7">
         This Privacy Policy explains how {LEGAL_NAME} ("we", "us", "our") collects, uses,
-        and protects your information when you use our website theastrosoul.in.
+        and protects your information when you use our website {WEBSITE_DOMAIN}.
       </p>
 
       <Section heading="Information We Collect">
