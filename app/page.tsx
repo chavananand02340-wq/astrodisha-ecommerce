@@ -111,9 +111,12 @@ const HERO_MOBILE = "/images/hero-mobile-2-1.webp";
 const HERO_DESKTOP = "/images/hero-desktop.webp";
 const HERO_FALLBACK = "linear-gradient(150deg, #f7efe3 0%, #f0dcc2 55%, #e7cba7 100%)";
 
-/* Homepage "Shop by Category" photos are LOCKED here (files in public/images/).
-   Changing a category photo in admin only changes that category page's banner.
-   A category not listed here (e.g. a new one added from admin) falls back to its admin photo. */
+/* Default homepage "Shop by Category" photos (files in public/images/).
+   Order used on the homepage card:
+   1) "Homepage card photo" uploaded in admin (categories.home_image_url)
+   2) this default WebP
+   3) the category page banner (categories.image_url)
+   The category page banner is never changed by the homepage photo, and vice versa. */
 const HOME_CATEGORY_IMAGES: Record<string, string> = {
   gemstones: "/images/category-gemstones.webp",
   crystals: "/images/category-crystals.webp",
@@ -174,7 +177,7 @@ export default async function HomePage() {
   const supabase = await createClient();
   const { data: categoriesData } = await supabase
     .from("categories")
-    .select("name, slug, description, image_url")
+    .select("name, slug, description, image_url, home_image_url")
     .eq("is_active", true)
     .order("display_order", { ascending: true });
 
@@ -182,7 +185,8 @@ export default async function HomePage() {
     name: c.name,
     slug: c.slug,
     description: c.description || "",
-    image: HOME_CATEGORY_IMAGES[c.slug] || c.image_url || "/images/placeholder-product.svg",
+    // Homepage card photo from admin → our default WebP → category banner
+    image: c.home_image_url || HOME_CATEGORY_IMAGES[c.slug] || c.image_url || "/images/placeholder-product.svg",
   }));
 
   // An active banner (festival etc.) set in admin overrides the default hero photo
@@ -390,7 +394,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {/* Horizontal scroll row — categories come live from Supabase, photos locked above */}
+          {/* Horizontal scroll row — categories come live from Supabase */}
           <div className="no-scrollbar flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:scroll-px-6 sm:gap-5 sm:px-6">
             {categories.map((category) => (
               <Link
@@ -627,4 +631,4 @@ export default async function HomePage() {
       </a>
     </main>
   );
-}
+    }
