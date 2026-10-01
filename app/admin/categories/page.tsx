@@ -10,6 +10,7 @@ type CategoryRow = {
   slug: string;
   description: string | null;
   image_url: string | null;
+  home_image_url: string | null;
   display_order: number;
   is_active: boolean;
 };
@@ -23,6 +24,10 @@ const RESERVED_SLUGS = [
   "shipping-delivery",
 ];
 
+// Photo sizes after compression (longest side, in pixels)
+const BANNER_MAX_SIZE = 1200; // category page banner
+const HOME_CARD_MAX_SIZE = 800; // small homepage "Shop by Category" card
+
 function slugify(text: string) {
   return text
     .toLowerCase()
@@ -31,7 +36,7 @@ function slugify(text: string) {
     .replace(/(^-|-$)+/g, "");
 }
 
-function compressImage(file: File): Promise<Blob> {
+function compressImage(file: File, maxDimension: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();
@@ -41,7 +46,6 @@ function compressImage(file: File): Promise<Blob> {
     };
 
     img.onload = () => {
-      const maxDimension = 1200;
       let { width, height } = img;
 
       if (width > height && width > maxDimension) {
@@ -93,6 +97,7 @@ function CategoriesContent() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [homeImageFile, setHomeImageFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Edit
@@ -100,13 +105,15 @@ function CategoriesContent() {
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [editHomeImageFile, setEditHomeImageFile] = useState<File | null>(null);
+  const [editUseDefaultHome, setEditUseDefaultHome] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
 
   async function loadCategories() {
     setLoading(true);
     const { data, error } = await supabase
       .from("categories")
-      .select("id, name, slug, description, image_url, display_order, is_active")
+      .select("id, name, slug, description, image_url, home_image_url, display_order, is_active")
       .order("display_order", { ascending: true });
 
     if (error) {
@@ -122,13 +129,17 @@ function CategoriesContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function uploadCategoryImage(file: File): Promise<string> {
-    const compressed = await compressImage(file);
-    const fileName = `categories/${Date.now()}-${Math.round(Math.random() * 1e6)}.jpg`;
+  async function uploadCategoryImage(file: File, maxDimension: number, folder: string): Promise<string> {
+    const compressed = await compressImage(file, maxDimension);
+    const fileName = `${folder}/${Date.now()}-${Math.round(Math.random() * 1e6)}.jpg`;
 
     const { error: uploadError } = await supabase.storage
       .from("product-images")
-      .upload(fileName, compressed, { contentType: "image/jpeg" });
+      .upload(fileName, compressed, {
+        contentType: "image/jpeg",
+        // Every upload gets a new file name, so it is safe to let browsers cache it for a year
+        cacheControl: "31536000",
+      });
 
     if (uploadError) {
       throw new Error(uploadError.message);
@@ -148,7 +159,7 @@ function CategoriesContent() {
     }
 
     if (!imageFile) {
-      setStatusMsg("Please choose a photo for this category.");
+      setStatusMsg("Please choose a category page banner photo.");
       return;
     }
 
@@ -172,7 +183,11 @@ function CategoriesContent() {
     setSubmitting(true);
 
     try {
-      const imageUrl = await uploadCategoryImage(imageFile);
+      const imageUrl = await uploadCategoryImage(imageFile, BANNER_MAX_SIZE, "categories");
+      const homeImageUrl = homeImageFile
+        ? await uploadCategoryImage(homeImageFile, HOME_CARD_MAX_SIZE, "categories-home")
+        : null;
+
       const nextOrder =
         categories.length > 0 ? Math.max(...categories.map((c) => c.display_order)) + 1 : 1;
 
@@ -181,6 +196,7 @@ function CategoriesContent() {
         slug,
         description: description.trim(),
         image_url: imageUrl,
+        home_image_url: homeImageUrl,
         display_order: nextOrder,
         is_active: true,
       });
@@ -194,6 +210,7 @@ function CategoriesContent() {
       setName("");
       setDescription("");
       setImageFile(null);
+      setHomeImageFile(null);
       setStatusMsg(`Category added. It's live at /${slug}`);
       await loadCategories();
     } catch (err) {
@@ -208,6 +225,8 @@ function CategoriesContent() {
     setEditName(cat.name);
     setEditDescription(cat.description || "");
     setEditImageFile(null);
+    setEditHomeImageFile(null);
+    setEditUseDefaultHome(false);
     setStatusMsg("");
   }
 
@@ -224,10 +243,19 @@ function CategoriesContent() {
     setSavingEdit(true);
 
     try {
+      // Category page banner — only changes if a new banner was chosen
       let imageUrl = cat.image_url;
       if (editImageFile) {
-        imageUrl = await uploadCategoryImage(editImageFile);
+        imageUrl = await uploadCategoryImage(editImageFile, BANNER_MAX_SIZE, "categories");
         // Note: the old photo stays in storage (not auto-deleted) to keep this safe and simple.
+      }
+
+      // Homepage card photo — completely separate from the banner
+      let homeImageUrl = cat.home_image_url;
+      if (editUseDefaultHome) {
+        homeImageUrl = null;
+      } else if (editHomeImageFile) {
+        homeImageUrl = await uploadCategoryImage(editHomeImageFile, HOME_CARD_MAX_SIZE, "categories-home");
       }
 
       const { error } = await supabase
@@ -236,6 +264,7 @@ function CategoriesContent() {
           name: editName.trim(),
           description: editDescription.trim(),
           image_url: imageUrl,
+          home_image_url: homeImageUrl,
         })
         .eq("id", cat.id);
 
@@ -346,13 +375,23 @@ function CategoriesContent() {
             style={{ ...inputStyle, minHeight: "60px" }}
           />
 
-          <label style={{ display: "block", fontSize: "0.85rem", color: "#3E2237", marginBottom: "0.4rem" }}>
-            Category photo
-          </label>
+          <label style={labelStyle}>Category page banner photo (required)</label>
+          <p style={hintStyle}>Shown at the top of this category's own page.</p>
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+            style={{ marginBottom: "1rem" }}
+          />
+
+          <label style={labelStyle}>Homepage card photo (optional)</label>
+          <p style={hintStyle}>
+            Shown on the homepage &quot;Shop by Category&quot; card. If left empty, the banner photo is used there.
+          </p>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setHomeImageFile(e.target.files?.[0] || null)}
             style={{ marginBottom: "1rem" }}
           />
 
@@ -411,16 +450,40 @@ function CategoriesContent() {
                     onChange={(e) => setEditDescription(e.target.value)}
                     style={{ ...inputStyle, minHeight: "60px" }}
                   />
-                  <label style={{ display: "block", fontSize: "0.8rem", color: "#3E2237", marginBottom: "0.4rem" }}>
-                    Replace photo (optional)
-                  </label>
+
+                  <label style={labelStyle}>Replace category page banner (optional)</label>
+                  <p style={hintStyle}>Only changes the banner on /{cat.slug}. The homepage card is not affected.</p>
                   <input
                     type="file"
                     accept="image/*"
                     onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
-                    style={{ marginBottom: "0.75rem" }}
+                    style={{ marginBottom: "1rem" }}
                   />
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
+
+                  <label style={labelStyle}>Replace homepage card photo (optional)</label>
+                  <p style={hintStyle}>Only changes the homepage &quot;Shop by Category&quot; card. The banner is not affected.</p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={editUseDefaultHome}
+                    onChange={(e) => setEditHomeImageFile(e.target.files?.[0] || null)}
+                    style={{ marginBottom: "0.5rem" }}
+                  />
+                  {cat.home_image_url && (
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#3E2237", marginBottom: "0.75rem" }}>
+                      <input
+                        type="checkbox"
+                        checked={editUseDefaultHome}
+                        onChange={(e) => {
+                          setEditUseDefaultHome(e.target.checked);
+                          if (e.target.checked) setEditHomeImageFile(null);
+                        }}
+                      />
+                      Remove custom homepage photo (use the default one again)
+                    </label>
+                  )}
+
+                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
                     <button
                       onClick={() => saveEdit(cat)}
                       disabled={savingEdit}
@@ -438,13 +501,46 @@ function CategoriesContent() {
                 </div>
               ) : (
                 <div style={{ display: "flex", gap: "0.9rem", alignItems: "flex-start", flexWrap: "wrap" }}>
-                  {cat.image_url && (
-                    <img
-                      src={cat.image_url}
-                      alt=""
-                      style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", flexShrink: 0 }}
-                    />
-                  )}
+                  <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+                    {cat.image_url && (
+                      <div style={{ textAlign: "center" }}>
+                        <img
+                          src={cat.image_url}
+                          alt=""
+                          style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", display: "block" }}
+                        />
+                        <span style={thumbLabelStyle}>Banner</span>
+                      </div>
+                    )}
+                    <div style={{ textAlign: "center" }}>
+                      {cat.home_image_url ? (
+                        <img
+                          src={cat.home_image_url}
+                          alt=""
+                          style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", display: "block" }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: "70px",
+                            height: "70px",
+                            borderRadius: "8px",
+                            border: "1px dashed #D9CEC1",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "0.65rem",
+                            color: "#8A607A",
+                            textAlign: "center",
+                            padding: "0.25rem",
+                          }}
+                        >
+                          Default
+                        </div>
+                      )}
+                      <span style={thumbLabelStyle}>Home card</span>
+                    </div>
+                  </div>
                   <div style={{ flex: 1, minWidth: "180px" }}>
                     <div style={{ fontWeight: "bold", color: "#3E2237", display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                       {cat.name}
@@ -510,4 +606,26 @@ const inputStyle: React.CSSProperties = {
   border: "1px solid #D9CEC1",
   borderRadius: "4px",
   backgroundColor: "#fff",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "0.85rem",
+  fontWeight: "bold",
+  color: "#3E2237",
+  marginBottom: "0.2rem",
+};
+
+const hintStyle: React.CSSProperties = {
+  fontSize: "0.75rem",
+  color: "#8A607A",
+  marginTop: 0,
+  marginBottom: "0.4rem",
+};
+
+const thumbLabelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "0.65rem",
+  color: "#8A607A",
+  marginTop: "0.2rem",
 };
