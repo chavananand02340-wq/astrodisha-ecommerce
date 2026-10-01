@@ -111,6 +111,18 @@ const HERO_MOBILE = "/images/hero-mobile-2-1.jpg";
 const HERO_DESKTOP = "/images/hero-desktop.jpg";
 const HERO_FALLBACK = "linear-gradient(150deg, #f7efe3 0%, #f0dcc2 55%, #e7cba7 100%)";
 
+/* Homepage "Shop by Category" photos are LOCKED here (files in public/images/).
+   Changing a category photo in admin only changes that category page's banner.
+   A category not listed here (e.g. a new one added from admin) falls back to its admin photo. */
+const HOME_CATEGORY_IMAGES: Record<string, string> = {
+  gemstones: "/images/category-gemstones.jpg",
+  crystals: "/images/category-crystals.jpg",
+  rudraksha: "/images/category-rudraksha.jpg",
+  puja: "/images/category-puja.jpg",
+  "crystal-jewellery": "/images/category-crystal-jewellery.jpg",
+  "divine-products": "/images/category-divine-products.jpg",
+};
+
 /* Journey photos: same idea — public/images/journey-*.jpg */
 const JOURNEY_STEPS = [
   { n: "01", title: "DISCOVER", text: "Find what aligns with you.", icon: ICONS.lotus, img: "/images/journey-1-discover.jpg" },
@@ -170,7 +182,7 @@ export default async function HomePage() {
     name: c.name,
     slug: c.slug,
     description: c.description || "",
-    image: c.image_url || "/images/placeholder-product.svg",
+    image: HOME_CATEGORY_IMAGES[c.slug] || c.image_url || "/images/placeholder-product.svg",
   }));
 
   // An active banner (festival etc.) set in admin overrides the default hero photo
@@ -361,7 +373,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {/* Horizontal scroll row — categories come live from Supabase */}
+          {/* Horizontal scroll row — categories come live from Supabase, photos locked above */}
           <div className="no-scrollbar flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:scroll-px-6 sm:gap-5 sm:px-6">
             {categories.map((category) => (
               <Link
@@ -597,4 +609,4 @@ export default async function HomePage() {
       </a>
     </main>
   );
-      }
+    }
