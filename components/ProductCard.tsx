@@ -96,6 +96,8 @@ export default function ProductCard({
             ref={imgRef}
             src={product.image}
             alt={`${product.name} - ${product.category}`}
+            loading="lazy"
+            decoding="async"
             className={`product-image h-full w-full object-cover transition-opacity duration-300 ${
               imageLoaded ? "opacity-100" : "opacity-0"
             } ${outOfStock ? "opacity-70 grayscale-[30%]" : ""}`}
@@ -225,4 +227,4 @@ export default function ProductCard({
       </div>
     </article>
   );
-}
+                }
