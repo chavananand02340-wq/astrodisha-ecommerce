@@ -105,32 +105,32 @@ function WhatsAppIcon({ className }: { className: string }) {
   );
 }
 
-/* Hero photos: drop these files into public/images/ — until then the
+/* Hero photos (compressed WebP in public/images/) — until a file exists the
    cream/gold gradient below shows (a missing file simply falls through). */
-const HERO_MOBILE = "/images/hero-mobile-2-1.jpg";
-const HERO_DESKTOP = "/images/hero-desktop.jpg";
+const HERO_MOBILE = "/images/hero-mobile-2-1.webp";
+const HERO_DESKTOP = "/images/hero-desktop.webp";
 const HERO_FALLBACK = "linear-gradient(150deg, #f7efe3 0%, #f0dcc2 55%, #e7cba7 100%)";
 
 /* Homepage "Shop by Category" photos are LOCKED here (files in public/images/).
    Changing a category photo in admin only changes that category page's banner.
    A category not listed here (e.g. a new one added from admin) falls back to its admin photo. */
 const HOME_CATEGORY_IMAGES: Record<string, string> = {
-  gemstones: "/images/category-gemstones.jpg",
-  crystals: "/images/category-crystals.jpg",
-  rudraksha: "/images/category-rudraksha.jpg",
-  puja: "/images/category-puja.jpg",
-  "crystal-jewellery": "/images/category-crystal-jewellery.jpg",
-  "divine-products": "/images/category-divine-products.jpg",
+  gemstones: "/images/category-gemstones.webp",
+  crystals: "/images/category-crystals.webp",
+  rudraksha: "/images/category-rudraksha.webp",
+  puja: "/images/category-puja.webp",
+  "crystal-jewellery": "/images/category-crystal-jewellery.webp",
+  "divine-products": "/images/category-divine-products.webp",
 };
 
-/* Journey photos: same idea — public/images/journey-*.jpg */
+/* Journey photos: compressed WebP in public/images/ */
 const JOURNEY_STEPS = [
-  { n: "01", title: "DISCOVER", text: "Find what aligns with you.", icon: ICONS.lotus, img: "/images/journey-1-discover.jpg" },
-  { n: "02", title: "AUTHENTICATE", text: "Tested for authenticity and quality.", icon: ICONS.gem, img: "/images/journey-2-authenticate.jpg" },
-  { n: "03", title: "PURIFY", text: "Cleansed with traditional shuddhi process.", icon: ICONS.droplet, img: "/images/journey-3-purify.jpg" },
-  { n: "04", title: "CONSECRATE", text: "Energised with mantra and sankalp.", icon: ICONS.flame, img: "/images/journey-4-consecrate.jpg" },
-  { n: "05", title: "DELIVER", text: "Carefully packed and delivered to your doorstep.", icon: ICONS.truck, img: "/images/journey-5-deliver.jpg" },
-  { n: "06", title: "ALIGN", text: "Guidance on how to wear and use for best results.", icon: ICONS.book, img: "/images/journey-6-align-ring.jpg" },
+  { n: "01", title: "DISCOVER", text: "Find what aligns with you.", icon: ICONS.lotus, img: "/images/journey-1-discover.webp" },
+  { n: "02", title: "AUTHENTICATE", text: "Tested for authenticity and quality.", icon: ICONS.gem, img: "/images/journey-2-authenticate.webp" },
+  { n: "03", title: "PURIFY", text: "Cleansed with traditional shuddhi process.", icon: ICONS.droplet, img: "/images/journey-3-purify.webp" },
+  { n: "04", title: "CONSECRATE", text: "Energised with mantra and sankalp.", icon: ICONS.flame, img: "/images/journey-4-consecrate.webp" },
+  { n: "05", title: "DELIVER", text: "Carefully packed and delivered to your doorstep.", icon: ICONS.truck, img: "/images/journey-5-deliver.webp" },
+  { n: "06", title: "ALIGN", text: "Guidance on how to wear and use for best results.", icon: ICONS.book, img: "/images/journey-6-align-ring.webp" },
 ];
 
 const WHY_ITEMS = [
@@ -191,6 +191,23 @@ export default async function HomePage() {
 
   return (
     <main style={{ backgroundColor: "var(--astro-bg)" }} className="min-h-screen">
+      {/* The hero photo is the largest thing on screen: tell the browser to fetch it first.
+          Each screen size downloads only its own photo. */}
+      <link
+        rel="preload"
+        as="image"
+        href={heroMobileImage}
+        media="(max-width: 767px)"
+        fetchPriority="high"
+      />
+      <link
+        rel="preload"
+        as="image"
+        href={heroDesktopImage}
+        media="(min-width: 768px)"
+        fetchPriority="high"
+      />
+
       <Header />
 
       {/* HERO — photo behind, text on a soft cream fade (mobile-first) */}
@@ -610,4 +627,4 @@ export default async function HomePage() {
       </a>
     </main>
   );
-    }
+}
