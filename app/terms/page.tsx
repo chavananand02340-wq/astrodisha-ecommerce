@@ -7,6 +7,7 @@ import {
   JURISDICTION,
   SUPPORT_EMAIL,
   SUPPORT_WHATSAPP_DISPLAY,
+  WEBSITE_DOMAIN,
 } from "@/lib/legal-info";
 
 export const metadata: Metadata = {
@@ -28,9 +29,9 @@ function Section({ heading, children }: { heading: string; children: React.React
 
 export default function TermsPage() {
   return (
-    <LegalPageLayout title="Terms & Conditions" lastUpdated="26 September 2026">
+    <LegalPageLayout title="Terms & Conditions" lastUpdated="1 October 2026">
       <p style={{ color: "var(--astro-mauve)" }} className="mb-7">
-        These Terms & Conditions govern your use of theastrosoul.in, operated by {LEGAL_NAME}
+        These Terms & Conditions govern your use of {WEBSITE_DOMAIN}, operated by {LEGAL_NAME}
         (GSTIN: {GSTIN}). By using this website or placing an order, you agree to these terms.
       </p>
 
