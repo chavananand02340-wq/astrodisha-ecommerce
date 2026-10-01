@@ -11,6 +11,7 @@ import {
   REGISTERED_ADDRESS,
   SUPPORT_EMAIL,
   SUPPORT_WHATSAPP_DISPLAY,
+  WEBSITE_DOMAIN,
 } from "@/lib/legal-info";
 
 export const metadata: Metadata = {
@@ -68,7 +69,7 @@ const FAQS = [
   },
   {
     q: "What is the ASTRODISHA website URL?",
-    a: "theastrosoul.in",
+    a: WEBSITE_DOMAIN,
   },
   {
     q: "What is the customer support email?",
@@ -78,7 +79,7 @@ const FAQS = [
 
 export default function FaqPage() {
   return (
-    <LegalPageLayout title="Frequently Asked Questions" lastUpdated="26 September 2026">
+    <LegalPageLayout title="Frequently Asked Questions" lastUpdated="1 October 2026">
       <div className="flex flex-col gap-6">
         {FAQS.map((item) => (
           <div key={item.q}>
