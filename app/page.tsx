@@ -552,12 +552,13 @@ export default async function HomePage() {
                 Explore
               </p>
 
+              {/* Footer categories come live from Supabase (same list as Shop by Category) */}
               <div className="mt-3 flex flex-col gap-2 text-xs opacity-75">
-                <Link href="/gemstones">Gemstones</Link>
-                <Link href="/crystals">Crystals</Link>
-                <Link href="/crystal-jewellery">Crystal Jewellery</Link>
-                <Link href="/rudraksha">Rudraksha</Link>
-                <Link href="/puja">Puja Essentials</Link>
+                {categories.map((category) => (
+                  <Link key={category.slug} href={`/${category.slug}`}>
+                    {category.name}
+                  </Link>
+                ))}
               </div>
             </div>
 
