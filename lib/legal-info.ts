@@ -10,8 +10,10 @@ export const REGISTERED_ADDRESS =
 
 export const JURISDICTION = "Wardha, Maharashtra";
 
-// Keep in sync with app/contact/page.tsx SUPPORT_EMAIL
-export const SUPPORT_EMAIL = "support@theastrosoul.in";
+// Single source for website name and support email.
+// Contact page, FAQ, Terms and Privacy Policy all read these.
+export const WEBSITE_DOMAIN = "www.astrodisha.shop";
+export const SUPPORT_EMAIL = "support@astrodisha.shop";
 
 export const SUPPORT_WHATSAPP_DISPLAY = "+91 77568 51026";
 
