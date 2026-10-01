@@ -5,6 +5,7 @@ import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/components/StoreProvider";
 import { createClient } from "@/utils/supabase/client";
+import { COD_ADVANCE_AMOUNT } from "@/lib/legal-info";
 
 declare global {
   interface Window {
@@ -36,7 +37,7 @@ export default function CheckoutPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const advanceAmount = 100;
+  const advanceAmount = COD_ADVANCE_AMOUNT;
   const amountAfterDiscount = Math.max(subtotal - appliedDiscount, 0);
 
   async function handlePinCodeChange(value: string) {
@@ -107,72 +108,6 @@ export default function CheckoutPage() {
     setCouponMsg("");
   }
 
-  async function createOrderInDatabase(
-    paymentStatus: string,
-    razorpayPaymentId: string | null,
-    razorpayOrderId: string | null
-  ) {
-    const items = cart.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-    }));
-
-    const { data, error } = await supabase.rpc("place_order", {
-      p_customer_name: name,
-      p_customer_mobile: mobile,
-      p_customer_email: email || null,
-      p_shipping_address: address,
-      p_shipping_city: city,
-      p_shipping_state: state,
-      p_shipping_pin_code: pinCode,
-      p_shipping_country: country,
-      p_payment_method: paymentMethod,
-      p_advance_paid: paymentMethod === "cod" ? advanceAmount : 0,
-      p_items: items,
-      p_coupon_code: appliedDiscount > 0 ? couponCode : null,
-      p_payment_status: paymentStatus,
-      p_razorpay_payment_id: razorpayPaymentId,
-      p_razorpay_order_id: razorpayOrderId,
-    });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    const result = Array.isArray(data) ? data[0] : data;
-
-    if (!result?.out_order_number) {
-      throw new Error("Order was placed but confirmation details are missing.");
-    }
-
-    fetch("/api/send-order-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderNumber: result.out_order_number,
-        customerName: name,
-        customerEmail: email || null,
-        customerMobile: mobile,
-        shippingAddress: address,
-        shippingCity: city,
-        shippingState: state,
-        shippingPinCode: pinCode,
-        subtotal: result.out_subtotal,
-        discountAmount: result.out_discount_amount,
-        deliveryCharge: result.out_delivery_charge,
-        totalAmount: result.out_total_amount,
-        paymentMethod,
-        advancePaid: paymentMethod === "cod" ? advanceAmount : 0,
-        items,
-      }),
-    }).catch(() => {});
-
-    clearCart();
-    router.push(`/order-confirmation/${result.out_order_number}`);
-  }
-
   async function startRazorpayPayment(isAdvanceForCod: boolean) {
     const items = cart.map((item) => ({
       id: item.id,
@@ -188,6 +123,16 @@ export default function CheckoutPage() {
         items,
         couponCode: appliedDiscount > 0 ? couponCode : null,
         isAdvanceForCod,
+        customer: {
+          name,
+          mobile,
+          email,
+          address,
+          city,
+          state,
+          pinCode,
+          country,
+        },
       }),
     });
 
@@ -219,6 +164,7 @@ export default function CheckoutPage() {
       order_id: data.order.id,
       handler: async function (response: any) {
         try {
+          // The server verifies the payment AND creates the order (only once)
           const verifyRes = await fetch("/api/verify-razorpay-payment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -237,7 +183,13 @@ export default function CheckoutPage() {
             return;
           }
 
-          await createOrderInDatabase("Paid", response.razorpay_payment_id, response.razorpay_order_id);
+          if (verifyData.status === "completed" && verifyData.orderNumber) {
+            clearCart();
+            router.push(`/order-confirmation/${verifyData.orderNumber}`);
+            return;
+          }
+
+          throw new Error(verifyData.error || "Order could not be created.");
         } catch (err) {
           console.error("Order creation failed after payment:", err);
           const detail = err instanceof Error ? err.message : "Unknown error";
