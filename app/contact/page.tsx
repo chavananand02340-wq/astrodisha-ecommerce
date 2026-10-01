@@ -1,7 +1,6 @@
 import Header from "@/components/Header";
 import { WHATSAPP_URL, WHATSAPP_ICON_PATH } from "@/lib/site";
-
-const SUPPORT_EMAIL = "support@astrodisha.com";
+import { SUPPORT_EMAIL } from "@/lib/legal-info";
 
 export default function ContactPage() {
   return (
