@@ -1,7 +1,8 @@
 import { Resend } from "resend";
 
-// Change this one line after the client's Resend domain is verified
-const EMAIL_FROM = "ASTRODISHA <onboarding@resend.dev>";
+// Sender for all order emails (domain verified in Resend).
+// Customer replies land in the Titan mailbox for this address.
+const EMAIL_FROM = "ASTRODISHA <support@astrodisha.shop>";
 
 export type OrderEmailItem = {
   name: string;
@@ -126,14 +127,21 @@ export async function sendOrderEmails(d: OrderEmailData) {
     if (error) console.error("Customer email failed:", error);
   }
 
-  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
-  if (adminEmail) {
+  // One or more admin emails, comma separated, e.g. "support@astrodisha.shop, owner@gmail.com"
+  const adminEmails = (process.env.ADMIN_NOTIFICATION_EMAIL || "")
+    .split(",")
+    .map((email) => email.trim())
+    .filter(Boolean);
+
+  if (adminEmails.length > 0) {
     const { error } = await resend.emails.send({
       from: EMAIL_FROM,
-      to: adminEmail,
+      to: adminEmails,
       subject: `New Order Received — ${orderId}`,
       html: adminEmailHtml,
     });
     if (error) console.error("Admin email failed:", error);
+  } else {
+    console.error("ADMIN_NOTIFICATION_EMAIL is missing — admin order email not sent.");
   }
-}
+      }
