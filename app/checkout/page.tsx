@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/components/StoreProvider";
@@ -12,6 +12,13 @@ declare global {
     Razorpay: any;
   }
 }
+
+type Quote = {
+  subtotal: number;
+  discount: number;
+  delivery: number;
+  total: number;
+};
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useStore();
@@ -36,9 +43,70 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Live price breakdown from the database — the same function that decides the Razorpay amount
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const advanceAmount = COD_ADVANCE_AMOUNT;
-  const amountAfterDiscount = Math.max(subtotal - appliedDiscount, 0);
+  const appliedCoupon = appliedDiscount > 0 ? couponCode : null;
+
+  // Fallback (only used for a moment while the quote loads)
+  const fallbackTotal = Math.max(subtotal - appliedDiscount, 0);
+
+  const shownSubtotal = quote ? quote.subtotal : subtotal;
+  const shownDiscount = quote ? quote.discount : appliedDiscount;
+  const orderTotal = quote ? quote.total : fallbackTotal;
+
+  const cartKey = cart.map((item) => `${item.id}:${item.quantity}`).join("|");
+
+  useEffect(() => {
+    if (cart.length === 0) return;
+
+    let cancelled = false;
+
+    async function loadQuote() {
+      setQuoteLoading(true);
+
+      const items = cart.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      }));
+
+      const { data, error } = await supabase.rpc("calculate_order_total", {
+        p_items: items,
+        p_coupon_code: appliedCoupon,
+      });
+
+      if (cancelled) return;
+
+      const result = Array.isArray(data) ? data[0] : data;
+
+      if (error || !result) {
+        setQuote(null);
+      } else if (result.out_error) {
+        setQuote(null);
+        setErrorMsg(result.out_error);
+      } else {
+        setQuote({
+          subtotal: Number(result.out_subtotal),
+          discount: Number(result.out_discount_amount),
+          delivery: Number(result.out_delivery_charge),
+          total: Number(result.out_total_amount),
+        });
+      }
+
+      setQuoteLoading(false);
+    }
+
+    loadQuote();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartKey, appliedCoupon]);
 
   async function handlePinCodeChange(value: string) {
     const digitsOnly = value.replace(/\D/g, "").slice(0, 6);
@@ -121,7 +189,7 @@ export default function CheckoutPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         items,
-        couponCode: appliedDiscount > 0 ? couponCode : null,
+        couponCode: appliedCoupon,
         isAdvanceForCod,
         customer: {
           name,
@@ -144,11 +212,12 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (!isAdvanceForCod) {
+    // Safety check: the amount shown on this page must match what the server will charge
+    if (!isAdvanceForCod && quote) {
       const serverTotal = Number(data.totalAmount);
-      if (Math.abs(serverTotal - amountAfterDiscount) > 1) {
+      if (Math.abs(serverTotal - quote.total) > 1) {
         setErrorMsg(
-          `Your order total has changed to ₹${serverTotal.toLocaleString("en-IN")} (was ₹${amountAfterDiscount.toLocaleString("en-IN")}). Please review your cart and try again.`
+          `Your order total has changed to ₹${serverTotal.toLocaleString("en-IN")} (was ₹${quote.total.toLocaleString("en-IN")}). Please review your cart and try again.`
         );
         setSubmitting(false);
         return;
@@ -275,6 +344,14 @@ export default function CheckoutPage() {
     );
   }
 
+  const rowStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "space-between",
+    color: "var(--astro-text)",
+    marginTop: "0.4rem",
+    fontSize: "0.95rem",
+  };
+
   return (
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
@@ -315,32 +392,35 @@ export default function CheckoutPage() {
 
             <div
               style={{
+                ...rowStyle,
                 borderTop: "1px solid var(--astro-border)",
                 marginTop: "0.75rem",
                 paddingTop: "0.75rem",
-                display: "flex",
-                justifyContent: "space-between",
-                color: "var(--astro-text)",
               }}
             >
               <span>Subtotal</span>
-              <span>₹{subtotal.toLocaleString("en-IN")}</span>
+              <span>₹{shownSubtotal.toLocaleString("en-IN")}</span>
             </div>
 
-            {appliedDiscount > 0 && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  color: "var(--astro-accent)",
-                  marginTop: "0.4rem",
-                  fontWeight: "bold",
-                }}
-              >
+            {shownDiscount > 0 && (
+              <div style={{ ...rowStyle, color: "var(--astro-accent)", fontWeight: "bold" }}>
                 <span>Discount ({couponCode})</span>
-                <span>−₹{appliedDiscount.toLocaleString("en-IN")}</span>
+                <span>−₹{shownDiscount.toLocaleString("en-IN")}</span>
               </div>
             )}
+
+            <div style={rowStyle}>
+              <span>Delivery</span>
+              <span>
+                {quoteLoading && !quote
+                  ? "…"
+                  : quote
+                  ? quote.delivery > 0
+                    ? `₹${quote.delivery.toLocaleString("en-IN")}`
+                    : <span style={{ color: "var(--astro-accent)", fontWeight: "bold" }}>FREE</span>
+                  : "Calculated at payment"}
+              </span>
+            </div>
 
             <div
               style={{
@@ -348,15 +428,19 @@ export default function CheckoutPage() {
                 justifyContent: "space-between",
                 fontWeight: "bold",
                 color: "var(--astro-primary)",
-                marginTop: "0.5rem",
+                marginTop: "0.6rem",
                 fontSize: "1.1rem",
               }}
             >
-              <span>{paymentMethod === "cod" ? "Payable Now" : "Total"}</span>
-              <span>
-                ₹{(paymentMethod === "cod" ? advanceAmount : amountAfterDiscount).toLocaleString("en-IN")}
-              </span>
+              <span>Total</span>
+              <span>₹{orderTotal.toLocaleString("en-IN")}</span>
             </div>
+
+            {paymentMethod === "cod" && (
+              <p style={{ color: "var(--astro-mauve)", fontSize: "0.8rem", marginTop: "0.4rem" }}>
+                Pay ₹{advanceAmount} now online · ₹{Math.max(orderTotal - advanceAmount, 0).toLocaleString("en-IN")} on delivery
+              </p>
+            )}
 
             <div style={{ marginTop: "1.1rem" }}>
               <label style={{ fontSize: "0.85rem", color: "var(--astro-text)", fontWeight: "bold" }}>
@@ -576,30 +660,4 @@ export default function CheckoutPage() {
                 borderRadius: "999px",
                 fontWeight: 600,
                 fontSize: "1rem",
-                cursor: submitting ? "not-allowed" : "pointer",
-              }}
-            >
-              {submitting
-                ? "Processing..."
-                : paymentMethod === "cod"
-                ? `Pay ₹${advanceAmount} & Place Order`
-                : `Pay ₹${amountAfterDiscount.toLocaleString("en-IN")} & Place Order`}
-            </button>
-          </form>
-        </div>
-      </div>
-    </>
-  );
-}
-
-const inputStyle: React.CSSProperties = {
-  display: "block",
-  width: "100%",
-  padding: "0.7rem 0.9rem",
-  marginBottom: "0.75rem",
-  border: "1px solid var(--astro-border)",
-  borderRadius: "10px",
-  backgroundColor: "#fff",
-  color: "#241046",
-  fontSize: "0.95rem",
-};
+                cursor: submi
