@@ -41,7 +41,7 @@ export async function finalizeOrder(
       const { data: checkout } = await supabase
         .from("pending_checkouts")
         .select(
-          "customer_name, customer_mobile, customer_email, shipping_address, shipping_city, shipping_state, shipping_pin_code, payment_method, advance_paid, order_id"
+          "customer_name, customer_mobile, customer_email, shipping_address, shipping_city, shipping_state, shipping_pin_code, payment_method, advance_paid, coupon_code, razorpay_payment_id, order_id"
         )
         .eq("razorpay_order_id", razorpayOrderId)
         .single();
@@ -72,6 +72,8 @@ export async function finalizeOrder(
           totalAmount: Number(row.out_total_amount),
           paymentMethod: checkout.payment_method,
           advancePaid: Number(checkout.advance_paid),
+          couponCode: checkout.coupon_code,
+          paymentId: checkout.razorpay_payment_id || razorpayPaymentId,
           items: lines.map((line) => ({
             name: line.product_name,
             price: Number(line.product_price),
