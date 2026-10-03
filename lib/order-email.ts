@@ -73,31 +73,44 @@ function buildCustomerEmail(d: OrderEmailData) {
   const isCod = d.paymentMethod === "cod";
   const dueOnDelivery = Math.max(Number(d.totalAmount) - Number(d.advancePaid), 0);
 
+  const paymentStatus = isCod ? "ADVANCE PAID" : "PAID";
+  const paymentMethodLabel = isCod ? "Cash on Delivery" : "Online Payment";
+  const deliveryLabel = Number(d.deliveryCharge) > 0 ? `₹${inr(d.deliveryCharge)}` : "FREE";
+
+  const divider = `<div style="border-top:1px solid ${LINE}; margin:22px 0;"></div>`;
+
+  const heading = (title: string) =>
+    `<div style="font-family:Arial,sans-serif; font-size:12px; font-weight:bold; letter-spacing:2px; color:${GOLD}; margin:0 0 10px;">${title}</div>`;
+
+  const row = (label: string, value: string, style = "") =>
+    `<tr><td style="padding:3px 0; font-size:14px; color:${MUTED}; ${style}">${label}</td><td style="padding:3px 0; text-align:right; font-size:14px; color:${TEXT}; ${style}">${value}</td></tr>`;
+
   const itemsHtml = d.items
     .map(
-      (item) => `
-        <tr><td style="padding:10px 0 2px; font-size:15px; color:${TEXT};"><strong>${esc(item.name)}</strong></td></tr>
-        <tr><td style="padding:0; font-size:14px; color:${MUTED};">Quantity: ${esc(item.quantity)}</td></tr>
-        <tr><td style="padding:0 0 10px; font-size:14px; color:${MUTED}; border-bottom:1px solid ${LINE};">
-          Price: ₹${inr(item.price)}${item.quantity > 1 ? ` &nbsp;·&nbsp; Amount: ₹${inr(item.price * item.quantity)}` : ""}
-        </td></tr>`
+      (item, i) => `
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${i > 0 ? `margin-top:10px; padding-top:10px; border-top:1px dashed ${LINE};` : ""}">
+          ${row("Product Name", `<strong>${esc(item.name)}</strong>`)}
+          ${row("Quantity", esc(item.quantity))}
+          ${row("Unit Price", `₹${inr(item.price)}`)}
+        </table>`
     )
     .join("");
 
-  const extraRows = [
-    Number(d.discountAmount) > 0
-      ? `<tr><td style="padding:3px 0; color:${GOLD};">Discount${d.couponCode ? ` (${esc(d.couponCode)})` : ""}</td><td style="padding:3px 0; text-align:right; color:${GOLD};">−₹${inr(d.discountAmount)}</td></tr>`
-      : "",
-    `<tr><td style="padding:3px 0; color:${MUTED};">Delivery</td><td style="padding:3px 0; text-align:right; color:${MUTED};">${Number(d.deliveryCharge) > 0 ? `₹${inr(d.deliveryCharge)}` : "FREE"}</td></tr>`,
-  ].join("");
+  const totalsHtml = `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px; padding-top:10px; border-top:1px solid ${LINE};">
+      ${row("Subtotal", `₹${inr(d.subtotal)}`)}
+      ${Number(d.discountAmount) > 0 ? row(`Discount${d.couponCode ? ` (${esc(d.couponCode)})` : ""}`, `−₹${inr(d.discountAmount)}`, `color:${GOLD};`) : ""}
+      ${row("Shipping / Delivery", deliveryLabel)}
+      ${
+        isCod
+          ? `${row("Order Total", `₹${inr(d.totalAmount)}`)}
+             ${row("Total Paid (advance)", `₹${inr(d.advancePaid)}`, `font-weight:bold; color:${PURPLE}; font-size:16px;`)}
+             ${row("Balance on Delivery", `₹${inr(dueOnDelivery)}`)}`
+          : row("Total Paid", `₹${inr(d.totalAmount)}`, `font-weight:bold; color:${PURPLE}; font-size:17px; padding-top:8px;`)
+      }
+    </table>`;
 
-  const totalRows = isCod
-    ? `
-      <tr><td style="padding:6px 0 3px; color:${TEXT};">Order Total</td><td style="padding:6px 0 3px; text-align:right; color:${TEXT};">₹${inr(d.totalAmount)}</td></tr>
-      <tr><td style="padding:3px 0; font-weight:bold; color:${PURPLE};">Total Paid (advance)</td><td style="padding:3px 0; text-align:right; font-weight:bold; color:${PURPLE};">₹${inr(d.advancePaid)}</td></tr>
-      <tr><td style="padding:3px 0; color:${TEXT};">Balance on Delivery</td><td style="padding:3px 0; text-align:right; color:${TEXT};">₹${inr(dueOnDelivery)}</td></tr>`
-    : `
-      <tr><td style="padding:8px 0 3px; font-size:17px; font-weight:bold; color:${PURPLE};">Total Paid</td><td style="padding:8px 0 3px; text-align:right; font-size:17px; font-weight:bold; color:${PURPLE};">₹${inr(d.totalAmount)}</td></tr>`;
+  const addressHtml = esc(d.shippingAddress).replace(/\r?\n/g, "<br />");
 
   const html = `
   <div style="background:${CREAM}; padding:24px 12px; font-family:Georgia,'Times New Roman',serif;">
@@ -111,29 +124,40 @@ function buildCustomerEmail(d: OrderEmailData) {
       <div style="padding:26px 24px 8px; color:${TEXT}; font-size:15px; line-height:1.65;">
         <p style="margin:0 0 14px;">Dear ${esc(d.customerName)},</p>
         <p style="margin:0 0 14px;">Thank you for choosing ASTRODISHA. 💜</p>
-        <p style="margin:0 0 20px;">We’re delighted to confirm that your order has been successfully placed.</p>
+        <p style="margin:0;">We’re pleased to confirm that your order has been successfully placed.</p>
 
-        <div style="font-family:Arial,sans-serif; font-size:12px; font-weight:bold; letter-spacing:2px; color:${GOLD}; border-bottom:1px solid ${LINE}; padding-bottom:6px;">ORDER DETAILS</div>
+        ${divider}
 
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px; font-size:14px;">
-          <tr><td style="padding:3px 0; color:${MUTED};">Order ID</td><td style="padding:3px 0; text-align:right; color:${TEXT};"><strong>${orderId}</strong></td></tr>
-          <tr><td style="padding:3px 0; color:${MUTED};">Order Date</td><td style="padding:3px 0; text-align:right; color:${TEXT};">${orderDate}</td></tr>
+        ${heading("ORDER CONFIRMATION")}
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          ${row("Order ID", `<strong>${orderId}</strong>`)}
+          ${row("Order Date", orderDate)}
+          ${row("Payment Status", `<strong style="color:#2E7D32;">${paymentStatus}</strong>`)}
+          ${row("Payment Method", paymentMethodLabel)}
         </table>
 
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;">
-          ${itemsHtml}
-        </table>
+        <div style="height:18px;"></div>
 
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px; font-size:14px;">
-          ${extraRows}
-          ${totalRows}
-        </table>
+        ${heading("PRODUCT DETAILS")}
+        ${itemsHtml}
+        ${totalsHtml}
 
-        <p style="margin:22px 0 14px;">Your order is now confirmed and will be carefully prepared for dispatch.
-        We’ll keep you updated once your order is ready to be shipped.</p>
-        <p style="margin:0 0 14px;">We truly appreciate your trust in ASTRODISHA and are grateful to be a part of your journey.</p>
-        <p style="margin:0 0 14px;">May divine blessings, positivity and peace always surround you. ✨</p>
-        <p style="margin:0 0 20px;">Wishing you abundance, harmony and beautiful energy.</p>
+        ${divider}
+
+        ${heading("DELIVERY ADDRESS")}
+        <p style="margin:0; font-size:14px; line-height:1.7; color:${TEXT};">
+          <strong>${esc(d.customerName)}</strong><br />
+          ${addressHtml}<br />
+          ${esc(d.shippingCity)}, ${esc(d.shippingState)} - ${esc(d.shippingPinCode)}<br />
+          India
+        </p>
+
+        ${divider}
+
+        <p style="margin:0 0 14px;">Your order is confirmed and will now be carefully prepared for dispatch.</p>
+        <p style="margin:0 0 14px;">We truly appreciate your trust in ASTRODISHA.<br />
+        Thank you for allowing us to be a part of your journey.</p>
+        <p style="margin:0 0 20px;">May divine blessings, peace, positivity and abundance always surround you. ✨</p>
 
         <p style="margin:0;">With gratitude &amp; blessings,<br /><strong style="color:${PURPLE};">Team ASTRODISHA</strong></p>
       </div>
@@ -148,23 +172,24 @@ function buildCustomerEmail(d: OrderEmailData) {
     </div>
   </div>`;
 
+  const line = "━━━━━━━━━━━━━━━━━━━━";
+
   const itemsText = d.items
     .map(
       (item) =>
-        `Product:\n${item.name}\n\nQuantity: ${item.quantity}\nPrice: ₹${inr(item.price)}` +
-        (item.quantity > 1 ? `\nAmount: ₹${inr(item.price * item.quantity)}` : "")
+        `Product Name: ${item.name}\nQuantity: ${item.quantity}\nUnit Price: ₹${inr(item.price)}`
     )
     .join("\n\n");
 
-  const extraText =
+  const totalsText =
+    `Subtotal: ₹${inr(d.subtotal)}\n` +
     (Number(d.discountAmount) > 0
       ? `Discount${d.couponCode ? ` (${d.couponCode})` : ""}: −₹${inr(d.discountAmount)}\n`
       : "") +
-    `Delivery: ${Number(d.deliveryCharge) > 0 ? `₹${inr(d.deliveryCharge)}` : "FREE"}\n`;
-
-  const totalText = isCod
-    ? `Order Total: ₹${inr(d.totalAmount)}\nTotal Paid (advance): ₹${inr(d.advancePaid)}\nBalance on Delivery: ₹${inr(dueOnDelivery)}`
-    : `Total Paid: ₹${inr(d.totalAmount)}`;
+    `Shipping / Delivery: ${deliveryLabel}\n` +
+    (isCod
+      ? `Order Total: ₹${inr(d.totalAmount)}\nTotal Paid (advance): ₹${inr(d.advancePaid)}\nBalance on Delivery: ₹${inr(dueOnDelivery)}`
+      : `Total Paid: ₹${inr(d.totalAmount)}`);
 
   const text = `ASTRODISHA
 GUIDANCE • HEALING • DIVINE ALIGNMENT
@@ -173,25 +198,40 @@ Dear ${d.customerName},
 
 Thank you for choosing ASTRODISHA. 💜
 
-We’re delighted to confirm that your order has been successfully placed.
+We’re pleased to confirm that your order has been successfully placed.
 
-ORDER DETAILS
+${line}
+
+ORDER CONFIRMATION
 
 Order ID: ${orderId}
 Order Date: ${orderDate}
+Payment Status: ${paymentStatus}
+Payment Method: ${paymentMethodLabel}
+
+PRODUCT DETAILS
 
 ${itemsText}
 
-${extraText}${totalText}
+${totalsText}
 
-Your order is now confirmed and will be carefully prepared for dispatch.
-We’ll keep you updated once your order is ready to be shipped.
+${line}
 
-We truly appreciate your trust in ASTRODISHA and are grateful to be a part of your journey.
+DELIVERY ADDRESS
 
-May divine blessings, positivity and peace always surround you. ✨
+${d.customerName}
+${d.shippingAddress}
+${d.shippingCity}, ${d.shippingState} - ${d.shippingPinCode}
+India
 
-Wishing you abundance, harmony and beautiful energy.
+${line}
+
+Your order is confirmed and will now be carefully prepared for dispatch.
+
+We truly appreciate your trust in ASTRODISHA.
+Thank you for allowing us to be a part of your journey.
+
+May divine blessings, peace, positivity and abundance always surround you. ✨
 
 With gratitude & blessings,
 Team ASTRODISHA
@@ -305,7 +345,7 @@ function buildAdminEmail(d: OrderEmailData) {
         ${section("SHIP TO")}
         <div style="font-size:13px; color:${TEXT}; line-height:1.6;">
           <strong>${esc(d.customerName)}</strong><br />
-          ${esc(d.shippingAddress)}<br />
+          ${esc(d.shippingAddress).replace(/\r?\n/g, "<br />")}<br />
           ${esc(d.shippingCity)}, ${esc(d.shippingState)} — ${esc(d.shippingPinCode)}<br />
           Phone: ${esc(d.customerMobile)}
         </div>
@@ -401,4 +441,4 @@ export async function sendOrderEmails(d: OrderEmailData) {
   } else {
     console.error("ADMIN_NOTIFICATION_EMAIL is missing — admin order email not sent.");
   }
-        }
+          }
