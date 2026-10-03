@@ -1,13 +1,11 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import SafeImage from "@/components/SafeImage";
 import { useStore } from "@/components/StoreProvider";
-
-// Keep same as Header.tsx and ProductDetails.tsx
-const FREE_SHIPPING_THRESHOLD = 999;
 
 const BAG_ICON = (
   <>
@@ -25,17 +23,25 @@ export default function CartPage() {
   const {
     cart,
     updateQuantity,
-    removeFromCart
+    removeFromCart,
+    showShippingNudge
   } = useStore();
+
+  // Show the free-delivery popup once when the cart page opens
+  // (the cart loads from the browser a moment after the page, so wait for it)
+  const nudgeShown = useRef(false);
+  useEffect(() => {
+    if (!nudgeShown.current && cart.length > 0) {
+      nudgeShown.current = true;
+      showShippingNudge();
+    }
+  }, [cart.length, showShippingNudge]);
 
   const subtotal = cart.reduce(
     (total, item) =>
       total + item.price * item.quantity,
     0
   );
-
-  const remainingForFreeShipping = Math.max(FREE_SHIPPING_THRESHOLD - subtotal, 0);
-  const shippingProgress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
 
   return (
     <>
@@ -201,24 +207,6 @@ export default function CartPage() {
                     </span>
                   </div>
 
-                  {remainingForFreeShipping > 0 ? (
-                    <div>
-                      <p style={{ color: "var(--astro-mauve)" }} className="text-[11px]">
-                        Add ₹{remainingForFreeShipping.toLocaleString("en-IN")} more for free shipping
-                      </p>
-                      <div style={{ backgroundColor: "var(--astro-border)" }} className="mt-2 h-1.5 w-full overflow-hidden rounded-full">
-                        <div
-                          style={{ backgroundColor: "var(--astro-accent)", width: `${shippingProgress}%` }}
-                          className="h-full rounded-full transition-all"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <p style={{ color: "var(--astro-accent)" }} className="text-[11px] font-semibold">
-                      ✓ You've unlocked free shipping
-                    </p>
-                  )}
-
                   <p style={{ color: "var(--astro-mauve)" }} className="text-[11px]">
                     Final total, including any delivery charge, is calculated at checkout.
                   </p>
@@ -239,4 +227,4 @@ export default function CartPage() {
       </main>
     </>
   );
-                }
+}
