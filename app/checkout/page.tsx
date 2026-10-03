@@ -254,7 +254,10 @@ export default function CheckoutPage() {
 
           if (verifyData.status === "completed" && verifyData.orderNumber) {
             clearCart();
-            router.push(`/order-confirmation/${verifyData.orderNumber}`);
+            // The secret ref lets the confirmation page show this customer's order details
+            router.push(
+              `/order-confirmation/${verifyData.orderNumber}?ref=${encodeURIComponent(response.razorpay_order_id)}`
+            );
             return;
           }
 
