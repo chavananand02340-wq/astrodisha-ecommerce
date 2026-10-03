@@ -660,4 +660,30 @@ export default function CheckoutPage() {
                 borderRadius: "999px",
                 fontWeight: 600,
                 fontSize: "1rem",
-                cursor: submi
+                cursor: submitting ? "not-allowed" : "pointer",
+              }}
+            >
+              {submitting
+                ? "Processing..."
+                : paymentMethod === "cod"
+                ? `Pay ₹${advanceAmount} & Place Order`
+                : `Pay ₹${orderTotal.toLocaleString("en-IN")} & Place Order`}
+            </button>
+          </form>
+        </div>
+      </div>
+    </>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  display: "block",
+  width: "100%",
+  padding: "0.7rem 0.9rem",
+  marginBottom: "0.75rem",
+  border: "1px solid var(--astro-border)",
+  borderRadius: "10px",
+  backgroundColor: "#fff",
+  color: "#241046",
+  fontSize: "0.95rem",
+};
