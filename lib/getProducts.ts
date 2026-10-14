@@ -88,7 +88,9 @@ export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
   return (data as unknown as ProductRow[]).map(mapRowToProduct);
 }
 
-// "/shop" page: every active product, newest first.
+// "/shop" page: every active product.
+// Products with a website position (display_order) come first in that order,
+// the rest follow newest first.
 export async function getAllProducts(): Promise<Product[]> {
   const supabase = await createClient();
 
@@ -96,6 +98,7 @@ export async function getAllProducts(): Promise<Product[]> {
     .from("products")
     .select(PRODUCT_SELECT)
     .eq("is_active", true)
+    .order("display_order", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
 
   if (error || !data) {
@@ -105,6 +108,8 @@ export async function getAllProducts(): Promise<Product[]> {
   return (data as unknown as ProductRow[]).map(mapRowToProduct);
 }
 
+// Category pages: products with a website position (display_order) come first
+// in that order, the rest follow newest first.
 export async function getProductsByCategory(categorySlug: string): Promise<Product[]> {
   const supabase = await createClient();
 
@@ -123,6 +128,7 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
     .select(PRODUCT_SELECT)
     .eq("is_active", true)
     .eq("category_id", category.id)
+    .order("display_order", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
 
   if (error || !data) {
