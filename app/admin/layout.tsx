@@ -42,7 +42,10 @@ export default function AdminLayout({
   }
 
   return (
-    <div style={{ backgroundColor: "#F7F3EC", minHeight: "100vh", color: "#3E2237", display: "flex" }}>
+    <div
+      style={{ backgroundColor: "#F7F3EC", minHeight: "100vh", color: "#3E2237" }}
+      className="flex flex-col md:flex-row"
+    >
       {/* Desktop Sidebar */}
       <aside
         style={{
@@ -50,7 +53,6 @@ export default function AdminLayout({
           backgroundColor: "#3E2237",
           color: "#fff",
           padding: "1.5rem 1rem",
-          display: "flex",
           flexDirection: "column",
           position: "sticky",
           top: 0,
@@ -123,7 +125,6 @@ export default function AdminLayout({
           backgroundColor: "#3E2237",
           color: "#fff",
           padding: "0.85rem 1.1rem",
-          display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
@@ -214,7 +215,7 @@ export default function AdminLayout({
       )}
 
       {/* Main content */}
-      <main style={{ flex: 1, minWidth: 0 }} className="pt-[52px] md:pt-0">
+      <main style={{ flex: 1, minWidth: 0 }} className="w-full pt-[52px] md:pt-0">
         {children}
       </main>
     </div>
