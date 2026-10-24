@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { StoreProvider } from "@/components/StoreProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import MarketingScripts from "@/components/MarketingScripts";
 
 export const metadata: Metadata = {
   title: "ASTRODISHA | Guidance • Healing • Divine Alignment",
@@ -31,6 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <MarketingScripts />
         <ThemeProvider>
           <StoreProvider>{children}</StoreProvider>
         </ThemeProvider>
