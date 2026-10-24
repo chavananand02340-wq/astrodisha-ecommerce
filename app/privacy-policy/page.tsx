@@ -1,108 +1,86 @@
+import Link from "next/link";
 import type { Metadata } from "next";
-import LegalPageLayout from "@/components/LegalPageLayout";
-import {
-  LEGAL_NAME,
-  REGISTERED_ADDRESS,
-  SUPPORT_EMAIL,
-  SUPPORT_WHATSAPP_DISPLAY,
-  WEBSITE_DOMAIN,
-} from "@/lib/legal-info";
+import Header from "@/components/Header";
+import ProductDetails from "@/components/ProductDetails";
+import { getProductBySlug, getRelatedProducts } from "@/lib/getProducts";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | ASTRODISHA",
-};
+const SITE_URL = "https://astrodisha.shop";
 
-function Section({ heading, children }: { heading: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-7 last:mb-0">
-      <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mb-2 text-xl">
-        {heading}
-      </h2>
-      <div style={{ color: "var(--astro-mauve)" }} className="space-y-2">
-        {children}
-      </div>
-    </section>
-  );
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+
+  if (!product) {
+    return { title: "Product Not Found | ASTRODISHA" };
+  }
+
+  const description = (product.description || `Buy ${product.name} online from ASTRODISHA.`).slice(0, 160);
+
+  return {
+    title: `${product.name} | ASTRODISHA`,
+    description,
+    alternates: { canonical: `${SITE_URL}/product/${slug}` },
+    openGraph: {
+      title: product.name,
+      description,
+      url: `${SITE_URL}/product/${slug}`,
+      type: "website",
+      images: [{ url: product.image }],
+    },
+  };
 }
 
-export default function PrivacyPolicyPage() {
+export default async function ProductPage({
+  params
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+
+  const product = await getProductBySlug(slug);
+
+  if (!product) {
+    return (
+      <>
+        <Header />
+
+        <main
+          style={{ backgroundColor: "var(--astro-bg)" }}
+          className="flex min-h-[70vh] items-center justify-center px-5 text-center"
+        >
+          <div>
+            <h1 style={{ color: "var(--astro-text)" }} className="astro-serif text-4xl">
+              Product Not Found
+            </h1>
+
+            <p style={{ color: "var(--astro-mauve)" }} className="mt-3 text-sm">
+              This product may have been removed or is not available.
+            </p>
+
+            <Link
+              href="/shop"
+              style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
+              className="mt-6 inline-flex h-12 items-center rounded-full px-7 text-sm font-semibold transition hover:opacity-90"
+            >
+              Browse All Products
+            </Link>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  const related = await getRelatedProducts(product);
+
   return (
-    <LegalPageLayout title="Privacy Policy" lastUpdated="1 October 2026">
-      <p style={{ color: "var(--astro-mauve)" }} className="mb-7">
-        This Privacy Policy explains how {LEGAL_NAME} ("we", "us", "our") collects, uses,
-        and protects your information when you use our website {WEBSITE_DOMAIN}.
-      </p>
+    <>
+      <Header />
 
-      <Section heading="Information We Collect">
-        <ul className="list-disc space-y-1 pl-5">
-          <li>Name, mobile number, and email address you provide at checkout or contact.</li>
-          <li>Shipping address (address, city, state, PIN code) for order delivery.</li>
-          <li>Order history and items purchased.</li>
-          <li>Basic technical information such as browser type and device, for site functioning.</li>
-        </ul>
-        <p>
-          We do not collect or store your card, UPI, or net banking details — these are handled
-          directly and securely by our payment partner, Razorpay.
-        </p>
-      </Section>
-
-      <Section heading="How We Use Your Information">
-        <ul className="list-disc space-y-1 pl-5">
-          <li>To process and deliver your orders.</li>
-          <li>To send order confirmations and updates via email or WhatsApp.</li>
-          <li>To respond to your questions or support requests.</li>
-          <li>To improve our website and product offerings.</li>
-        </ul>
-      </Section>
-
-      <Section heading="Sharing of Information">
-        <p>
-          We share your information only with trusted service providers who help us run our
-          business — such as our payment gateway (Razorpay) and courier/shipping partners — solely
-          to complete your order. We do not sell your personal information to third parties.
-        </p>
-      </Section>
-
-      <Section heading="Data Security">
-        <p>
-          We follow reasonable, industry-standard security practices to protect your information.
-          However, no method of transmission or storage over the internet is 100% secure, and we
-          cannot guarantee absolute security.
-        </p>
-      </Section>
-
-      <Section heading="Cookies">
-        <p>
-          Our website may use basic cookies to keep your cart and preferences working correctly
-          while you browse. You can control cookies through your browser settings.
-        </p>
-      </Section>
-
-      <Section heading="Your Rights">
-        <p>
-          You may request access to, correction of, or deletion of your personal information by
-          contacting us at {SUPPORT_EMAIL} or {SUPPORT_WHATSAPP_DISPLAY}.
-        </p>
-      </Section>
-
-      <Section heading="Changes to This Policy">
-        <p>
-          We may update this Privacy Policy from time to time. Changes will be posted on this page
-          with an updated date.
-        </p>
-      </Section>
-
-      <Section heading="Contact Us">
-        <p>
-          {LEGAL_NAME}
-          <br />
-          {REGISTERED_ADDRESS}
-          <br />
-          Email: {SUPPORT_EMAIL}
-          <br />
-          WhatsApp: {SUPPORT_WHATSAPP_DISPLAY}
-        </p>
-      </Section>
-    </LegalPageLayout>
+      <ProductDetails product={product} related={related} />
+    </>
   );
 }
