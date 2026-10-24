@@ -14,6 +14,7 @@ const navItems = [
   { name: "Banners", href: "/admin/banners", icon: "🎉" },
   { name: "Testimonials", href: "/admin/testimonials", icon: "💬" },
   { name: "Reviews", href: "/admin/reviews", icon: "⭐" },
+  { name: "Settings", href: "/admin/settings", icon: "⚙️" },
 ];
 
 export default function AdminLayout({
