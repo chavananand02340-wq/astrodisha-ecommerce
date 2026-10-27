@@ -24,6 +24,9 @@ type Order = {
   discount_amount: number;
   coupon_code: string | null;
   created_at: string;
+  awb_code: string | null;
+  courier_name: string | null;
+  tracking_url: string | null;
 };
 
 type OrderItem = {
@@ -69,6 +72,7 @@ function OrdersContent() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
+  const [creatingShipmentFor, setCreatingShipmentFor] = useState<string | null>(null);
 
   async function loadOrders() {
     setLoading(true);
@@ -76,7 +80,7 @@ function OrdersContent() {
     let query = supabase
       .from("orders")
       .select(
-        "id, order_number, customer_name, customer_mobile, customer_email, shipping_address, shipping_city, shipping_state, shipping_pin_code, subtotal, delivery_charge, total_amount, payment_status, order_status, payment_method, advance_paid, discount_amount, coupon_code, created_at"
+        "id, order_number, customer_name, customer_mobile, customer_email, shipping_address, shipping_city, shipping_state, shipping_pin_code, subtotal, delivery_charge, total_amount, payment_status, order_status, payment_method, advance_paid, discount_amount, coupon_code, created_at, awb_code, courier_name, tracking_url"
       );
 
     if (filterStatus !== "all") {
@@ -112,7 +116,7 @@ function OrdersContent() {
     if (error) {
       setStatusMsg("Failed to load orders: " + error.message);
     } else {
-      let result = data || [];
+      let result = (data || []) as unknown as Order[];
 
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
@@ -170,6 +174,37 @@ function OrdersContent() {
     }
 
     loadOrders();
+  }
+
+  async function handleCreateShipment(orderId: string) {
+    if (!window.confirm("Shiprocket par is order ka shipment banega aur courier pickup hoga. Continue?")) {
+      return;
+    }
+
+    setCreatingShipmentFor(orderId);
+    setStatusMsg("Creating shipment...");
+
+    try {
+      const res = await fetch("/api/create-shipment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+        credentials: "include",
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || result.error) {
+        setStatusMsg("Shipment failed: " + (result.error || "Unknown error"));
+      } else {
+        setStatusMsg(`Shipment created. AWB: ${result.awb_code}`);
+        loadOrders();
+      }
+    } catch (err) {
+      setStatusMsg("Shipment failed: " + (err instanceof Error ? err.message : "Network error"));
+    }
+
+    setCreatingShipmentFor(null);
   }
 
   function formatDate(dateStr: string) {
@@ -436,6 +471,46 @@ function OrdersContent() {
                       &nbsp;|&nbsp; <strong>Delivery:</strong> ₹{order.delivery_charge} &nbsp;|&nbsp;{" "}
                       <strong>Total:</strong> ₹{order.total_amount}
                     </p>
+
+                    <div style={{ marginBottom: "0.75rem", fontSize: "0.85rem" }}>
+                      {order.awb_code ? (
+                        <>
+                          <strong>AWB:</strong> {order.awb_code}
+                          {order.courier_name && (
+                            <> &nbsp;|&nbsp; <strong>Courier:</strong> {order.courier_name}</>
+                          )}
+                          {order.tracking_url && (
+                            <>
+                              {" "}
+                              <a
+                                href={order.tracking_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: "#5A3150", textDecoration: "underline" }}
+                              >
+                                Track
+                              </a>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => handleCreateShipment(order.id)}
+                          disabled={creatingShipmentFor === order.id}
+                          style={{
+                            backgroundColor: "#5A3150",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "4px",
+                            padding: "0.4rem 0.9rem",
+                            fontSize: "0.8rem",
+                            cursor: creatingShipmentFor === order.id ? "not-allowed" : "pointer",
+                          }}
+                        >
+                          {creatingShipmentFor === order.id ? "Creating..." : "Create Shipment"}
+                        </button>
+                      )}
+                    </div>
 
                     <p style={{ fontWeight: "bold", marginBottom: "0.4rem", marginTop: "0.75rem" }}>
                       Items:
