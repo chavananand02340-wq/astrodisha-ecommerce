@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .select(
-      "id, order_number, customer_name, customer_mobile, customer_email, shipping_address, shipping_city, shipping_state, shipping_pin_code, shipping_country, total_amount, advance_paid, payment_method, shipment_id, awb_code"
+      "id, order_number, customer_name, customer_mobile, customer_email, shipping_address, shipping_city, shipping_state, shipping_pin_code, shipping_country, subtotal, total_amount, advance_paid, payment_method, shipment_id, awb_code"
     )
     .eq("id", orderId)
     .single();
@@ -83,6 +83,7 @@ export async function POST(req: NextRequest) {
     };
 
     // 4. Create order in Shiprocket
+    // COD collect amount = total minus online advance already paid
     const isCod = order.payment_method === "cod";
     const codAmount = isCod ? Math.max(order.total_amount - order.advance_paid, 0) : 0;
 
@@ -110,7 +111,8 @@ export async function POST(req: NextRequest) {
           selling_price: i.product_price,
         })),
         payment_method: isCod ? "COD" : "Prepaid",
-        sub_total: order.total_amount,
+        // Product value only (not the COD collect amount)
+        sub_total: order.subtotal,
         length: DEFAULT_LENGTH_CM,
         breadth: DEFAULT_BREADTH_CM,
         height: DEFAULT_HEIGHT_CM,
@@ -168,4 +170,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+            }
