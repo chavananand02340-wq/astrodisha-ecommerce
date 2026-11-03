@@ -28,12 +28,13 @@ export default function TestimonialsSection({
           </h2>
         </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Horizontal scroll row — same style as Shop by Category */}
+        <div className="no-scrollbar mt-8 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-1 pb-2 sm:scroll-px-6 sm:gap-5">
           {testimonials.map((t) => (
             <div
               key={t.id}
               style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-              className="rounded-xl border p-6"
+              className="flex w-[82%] shrink-0 snap-start flex-col rounded-xl border p-5 sm:w-[46%] sm:p-6 lg:w-[32%]"
             >
               {t.media_url && t.media_type === "video" && (
                 <video
@@ -71,7 +72,7 @@ export default function TestimonialsSection({
                 </p>
               )}
 
-              <div className="mt-5 flex items-center gap-3">
+              <div className="mt-auto flex items-center gap-3 pt-5">
                 {t.image_url ? (
                   <img
                     src={t.image_url}
