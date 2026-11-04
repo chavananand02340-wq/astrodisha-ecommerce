@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 type TestimonialItem = {
   id: string | number;
   customer_name: string;
@@ -8,6 +12,32 @@ type TestimonialItem = {
   media_type?: string | null;
   media_url?: string | null;
 };
+
+const TEXT_PREVIEW_LENGTH = 180;
+
+function TestimonialText({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = text.length > TEXT_PREVIEW_LENGTH;
+  const shown = expanded || !isLong ? text : text.slice(0, TEXT_PREVIEW_LENGTH).trimEnd() + "…";
+
+  return (
+    <div className="mt-3">
+      <p style={{ color: "var(--astro-text)", opacity: 0.85 }} className="text-sm leading-6">
+        "{shown}"
+      </p>
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          style={{ color: "var(--astro-primary)" }}
+          className="mt-1 text-xs font-semibold underline underline-offset-2"
+        >
+          {expanded ? "see less" : "see more"}
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function TestimonialsSection({
   testimonials,
@@ -66,11 +96,7 @@ export default function TestimonialsSection({
                 </p>
               ) : null}
 
-              {t.testimonial_text && (
-                <p style={{ color: "var(--astro-text)", opacity: 0.85 }} className="mt-3 line-clamp-6 text-sm leading-6">
-                  "{t.testimonial_text}"
-                </p>
-              )}
+              {t.testimonial_text && <TestimonialText text={t.testimonial_text} />}
 
               <div className="mt-auto flex items-center gap-3 pt-5">
                 {t.image_url ? (
