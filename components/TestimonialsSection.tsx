@@ -34,7 +34,7 @@ export default function TestimonialsSection({
             <div
               key={t.id}
               style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-              className="flex w-[82%] shrink-0 snap-start flex-col rounded-xl border p-5 sm:w-[46%] sm:p-6 lg:w-[32%]"
+              className="flex w-[70%] shrink-0 snap-start flex-col rounded-xl border p-4 sm:w-[40%] sm:p-5 lg:w-[30%]"
             >
               {t.media_url && t.media_type === "video" && (
                 <video
@@ -42,12 +42,12 @@ export default function TestimonialsSection({
                   controls
                   playsInline
                   preload="metadata"
-                  className="mb-4 max-h-[420px] w-full rounded-lg bg-black object-contain"
+                  className="mb-3 max-h-[420px] w-full rounded-lg bg-black object-contain"
                 />
               )}
 
               {t.media_url && t.media_type === "audio" && (
-                <audio src={t.media_url} controls preload="none" className="mb-4 w-full" />
+                <audio src={t.media_url} controls preload="none" className="mb-3 w-full" />
               )}
 
               {t.media_url && t.media_type === "image" && (
@@ -55,7 +55,7 @@ export default function TestimonialsSection({
                   src={t.media_url}
                   alt={`${t.customer_name}'s testimonial`}
                   loading="lazy"
-                  className="mb-4 max-h-[360px] w-full rounded-lg object-cover"
+                  className="mb-3 aspect-square w-full rounded-lg object-cover"
                 />
               )}
 
@@ -67,7 +67,7 @@ export default function TestimonialsSection({
               ) : null}
 
               {t.testimonial_text && (
-                <p style={{ color: "var(--astro-text)", opacity: 0.85 }} className="mt-3 text-sm leading-6">
+                <p style={{ color: "var(--astro-text)", opacity: 0.85 }} className="mt-3 line-clamp-6 text-sm leading-6">
                   "{t.testimonial_text}"
                 </p>
               )}
