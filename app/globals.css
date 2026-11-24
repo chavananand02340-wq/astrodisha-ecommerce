@@ -1,65 +1,128 @@
 @import "tailwindcss";
 
+/* =====================================================================
+   ASTRODISHA DESIGN SYSTEM
+   Every page reads these --astro-* variables, so changing a value here
+   restyles the whole site (light + dark). Tailwind utilities such as
+   bg-astro-card / text-astro-gold / font-serif are mapped in @theme below.
+   ===================================================================== */
 :root {
-  /* Light "Cream" theme (default) */
-  --astro-bg: #f4ece0;
-  --astro-text: #241046;
-  --astro-primary: #2d1155;
+  /* Light "Sacred Cream" theme (default) */
+  --astro-bg: #f9f6f1;          /* page background — warm cream */
+  --astro-surface: #f3ede4;     /* alternate section band */
+  --astro-text: #241046;        /* headings — deep indigo */
+  --astro-body: #4a4453;        /* body copy — soft charcoal */
+  --astro-primary: #2d1155;     /* brand indigo */
+  --astro-primary-hover: #3e1f6e;
   --astro-primary-text: #ffffff;
-  --astro-accent: #c6a15b;
-  --astro-card: #f3e1cf;
-  --astro-border: #d9cec1;
-  --astro-mauve: #5f5265;
+  --astro-accent: #a9843f;      /* soft gold (text-safe on cream) */
+  --astro-gold: #c6a15b;        /* decorative gold */
+  --astro-gold-soft: #efe4cc;
+  --astro-terracotta: #b4664a;
+  --astro-emerald: #2f6b57;
+  --astro-emerald-soft: #e3efe8;
+  --astro-card: #fffdf9;
+  --astro-border: #e7ddcf;
+  --astro-mauve: #6a5d70;       /* secondary text */
+  --astro-skeleton: #eee6da;
+  --astro-shadow-sm: 0 1px 2px rgba(36, 16, 70, 0.04), 0 2px 10px rgba(36, 16, 70, 0.04);
+  --astro-shadow-md: 0 2px 6px rgba(36, 16, 70, 0.05), 0 14px 34px -12px rgba(36, 16, 70, 0.16);
+  --astro-shadow-lg: 0 24px 60px -20px rgba(36, 16, 70, 0.28);
 }
 
 [data-theme="dark"] {
   /* Dark theme (optional, via toggle) */
   --astro-bg: #160828;
+  --astro-surface: #1b0c31;
   --astro-text: #f4effb;
+  --astro-body: #d9d0e6;
   --astro-primary: #e8b23f;
+  --astro-primary-hover: #f0c35f;
   --astro-primary-text: #160828;
-  --astro-accent: #b69bee;
+  --astro-accent: #d7b46a;
+  --astro-gold: #d7b46a;
+  --astro-gold-soft: #2c1a3f;
+  --astro-terracotta: #e09a7d;
+  --astro-emerald: #7cc4a7;
+  --astro-emerald-soft: #1d2b2f;
   --astro-card: #1f0d38;
   --astro-border: #3a2456;
   --astro-mauve: #b69bee;
+  --astro-skeleton: #2a1747;
+  --astro-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --astro-shadow-md: 0 14px 34px -12px rgba(0, 0, 0, 0.5);
+  --astro-shadow-lg: 0 24px 60px -20px rgba(0, 0, 0, 0.6);
 }
 
-* {
-  box-sizing: border-box;
+@theme inline {
+  --color-astro-bg: var(--astro-bg);
+  --color-astro-surface: var(--astro-surface);
+  --color-astro-text: var(--astro-text);
+  --color-astro-body: var(--astro-body);
+  --color-astro-primary: var(--astro-primary);
+  --color-astro-primary-hover: var(--astro-primary-hover);
+  --color-astro-on-primary: var(--astro-primary-text);
+  --color-astro-accent: var(--astro-accent);
+  --color-astro-gold: var(--astro-gold);
+  --color-astro-gold-soft: var(--astro-gold-soft);
+  --color-astro-terracotta: var(--astro-terracotta);
+  --color-astro-emerald: var(--astro-emerald);
+  --color-astro-emerald-soft: var(--astro-emerald-soft);
+  --color-astro-card: var(--astro-card);
+  --color-astro-border: var(--astro-border);
+  --color-astro-mauve: var(--astro-mauve);
+  --color-astro-skeleton: var(--astro-skeleton);
+  --shadow-astro-sm: var(--astro-shadow-sm);
+  --shadow-astro-md: var(--astro-shadow-md);
+  --shadow-astro-lg: var(--astro-shadow-lg);
+  --font-serif: "Cormorant Garamond Variable", "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-sans: "DM Sans Variable", "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --ease-astro: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* Element resets live in the base layer so Tailwind utilities (e.g. text-* on links)
+   can override them. */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
 
-body {
-  margin: 0;
-  background: var(--astro-bg);
-  color: var(--astro-text);
-  font-family: Arial, Helvetica, sans-serif;
-  overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
+  html {
+    scroll-behavior: smooth;
+  }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
+  body {
+    margin: 0;
+    background: var(--astro-bg);
+    color: var(--astro-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
 
-button {
-  cursor: pointer;
-}
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+  button {
+    cursor: pointer;
+  }
 
-img {
-  max-width: 100%;
-  display: block;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
 }
 
 ::selection {
@@ -68,8 +131,24 @@ img {
 }
 
 /* Premium serif typography */
-.astro-serif {
-  font-family: Georgia, "Times New Roman", serif;
+@layer components {
+  .astro-serif {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+/* Keyboard focus — visible gold ring everywhere, invisible for mouse users */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--astro-gold);
+  outline-offset: 2px;
 }
 
 /* Hide scrollbar but preserve horizontal scrolling */
@@ -98,11 +177,62 @@ img {
 
 /* Image hover */
 .product-image {
-  transition: transform 0.5s ease;
+  transition: transform 0.9s var(--ease-astro), opacity 0.5s ease;
 }
 
 .product-card:hover .product-image {
-  transform: scale(1.045);
+  transform: scale(1.05);
+}
+
+/* Skeleton shimmer — soft cream sweep instead of flat grey boxes */
+@keyframes astroShimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+.astro-skeleton {
+  background: linear-gradient(
+    100deg,
+    var(--astro-skeleton) 30%,
+    color-mix(in srgb, var(--astro-card) 70%, var(--astro-skeleton)) 50%,
+    var(--astro-skeleton) 70%
+  );
+  background-size: 200% 100%;
+  animation: astroShimmer 1.6s ease-in-out infinite;
+}
+
+/* Bottom-sheet (mobile filters) */
+@keyframes astroSheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes astroFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.astro-sheet { animation: astroSheetUp 0.38s var(--ease-astro); }
+.astro-backdrop { animation: astroFadeIn 0.25s ease; }
+
+/* Slow drifting glow used in heroes / empty states */
+@keyframes astroDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -8px, 0) scale(1.03); }
+}
+
+.astro-drift { animation: astroDrift 9s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .astro-skeleton,
+  .astro-drift,
+  .astro-sheet,
+  .astro-backdrop {
+    animation: none;
+  }
+  .product-image {
+    transition: none;
+  }
 }
 
 /* Soft fade animation */
