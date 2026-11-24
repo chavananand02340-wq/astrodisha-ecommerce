@@ -340,3 +340,29 @@ h3 {
   .astro-line-flow,
   .astro-node-glow { animation: none; }
 }
+
+/* Journey zig-zag — slow seamless drift (two identical halves, move by -50%) */
+.astro-journey {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.astro-journey-track {
+  animation: astroMarquee 36s linear infinite;
+  will-change: transform;
+}
+
+.astro-journey:hover .astro-journey-track,
+.astro-journey:active .astro-journey-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .astro-journey { overflow-x: auto; }
+  .astro-journey-track { animation: none; }
+}
+
+/* Find Your Stone placeholder — slow turning zodiac wheel */
+@keyframes astroSpin { to { transform: rotate(360deg); } }
+.astro-wheel { animation: astroSpin 60s linear infinite; transform-origin: 50% 50%; }
+@media (prefers-reduced-motion: reduce) { .astro-wheel { animation: none; } }
