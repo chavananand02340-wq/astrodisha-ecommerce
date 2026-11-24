@@ -27,6 +27,15 @@ type ProductDetailRow = ProductRow & {
 const PRODUCT_SELECT =
   "id, slug, name, short_description, price, stock, rating, review_count, specifications, categories(name, slug), product_images(image_url, is_primary, sort_order)";
 
+// Listing pages (/shop + category pages) also need the created date for the
+// "Newest" sort and benefit titles for the card benefit line + Benefits filter.
+const PRODUCT_LIST_SELECT = PRODUCT_SELECT + ", created_at, benefits";
+
+type ProductListRow = ProductRow & {
+  created_at: string | null;
+  benefits: PdpBenefit[] | null;
+};
+
 const PRODUCT_DETAIL_SELECT =
   PRODUCT_SELECT + ", benefits, how_to_wear, product_details, certificate, certificate_image_url";
 
@@ -54,6 +63,14 @@ function mapRowToProduct(row: ProductRow): Product {
     rating: row.rating ? Number(row.rating) : undefined,
     reviewCount: row.review_count ?? undefined,
     specifications: Array.isArray(row.specifications) ? row.specifications : [],
+  };
+}
+
+function mapRowToListProduct(row: ProductListRow): Product {
+  return {
+    ...mapRowToProduct(row),
+    createdAt: row.created_at || undefined,
+    benefits: Array.isArray(row.benefits) ? row.benefits : [],
   };
 }
 
@@ -96,7 +113,7 @@ export async function getAllProducts(): Promise<Product[]> {
 
   const { data, error } = await supabase
     .from("products")
-    .select(PRODUCT_SELECT)
+    .select(PRODUCT_LIST_SELECT)
     .eq("is_active", true)
     .order("display_order", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
@@ -105,7 +122,7 @@ export async function getAllProducts(): Promise<Product[]> {
     return [];
   }
 
-  return (data as unknown as ProductRow[]).map(mapRowToProduct);
+  return (data as unknown as ProductListRow[]).map(mapRowToListProduct);
 }
 
 // Category pages: products with a website position (display_order) come first
@@ -125,7 +142,7 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
 
   const { data, error } = await supabase
     .from("products")
-    .select(PRODUCT_SELECT)
+    .select(PRODUCT_LIST_SELECT)
     .eq("is_active", true)
     .eq("category_id", category.id)
     .order("display_order", { ascending: true, nullsFirst: false })
@@ -135,7 +152,7 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
     return [];
   }
 
-  return (data as unknown as ProductRow[]).map(mapRowToProduct);
+  return (data as unknown as ProductListRow[]).map(mapRowToListProduct);
 }
 
 // Single product page: also loads Benefits, How to Wear, Product Details and Certificate.

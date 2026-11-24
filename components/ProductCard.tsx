@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useStore } from "./StoreProvider";
+import Icon from "./ui/Icon";
 
 export type PdpBenefit = { title: string; description: string };
 export type PdpStep = { title: string; description: string; icon: string };
@@ -40,25 +41,21 @@ export type Product = {
   productDetails?: PdpDetail[];
   certificate?: PdpCertificate;
   certificateImageUrl?: string;
+  // Listing pages only (shop + category) — used for the "Newest" sort
+  createdAt?: string;
 };
 
 type ProductCardProps = {
   product: Product;
+  /** Load the image eagerly (use for the first row above the fold) */
+  priority?: boolean;
 };
 
-const HEART_PATH =
-  "M12 20s-7-4.4-9.2-8.6C1.2 8.2 3 4.8 6.4 4.5c2-.2 3.8.9 5.6 3 1.8-2.1 3.6-3.2 5.6-3 3.4.3 5.2 3.7 3.6 6.9C19 15.6 12 20 12 20z";
-
-export default function ProductCard({
-  product
-}: ProductCardProps) {
-  const {
-    addToCart,
-    toggleWishlist,
-    isWishlisted
-  } = useStore();
+export default function ProductCard({ product, priority = false }: ProductCardProps) {
+  const { addToCart, toggleWishlist, isWishlisted } = useStore();
 
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
@@ -68,61 +65,88 @@ export default function ProductCard({
     }
   }, []);
 
+  useEffect(() => {
+    if (!justAdded) return;
+    const t = window.setTimeout(() => setJustAdded(false), 1600);
+    return () => window.clearTimeout(t);
+  }, [justAdded]);
+
   const wishlisted = isWishlisted(product.id);
-  const stars = product.rating ? Math.round(Math.min(Math.max(product.rating, 0), 5)) : 0;
+  const rating = product.rating ? Math.min(Math.max(product.rating, 0), 5) : 0;
 
   const stock = product.stock ?? 0;
   const outOfStock = stock <= 0;
   const lowStock = !outOfStock && stock <= 5;
 
-  return (
-    <article
-      style={{ backgroundColor: "var(--astro-card)", borderColor: "var(--astro-border)" }}
-      className="product-card group flex flex-col overflow-hidden rounded-2xl border shadow-[0_4px_20px_rgba(36,16,70,0.05)]"
-    >
-      <div
-        style={{ backgroundColor: "var(--astro-border)" }}
-        className="relative aspect-[4/3] overflow-hidden"
-      >
-        {!imageLoaded && (
-          <div className="absolute inset-0 animate-pulse opacity-60" style={{ backgroundColor: "var(--astro-border)" }} />
-        )}
+  // Second photo cross-fades in on hover (desktop) when the product has one
+  const hoverImage = product.images && product.images.length > 1 ? product.images[1] : undefined;
 
-        <Link
-          href={`/product/${product.slug}`}
-          aria-label={`View ${product.name}`}
-        >
+  // Short benefit line: first admin "Benefit" title, else the short description
+  const benefitLine = product.benefits?.find((b) => b?.title?.trim())?.title?.trim();
+  const href = `/product/${product.slug}`;
+
+  function handleAdd() {
+    if (outOfStock) return;
+    addToCart(product);
+    setJustAdded(true);
+  }
+
+  return (
+    <article className="product-card group relative flex flex-col overflow-hidden rounded-[22px] border border-astro-border bg-astro-card shadow-astro-sm transition-[box-shadow,transform,border-color] duration-500 ease-[var(--ease-astro)] hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--astro-gold)_45%,var(--astro-border))] hover:shadow-astro-md">
+      {/* IMAGE */}
+      <div className="relative aspect-square overflow-hidden bg-astro-surface">
+        {!imageLoaded && <div className="astro-skeleton absolute inset-0" aria-hidden="true" />}
+
+        <Link href={href} aria-label={`View ${product.name}`} className="block h-full w-full">
           <img
             ref={imgRef}
             src={product.image}
             alt={`${product.name} - ${product.category}`}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : undefined}
             decoding="async"
-            className={`product-image h-full w-full object-cover transition-opacity duration-300 ${
-              imageLoaded ? "opacity-100" : "opacity-0"
-            } ${outOfStock ? "opacity-70 grayscale-[30%]" : ""}`}
+            className={`product-image h-full w-full object-cover ${imageLoaded ? "opacity-100" : "opacity-0"} ${
+              outOfStock ? "grayscale-[35%]" : ""
+            }`}
             onLoad={() => setImageLoaded(true)}
             onError={(event) => {
               const image = event.currentTarget;
-
               if (!image.src.includes("placeholder-product.svg")) {
                 image.src = "/images/placeholder-product.svg";
               }
-
               setImageLoaded(true);
             }}
           />
+          {hoverImage && !outOfStock && (
+            <img
+              src={hoverImage}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              className="product-image pointer-events-none absolute inset-0 hidden h-full w-full object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100 md:block"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          )}
         </Link>
 
+        {/* soft vignette so badges stay legible on light photos */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/10 to-transparent"
+        />
+
+        {lowStock && (
+          <span className="absolute left-2.5 top-2.5 rounded-full bg-astro-card/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-astro-terracotta shadow-astro-sm backdrop-blur">
+            Only {stock} left
+          </span>
+        )}
+
         {outOfStock && (
-          <div
-            style={{ backgroundColor: "rgba(22,8,40,0.5)" }}
-            className="pointer-events-none absolute inset-0 flex items-center justify-center"
-          >
-            <span
-              style={{ backgroundColor: "var(--astro-card)", color: "var(--astro-text)" }}
-              className="rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide"
-            >
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[rgba(22,8,40,0.35)]">
+            <span className="rounded-full bg-astro-card px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-astro-text">
               Out of Stock
             </span>
           </div>
@@ -130,101 +154,74 @@ export default function ProductCard({
 
         <button
           type="button"
-          aria-label={
-            wishlisted
-              ? `Remove ${product.name} from wishlist`
-              : `Add ${product.name} to wishlist`
-          }
+          aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
           aria-pressed={wishlisted}
           onClick={() => toggleWishlist(product)}
-          style={{
-            backgroundColor: "var(--astro-card)",
-            color: wishlisted ? "var(--astro-accent)" : "var(--astro-primary)",
-            borderColor: wishlisted ? "var(--astro-accent)" : "transparent",
-          }}
-          className="absolute right-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded-full border shadow-[0_2px_8px_rgba(36,16,70,0.12)] transition active:scale-90"
+          className={`absolute right-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded-full bg-astro-card/90 shadow-astro-sm backdrop-blur transition duration-300 hover:scale-110 active:scale-90 ${
+            wishlisted ? "text-astro-terracotta" : "text-astro-primary"
+          }`}
         >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-[18px] w-[18px]"
-            fill={wishlisted ? "currentColor" : "none"}
-            stroke="currentColor"
-            strokeWidth={1.8}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d={HEART_PATH} />
-          </svg>
+          <Icon name="heart" filled={wishlisted} className="h-[18px] w-[18px]" strokeWidth={1.8} />
         </button>
       </div>
 
-      <div className="flex flex-1 flex-col p-3 sm:p-4">
-        <p style={{ color: "var(--astro-mauve)" }} className="text-[10px] font-medium uppercase tracking-[0.12em]">
-          {product.category}
-        </p>
+      {/* DETAILS */}
+      <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-3 sm:px-4 sm:pb-4 sm:pt-3.5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-astro-accent">{product.category}</p>
 
-        <Link href={`/product/${product.slug}`}>
-          <h3
-            style={{ color: "var(--astro-text)" }}
-            className="astro-serif mt-1 line-clamp-2 text-[16px] leading-[1.25] transition hover:opacity-80 sm:text-[18px]"
-          >
+        <Link href={href} className="mt-1">
+          <h3 className="astro-serif line-clamp-2 text-[17px] leading-[1.2] text-astro-text transition-colors group-hover:text-astro-primary sm:text-[19px]">
             {product.name}
           </h3>
         </Link>
 
-        {product.description && (
-          <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 line-clamp-2 text-[12px] leading-[1.45] sm:text-[13px]">
-            {product.description}
+        {benefitLine ? (
+          <p className="mt-1.5 flex items-start gap-1.5 text-[12px] leading-[1.45] text-astro-body sm:text-[13px]">
+            <Icon name="sparkle" className="mt-[2px] h-3.5 w-3.5 shrink-0 text-astro-gold" />
+            <span className="line-clamp-1">{benefitLine}</span>
           </p>
+        ) : (
+          product.description && (
+            <p className="mt-1.5 line-clamp-2 text-[12px] leading-[1.45] text-astro-mauve sm:text-[13px]">
+              {product.description}
+            </p>
+          )
         )}
 
-        <div className="mt-auto pt-3">
-          <div className="flex items-center justify-between gap-2">
-            <span style={{ color: "var(--astro-primary)" }} className="text-[17px] font-bold sm:text-[19px]">
-              ₹{product.price.toLocaleString("en-IN")}
-            </span>
-
-            {stars > 0 && (
-              <span
-                style={{ color: "var(--astro-accent)" }}
-                className="text-[10px]"
-                aria-label={`Rated ${product.rating} out of 5`}
-              >
-                {"★".repeat(stars)}
-                <span style={{ color: "var(--astro-border)" }}>{"★".repeat(5 - stars)}</span>
-                {product.reviewCount ? (
-                  <span style={{ color: "var(--astro-mauve)" }}> ({product.reviewCount})</span>
-                ) : null}
-              </span>
-            )}
+        {rating > 0 && (
+          <div
+            className="mt-2 flex items-center gap-1 text-[11px] text-astro-mauve"
+            aria-label={`Rated ${rating.toFixed(1)} out of 5`}
+          >
+            <Icon name="star" filled className="h-3.5 w-3.5 text-astro-gold" strokeWidth={1.2} />
+            <span className="font-semibold text-astro-text">{rating.toFixed(1)}</span>
+            {product.reviewCount ? <span>({product.reviewCount})</span> : null}
           </div>
+        )}
 
-          {lowStock && (
-            <p style={{ color: "var(--astro-accent)" }} className="mt-1 text-[11px] font-medium">
-              Only {stock} left
-            </p>
-          )}
+        <div className="mt-auto flex items-end justify-between gap-2 pt-3">
+          <span className="text-[17px] font-semibold tracking-tight text-astro-text sm:text-[19px]">
+            ₹{product.price.toLocaleString("en-IN")}
+          </span>
 
           <button
             type="button"
             disabled={outOfStock}
-            onClick={() => {
-              if (!outOfStock) addToCart(product);
-            }}
-            style={
+            onClick={handleAdd}
+            aria-label={outOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
+            className={`inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full text-[13px] font-semibold transition-[background-color,transform,box-shadow] duration-300 ease-[var(--ease-astro)] active:scale-95 w-10 sm:w-auto sm:px-4 ${
               outOfStock
-                ? { backgroundColor: "var(--astro-border)", color: "var(--astro-mauve)" }
-                : { backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }
-            }
-            className={`mt-3 h-12 w-full rounded-[10px] text-[14px] font-semibold transition duration-150 ease-in-out ${
-              outOfStock ? "cursor-not-allowed" : "hover:opacity-90 active:scale-[0.98]"
+                ? "cursor-not-allowed bg-astro-border text-astro-mauve"
+                : justAdded
+                  ? "bg-astro-emerald text-white"
+                  : "bg-astro-primary text-astro-on-primary hover:bg-astro-primary-hover hover:shadow-astro-md"
             }`}
           >
-            {outOfStock ? "Out of Stock" : "Add to Cart"}
+            <Icon name={justAdded ? "check" : outOfStock ? "close" : "bag"} className="h-[17px] w-[17px]" strokeWidth={1.9} />
+            <span className="hidden sm:inline">{outOfStock ? "Sold out" : justAdded ? "Added" : "Add"}</span>
           </button>
         </div>
       </div>
     </article>
   );
-                }
+}

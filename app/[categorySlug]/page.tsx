@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import CategoryPage from "@/components/CategoryPage";
 import { createClient } from "@/utils/supabase/server";
 import { getProductsByCategory } from "@/lib/getProducts";
+import { getActiveCategories } from "@/lib/getCategories";
 
 export default async function DynamicCategoryPage({
   params,
@@ -23,16 +24,21 @@ export default async function DynamicCategoryPage({
     notFound();
   }
 
-  const products = await getProductsByCategory(categorySlug);
+  const [products, categories] = await Promise.all([
+    getProductsByCategory(categorySlug),
+    getActiveCategories(),
+  ]);
 
   return (
     <>
       <Header />
       <CategoryPage
+        slug={categorySlug}
         title={category.name}
         description={category.description || ""}
         image={category.image_url || undefined}
         products={products}
+        categories={categories}
       />
     </>
   );

@@ -1,149 +1,321 @@
 import Link from "next/link";
-import ProductCard from "./ProductCard";
-import SafeImage from "./SafeImage";
 import type { Product } from "./ProductCard";
-import { categories } from "@/data/categories";
-import { WHATSAPP_URL, WHATSAPP_ICON_PATH } from "@/lib/site";
+import ProductBrowser, { type BrowserCategory } from "./catalog/ProductBrowser";
+import Icon, { type IconName } from "./ui/Icon";
+import { ButtonLink } from "./ui/Button";
+import { categories as localCategories } from "@/data/categories";
+import { getCategoryContent, getCategoryFallbackImage } from "@/lib/categoryContent";
+import { WHATSAPP_URL, WHATSAPP_ICON_PATH, FREE_SHIPPING_THRESHOLD } from "@/lib/site";
 
 type CategoryPageProps = {
-  /** Category slug (e.g. "crystals") — when given, title, description and
-   *  the hero image are pulled automatically from data/categories.ts, so a
-   *  new category added there needs no extra design work here. */
+  /** Category slug (e.g. "crystals") — drives the hero copy, fallback image and
+   *  the "Coming soon" cross-links. */
   slug?: string;
-  /** Only used when no slug is given (e.g. the generic /shop page), or as
-   *  a fallback if the slug isn't found. */
   title?: string;
   description?: string;
   image?: string;
   products: Product[];
+  /** Active categories — powers the /shop quick nav and empty-state links */
+  categories?: BrowserCategory[];
+  /** "shop" shows category chips + a category filter */
+  variant?: "category" | "shop";
 };
+
+const TRUST: { icon: IconName; title: string; text: string }[] = [
+  { icon: "shield", title: "100% Authentic", text: "Quality-checked pieces" },
+  { icon: "sparkle", title: "Energised", text: "Purified & consecrated" },
+  {
+    icon: "truck",
+    title: "Free Shipping",
+    text: `On orders above ₹${FREE_SHIPPING_THRESHOLD.toLocaleString("en-IN")}`,
+  },
+  { icon: "lotus", title: "Expert Guidance", text: "Help choosing, on WhatsApp" },
+];
 
 export default function CategoryPage({
   slug,
   title,
   description,
   image,
-  products
+  products,
+  categories = [],
+  variant = "category",
 }: CategoryPageProps) {
-  const category = slug ? categories.find((c) => c.slug === slug) : undefined;
+  const local = slug ? localCategories.find((c) => c.slug === slug) : undefined;
+  const content = getCategoryContent(slug);
+  const isShop = variant === "shop";
 
-  const resolvedTitle = category?.name || title || "Collection";
-  const resolvedDescription = category?.description || description || "";
-  const resolvedImage = category?.image || image;
+  const resolvedTitle = title || local?.name || "Collection";
+  const resolvedDescription = description || local?.description || "";
+  const heroImage =
+    image || getCategoryFallbackImage(slug) || (isShop ? "/images/category-gemstones.webp" : local?.image);
+
+  const inStock = products.filter((p) => (p.stock ?? 0) > 0).length;
 
   return (
-    <main style={{ backgroundColor: "var(--astro-bg)" }} className="min-h-screen">
-      {/* HERO — text overlaid on the category image, one merged banner */}
-      <section
-        style={{ borderColor: "var(--astro-border)" }}
-        className="relative min-h-[340px] overflow-hidden border-b sm:min-h-[400px] lg:min-h-[460px]"
-      >
-        {resolvedImage && (
-          <div className="absolute inset-0">
-            <SafeImage src={resolvedImage} alt={resolvedTitle} />
+    <main className="min-h-screen bg-astro-bg">
+      {/* ============================== HERO ============================== */}
+      <section className="relative overflow-hidden border-b border-astro-border bg-astro-surface">
+        {/* soft gold aura */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-40 -top-40 h-[560px] w-[560px] rounded-full opacity-70 blur-3xl"
+          style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--astro-gold) 28%, transparent), transparent 65%)" }}
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-48 -left-32 h-[420px] w-[420px] rounded-full opacity-60 blur-3xl"
+          style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--astro-primary) 12%, transparent), transparent 65%)" }}
+        />
+
+        {/* MOBILE: photo as a soft full-bleed backdrop */}
+        {heroImage && (
+          <div className="absolute inset-0 md:hidden" aria-hidden="true">
+            <img src={heroImage} alt="" fetchPriority="high" className="h-full w-full object-cover object-center" />
+            <div className="absolute inset-0 bg-gradient-to-t from-astro-surface from-40% via-astro-surface/70 via-65% to-transparent" />
           </div>
         )}
 
-        {/* Left-to-right fade: solid page background on the left (behind text),
-            fading to fully transparent so the photo shows clearly on the right —
-            works in both light and dark theme since it uses --astro-bg.
-            Solid zone kept to ~1/3 of the width so more of the photo is visible. */}
-        {resolvedImage && (
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to right, var(--astro-bg) 0%, var(--astro-bg) 30%, rgba(0,0,0,0) 65%)",
-            }}
-            aria-hidden="true"
-          />
-        )}
+        <div
+          className={`relative mx-auto grid max-w-7xl items-center gap-10 px-5 pb-9 sm:px-8 md:grid-cols-12 md:pb-16 md:pt-12 lg:pb-20 lg:pt-14 ${
+            heroImage ? "pt-32" : "pt-10"
+          }`}
+        >
+          <div className="md:col-span-7 lg:col-span-7">
+            <Breadcrumb title={resolvedTitle} />
 
-        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-5 py-10 sm:px-8 sm:py-14">
-          {/* BREADCRUMB — same style as the product page */}
-          <nav aria-label="Breadcrumb">
-            <ol className="flex items-center gap-1.5 whitespace-nowrap text-[12px] sm:text-[13px]">
-              <li>
-                <Link href="/" style={{ color: "var(--astro-mauve)" }} className="transition hover:opacity-75">
-                  Home
-                </Link>
-              </li>
-              <li aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-3 w-3 opacity-60"
-                  style={{ color: "var(--astro-mauve)" }}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M9 6l6 6-6 6" />
-                </svg>
-              </li>
-              <li style={{ color: "var(--astro-text)" }} className="font-medium" aria-current="page">
-                {resolvedTitle}
-              </li>
-            </ol>
-          </nav>
-
-          <div className="mt-6 max-w-[70%] sm:max-w-sm lg:max-w-md">
-            <p style={{ color: "var(--astro-accent)" }} className="text-[10px] font-semibold uppercase tracking-[0.2em]">
-              ASTRODISHA Collection
+            <p className="mt-6 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-astro-accent">
+              <span className="h-px w-8 bg-astro-gold" aria-hidden="true" />
+              {isShop ? "The complete collection" : content.eyebrow}
             </p>
 
-            <h1 style={{ color: "var(--astro-text)" }} className="astro-serif mt-3 text-4xl sm:text-5xl">
+            <h1 className="astro-serif mt-3 text-[44px] leading-[1.02] text-astro-text sm:text-6xl lg:text-[76px]">
               {resolvedTitle}
             </h1>
 
+            <p className="astro-serif mt-4 max-w-xl text-[20px] font-medium italic leading-snug text-astro-primary sm:text-[24px]">
+              {isShop ? "Every stone, seed and sacred object — gathered in one calm place." : content.verse}
+            </p>
+
             {resolvedDescription && (
-              <p style={{ color: "var(--astro-text)", opacity: 0.75 }} className="mt-4 text-sm leading-7">
-                {resolvedDescription}
+              <p className="mt-4 max-w-lg text-[14.5px] leading-7 text-astro-body">{resolvedDescription}</p>
+            )}
+
+            <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
+              {content.promises.map((p) => (
+                <li key={p} className="flex items-center gap-1.5 text-[13px] font-medium text-astro-text">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-astro-emerald-soft text-astro-emerald">
+                    <Icon name="check" className="h-3 w-3" strokeWidth={2.4} />
+                  </span>
+                  {p}
+                </li>
+              ))}
+            </ul>
+
+            {products.length > 0 && (
+              <p className="mt-6 text-[13px] text-astro-mauve">
+                <span className="font-semibold text-astro-text">{products.length}</span>{" "}
+                {products.length === 1 ? "piece" : "pieces"}
+                {inStock < products.length && <> · {inStock} ready to ship</>}
               </p>
             )}
           </div>
+
+          {/* DESKTOP: temple-arch framed photo */}
+          {heroImage && (
+            <div className="relative mx-auto hidden w-full max-w-[400px] md:col-span-5 md:block">
+              <div
+                aria-hidden="true"
+                className="astro-drift absolute -inset-4 rounded-t-full rounded-b-[40px] border border-[color-mix(in_srgb,var(--astro-gold)_45%,transparent)]"
+              />
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-t-full rounded-b-[32px] bg-astro-card shadow-astro-lg ring-1 ring-black/5">
+                <img src={heroImage} alt={resolvedTitle} fetchPriority="high" className="h-full w-full object-cover" />
+              </div>
+              <div className="absolute -bottom-4 left-0 flex items-center gap-3 rounded-2xl border border-astro-border bg-astro-card/90 px-4 py-3 shadow-astro-md backdrop-blur lg:-left-6">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-astro-gold-soft text-astro-accent">
+                  <Icon name="lotus" className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-[12.5px] font-semibold text-astro-text">Purified & energised</p>
+                  <p className="text-[11.5px] text-astro-mauve">before it reaches you</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-8 sm:py-14">
+      {/* =========================== TRUST STRIP =========================== */}
+      <section className="border-b border-astro-border bg-astro-bg">
+        <ul className="no-scrollbar mx-auto flex max-w-7xl gap-6 overflow-x-auto px-5 py-4 sm:px-8 lg:grid lg:grid-cols-4 lg:gap-8 lg:py-5">
+          {TRUST.map((t) => (
+            <li key={t.title} className="flex shrink-0 items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-astro-border bg-astro-card text-astro-accent">
+                <Icon name={t.icon} className="h-[18px] w-[18px]" />
+              </span>
+              <div>
+                <p className="text-[13px] font-semibold text-astro-text">{t.title}</p>
+                <p className="text-[12px] text-astro-mauve">{t.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* ========================= PRODUCTS / EMPTY ========================= */}
+      <section className="mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-8 sm:pt-12">
         {products.length === 0 ? (
-          <div
-            style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-            className="rounded-2xl border px-6 py-16 text-center"
-          >
-            <h2 style={{ color: "var(--astro-text)" }} className="astro-serif text-2xl">
-              Coming Soon
-            </h2>
+          <ComingSoon
+            title={resolvedTitle}
+            image={heroImage}
+            others={categories.filter((c) => c.slug !== slug).slice(0, 4)}
+          />
+        ) : (
+          <ProductBrowser
+            products={products}
+            categories={categories}
+            showCategoryFilter={isShop}
+            collectionName={resolvedTitle}
+          />
+        )}
+      </section>
+    </main>
+  );
+}
 
-            <p style={{ color: "var(--astro-mauve)" }} className="mt-2 text-sm">
-              New products are being added to this collection.
-            </p>
+/* ------------------------------------------------------------------ */
 
+function Breadcrumb({ title }: { title: string }) {
+  return (
+    <nav aria-label="Breadcrumb">
+      <ol className="flex items-center gap-1.5 whitespace-nowrap text-[12px] text-astro-mauve sm:text-[13px]">
+        <li>
+          <Link href="/" className="transition hover:text-astro-primary">
+            Home
+          </Link>
+        </li>
+        <li aria-hidden="true">
+          <Icon name="chevronRight" className="h-3 w-3 opacity-60" strokeWidth={2} />
+        </li>
+        {title !== "All Products" && (
+          <>
+            <li>
+              <Link href="/shop" className="transition hover:text-astro-primary">
+                Shop
+              </Link>
+            </li>
+            <li aria-hidden="true">
+              <Icon name="chevronRight" className="h-3 w-3 opacity-60" strokeWidth={2} />
+            </li>
+          </>
+        )}
+        <li className="font-medium text-astro-text" aria-current="page">
+          {title}
+        </li>
+      </ol>
+    </nav>
+  );
+}
+
+function ComingSoon({
+  title,
+  image,
+  others,
+}: {
+  title: string;
+  image?: string;
+  others: BrowserCategory[];
+}) {
+  return (
+    <div>
+      <div className="relative overflow-hidden rounded-[32px] border border-astro-border bg-astro-card px-6 py-14 text-center shadow-astro-sm sm:px-12 sm:py-20">
+        {/* concentric gold rings */}
+        <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          {[560, 420, 280].map((size) => (
+            <div
+              key={size}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[color-mix(in_srgb,var(--astro-gold)_22%,transparent)]"
+              style={{ width: size, height: size }}
+            />
+          ))}
+        </div>
+
+        <div className="relative">
+          <div className="astro-drift mx-auto h-36 w-28 overflow-hidden rounded-t-full rounded-b-2xl bg-astro-surface shadow-astro-md ring-4 ring-astro-card sm:h-44 sm:w-36">
+            {image ? (
+              <img src={image} alt="" className="h-full w-full object-cover opacity-90" />
+            ) : (
+              <div className="flex h-full items-center justify-center text-astro-accent">
+                <Icon name="lotus" className="h-12 w-12" />
+              </div>
+            )}
+          </div>
+
+          <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.26em] text-astro-accent">
+            {title} · Coming soon
+          </p>
+          <h2 className="astro-serif mx-auto mt-3 max-w-xl text-[34px] leading-[1.1] text-astro-text sm:text-[46px]">
+            Being lovingly curated
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-[14.5px] leading-7 text-astro-body">
+            Each piece is chosen, purified and energised before it joins the collection. Tell us what you&apos;re looking for
+            and we&apos;ll let you know the moment it arrives.
+          </p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-              className="mt-6 inline-flex h-12 items-center gap-2 rounded-full px-7 text-sm font-semibold transition hover:opacity-90"
+              className="inline-flex h-[52px] items-center gap-2 rounded-full bg-astro-primary px-7 text-[15px] font-semibold text-astro-on-primary shadow-astro-sm transition hover:bg-astro-primary-hover hover:shadow-astro-md"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
                 <path d={WHATSAPP_ICON_PATH} />
               </svg>
-              Ask When It&apos;s Available
+              Notify me on WhatsApp
             </a>
+            <ButtonLink href="/shop" variant="secondary" size="lg">
+              Browse all products
+            </ButtonLink>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-              />
+        </div>
+      </div>
+
+      {others.length > 0 && (
+        <div className="mt-14">
+          <div className="flex items-end justify-between gap-4">
+            <h3 className="astro-serif text-[28px] text-astro-text sm:text-[34px]">Explore other collections</h3>
+            <Link href="/shop" className="hidden items-center gap-1 text-[13px] font-semibold text-astro-primary sm:inline-flex">
+              View all <Icon name="arrowRight" className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+            {others.map((c) => (
+              <Link
+                key={c.slug}
+                href={`/${c.slug}`}
+                className="group relative aspect-[4/5] overflow-hidden rounded-[24px] bg-astro-surface shadow-astro-sm transition duration-500 hover:-translate-y-1 hover:shadow-astro-md"
+              >
+                {c.image && (
+                  <img
+                    src={c.image}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover transition duration-700 ease-[var(--ease-astro)] group-hover:scale-105"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(22,8,40,0.72)] via-[rgba(22,8,40,0.1)] to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4">
+                  <span className="astro-serif text-[22px] leading-tight text-white sm:text-[26px]">{c.name}</span>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition group-hover:bg-white group-hover:text-[#2d1155]">
+                    <Icon name="arrowRight" className="h-4 w-4" />
+                  </span>
+                </div>
+              </Link>
             ))}
           </div>
-        )}
-      </section>
-    </main>
+        </div>
+      )}
+    </div>
   );
 }

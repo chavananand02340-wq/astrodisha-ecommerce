@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import "@fontsource-variable/cormorant-garamond/wght.css";
+import "@fontsource-variable/cormorant-garamond/wght-italic.css";
+import "@fontsource-variable/dm-sans/wght.css";
 import "./globals.css";
 import { StoreProvider } from "@/components/StoreProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
