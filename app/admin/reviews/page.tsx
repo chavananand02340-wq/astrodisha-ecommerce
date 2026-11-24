@@ -61,12 +61,12 @@ function ReviewsContent() {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "900px", margin: "0 auto", fontFamily: "Inter, sans-serif" }}>
-      <h1 style={{ fontFamily: "Playfair Display, serif", color: "#3E2237" }}>
+    <div style={{ padding: "2rem", maxWidth: "900px", margin: "0 auto", fontFamily: "var(--font-sans)" }}>
+      <h1 style={{ fontFamily: "var(--font-serif)", color: "#241046" }}>
         Customer Reviews
       </h1>
 
-      <p style={{ color: "#8A607A", fontSize: "0.85rem", marginTop: "0.5rem" }}>
+      <p style={{ color: "#6a5d70", fontSize: "0.85rem", marginTop: "0.5rem" }}>
         All reviews go live on the site immediately. Use Delete to remove any review.
       </p>
 
@@ -77,37 +77,37 @@ function ReviewsContent() {
       {loading ? (
         <p style={{ marginTop: "1rem" }}>Loading...</p>
       ) : reviews.length === 0 ? (
-        <p style={{ color: "#8A607A", marginTop: "1rem" }}>No reviews yet.</p>
+        <p style={{ color: "#6a5d70", marginTop: "1rem" }}>No reviews yet.</p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1.5rem" }}>
           {reviews.map((r) => (
             <div
               key={r.id}
               style={{
-                border: "1px solid #D9CEC1",
+                border: "1px solid #E7DDCF",
                 borderRadius: "8px",
                 padding: "1rem",
-                backgroundColor: "#FBF8F2",
+                backgroundColor: "#FFFDF9",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem" }}>
                 <div>
-                  <p style={{ fontWeight: "bold", color: "#3E2237", margin: 0 }}>
+                  <p style={{ fontWeight: "bold", color: "#241046", margin: 0 }}>
                     {r.customer_name}{" "}
-                    <span style={{ fontWeight: "normal", color: "#8A607A", fontSize: "0.85rem" }}>
+                    <span style={{ fontWeight: "normal", color: "#6a5d70", fontSize: "0.85rem" }}>
                       on {r.products?.name || "Unknown product"}
                     </span>
                   </p>
                   <p style={{ color: "#C6A15B", margin: "0.25rem 0" }}>
                     {"★".repeat(r.rating)}
-                    <span style={{ color: "#D9CEC1" }}>{"★".repeat(5 - r.rating)}</span>
+                    <span style={{ color: "#E7DDCF" }}>{"★".repeat(5 - r.rating)}</span>
                   </p>
                   {r.review_text && (
-                    <p style={{ color: "#3E2237", fontSize: "0.9rem", margin: "0.25rem 0" }}>
+                    <p style={{ color: "#241046", fontSize: "0.9rem", margin: "0.25rem 0" }}>
                       {r.review_text}
                     </p>
                   )}
-                  <p style={{ color: "#8A607A", fontSize: "0.75rem", margin: 0 }}>
+                  <p style={{ color: "#6a5d70", fontSize: "0.75rem", margin: 0 }}>
                     {new Date(r.created_at).toLocaleString("en-IN")}
                   </p>
                 </div>

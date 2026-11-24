@@ -128,6 +128,11 @@ export default function FindYourStone() {
   const stone = rashi ? STONES[rashi.stone] : null;
 
   function choose(name: string) {
+    // tapping the chosen Rashi again closes the result
+    if (selected === name) {
+      setSelected(null);
+      return;
+    }
     setSelected(name);
     // On phones the result sits below the grid — bring it into view
     if (window.matchMedia("(max-width: 1023px)").matches) {

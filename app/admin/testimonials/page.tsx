@@ -390,21 +390,21 @@ function TestimonialsContent() {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto", fontFamily: "Inter, sans-serif" }}>
-      <h1 style={{ fontFamily: "Playfair Display, serif", color: "#3E2237" }}>
+    <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto", fontFamily: "var(--font-sans)" }}>
+      <h1 style={{ fontFamily: "var(--font-serif)", color: "#241046" }}>
         Manage Testimonials
       </h1>
 
       <div
         style={{
-          backgroundColor: "#FBF8F2",
-          border: "1px solid #D9CEC1",
+          backgroundColor: "#FFFDF9",
+          border: "1px solid #E7DDCF",
           borderRadius: "8px",
           padding: "1.5rem",
           marginTop: "1.5rem",
         }}
       >
-        <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginBottom: "1rem" }}>
+        <h2 style={{ fontSize: "1.1rem", color: "#241046", marginBottom: "1rem" }}>
           Add Testimonial
         </h2>
         <form onSubmit={handleAddTestimonial}>
@@ -429,7 +429,7 @@ function TestimonialsContent() {
             <option value="1">★☆☆☆☆ (1)</option>
           </select>
 
-          <label style={{ fontSize: "0.8rem", color: "#8A607A" }}>Customer photo (optional, small avatar)</label>
+          <label style={{ fontSize: "0.8rem", color: "#6a5d70" }}>Customer photo (optional, small avatar)</label>
           <input
             type="file"
             name="testimonialImage"
@@ -442,15 +442,15 @@ function TestimonialsContent() {
               marginTop: "0.25rem",
               marginBottom: "1rem",
               padding: "0.9rem",
-              border: "1px solid #D9CEC1",
+              border: "1px solid #E7DDCF",
               borderRadius: "6px",
               backgroundColor: "#fff",
             }}
           >
-            <p style={{ fontWeight: "bold", color: "#3E2237", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+            <p style={{ fontWeight: "bold", color: "#241046", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
               Testimonial Media (optional)
             </p>
-            <p style={{ color: "#8A607A", fontSize: "0.75rem", marginBottom: "0.6rem" }}>
+            <p style={{ color: "#6a5d70", fontSize: "0.75rem", marginBottom: "0.6rem" }}>
               Let the customer's testimonial include a photo, a short video (max 15MB) or a voice note (max 3MB).
             </p>
 
@@ -461,9 +461,9 @@ function TestimonialsContent() {
                   type="button"
                   onClick={() => setMediaType(opt)}
                   style={{
-                    backgroundColor: mediaType === opt ? "#5A3150" : "#FBF8F2",
-                    color: mediaType === opt ? "#fff" : "#3E2237",
-                    border: "1px solid #D9CEC1",
+                    backgroundColor: mediaType === opt ? "#2d1155" : "#FFFDF9",
+                    color: mediaType === opt ? "#fff" : "#241046",
+                    border: "1px solid #E7DDCF",
                     borderRadius: "999px",
                     padding: "0.35rem 0.9rem",
                     fontSize: "0.78rem",
@@ -493,7 +493,7 @@ function TestimonialsContent() {
             className="transition hover:opacity-85 active:scale-95"
             style={{
               display: "block",
-              backgroundColor: "#5A3150",
+              backgroundColor: "#2d1155",
               color: "#fff",
               border: "none",
               borderRadius: "6px",
@@ -507,11 +507,11 @@ function TestimonialsContent() {
         </form>
 
         {statusMsg && (
-          <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#3E2237" }}>{statusMsg}</p>
+          <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#241046" }}>{statusMsg}</p>
         )}
       </div>
 
-      <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginTop: "2rem", marginBottom: "1rem" }}>
+      <h2 style={{ fontSize: "1.1rem", color: "#241046", marginTop: "2rem", marginBottom: "1rem" }}>
         All Testimonials
       </h2>
 
@@ -525,10 +525,10 @@ function TestimonialsContent() {
             <div
               key={t.id}
               style={{
-                border: "1px solid #D9CEC1",
+                border: "1px solid #E7DDCF",
                 borderRadius: "8px",
                 padding: "1rem",
-                backgroundColor: "#FBF8F2",
+                backgroundColor: "#FFFDF9",
                 display: "flex",
                 gap: "1rem",
                 alignItems: "flex-start",
@@ -543,10 +543,10 @@ function TestimonialsContent() {
                 />
               )}
               <div style={{ flex: 1, minWidth: "220px" }}>
-                <div style={{ fontWeight: "bold", color: "#3E2237" }}>
+                <div style={{ fontWeight: "bold", color: "#241046" }}>
                   {t.customer_name} {t.rating && "★".repeat(t.rating)}
                 </div>
-                <p style={{ fontSize: "0.85rem", color: "#5E4A58", marginTop: "0.3rem" }}>
+                <p style={{ fontSize: "0.85rem", color: "#4a4453", marginTop: "0.3rem" }}>
                   {t.testimonial_text}
                 </p>
 
@@ -560,7 +560,7 @@ function TestimonialsContent() {
                   <img src={t.media_url} alt="" style={{ marginTop: "0.5rem", maxWidth: "220px", borderRadius: "8px" }} />
                 )}
 
-                <div style={{ fontSize: "0.75rem", color: "#8A607A", marginTop: "0.4rem" }}>
+                <div style={{ fontSize: "0.75rem", color: "#6a5d70", marginTop: "0.4rem" }}>
                   {t.is_active ? "Active" : "Inactive"}
                   {t.media_type ? ` • Media: ${t.media_type}` : ""}
                 </div>
@@ -570,7 +570,7 @@ function TestimonialsContent() {
                     onClick={() => toggleActive(t)}
                     className="transition hover:opacity-85 active:scale-95"
                     style={{
-                      backgroundColor: t.is_active ? "#B00020" : "#5A3150",
+                      backgroundColor: t.is_active ? "#B00020" : "#2d1155",
                       color: "#fff",
                       border: "none",
                       borderRadius: "4px",
@@ -585,7 +585,7 @@ function TestimonialsContent() {
                     onClick={() => deleteTestimonial(t)}
                     className="transition hover:opacity-85 active:scale-95"
                     style={{
-                      backgroundColor: "#8A607A",
+                      backgroundColor: "#6a5d70",
                       color: "#fff",
                       border: "none",
                       borderRadius: "4px",
@@ -618,7 +618,7 @@ function TestimonialsContent() {
                 </div>
 
                 <div style={{ marginTop: "0.6rem" }}>
-                  <label style={{ fontSize: "0.72rem", color: "#8A607A", display: "block", marginBottom: "0.25rem" }}>
+                  <label style={{ fontSize: "0.72rem", color: "#6a5d70", display: "block", marginBottom: "0.25rem" }}>
                     {t.media_url ? "Replace media with:" : "Add media:"}
                   </label>
                   <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap", marginBottom: "0.3rem" }}>
@@ -627,11 +627,11 @@ function TestimonialsContent() {
                         key={opt}
                         style={{
                           fontSize: "0.72rem",
-                          border: "1px solid #D9CEC1",
+                          border: "1px solid #E7DDCF",
                           borderRadius: "999px",
                           padding: "0.2rem 0.6rem",
                           cursor: replacingId === t.id ? "not-allowed" : "pointer",
-                          color: "#3E2237",
+                          color: "#241046",
                           textTransform: "capitalize",
                         }}
                       >
@@ -651,7 +651,7 @@ function TestimonialsContent() {
                     ))}
                   </div>
                   {replacingId === t.id && (
-                    <p style={{ fontSize: "0.72rem", color: "#8A607A" }}>Uploading...</p>
+                    <p style={{ fontSize: "0.72rem", color: "#6a5d70" }}>Uploading...</p>
                   )}
                 </div>
               </div>
@@ -668,7 +668,7 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.6rem",
   marginBottom: "0.75rem",
-  border: "1px solid #D9CEC1",
+  border: "1px solid #E7DDCF",
   borderRadius: "4px",
   backgroundColor: "#fff",
 };

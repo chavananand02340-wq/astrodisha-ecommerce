@@ -141,14 +141,14 @@ export default function OrdersChart() {
   return (
     <div
       style={{
-        backgroundColor: "#FBF8F2",
-        border: "1px solid #D9CEC1",
+        backgroundColor: "#FFFDF9",
+        border: "1px solid #E7DDCF",
         borderRadius: "12px",
         padding: "1.25rem",
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1rem" }}>
-        <h2 style={{ fontSize: "1.05rem", color: "#3E2237", fontWeight: "bold", margin: 0, fontFamily: "Playfair Display, serif" }}>
+        <h2 style={{ fontSize: "1.05rem", color: "#241046", fontWeight: "bold", margin: 0, fontFamily: "var(--font-serif)" }}>
           Orders Tracking
         </h2>
 
@@ -158,9 +158,9 @@ export default function OrdersChart() {
               key={mode}
               onClick={() => setViewMode(mode)}
               style={{
-                backgroundColor: viewMode === mode ? "#5A3150" : "#fff",
-                color: viewMode === mode ? "#fff" : "#3E2237",
-                border: "1px solid " + (viewMode === mode ? "#5A3150" : "#D9CEC1"),
+                backgroundColor: viewMode === mode ? "#2d1155" : "#fff",
+                color: viewMode === mode ? "#fff" : "#241046",
+                border: "1px solid " + (viewMode === mode ? "#2d1155" : "#E7DDCF"),
                 borderRadius: "999px",
                 padding: "0.35rem 0.9rem",
                 fontSize: "0.78rem",
@@ -178,9 +178,9 @@ export default function OrdersChart() {
       {error ? (
         <p style={{ color: "#B00020", fontSize: "0.85rem" }}>{error}</p>
       ) : !rawDates ? (
-        <p style={{ color: "#8A607A", fontSize: "0.85rem" }}>Loading chart...</p>
+        <p style={{ color: "#6a5d70", fontSize: "0.85rem" }}>Loading chart...</p>
       ) : buckets.every((b) => b.count === 0) ? (
-        <p style={{ color: "#8A607A", fontSize: "0.85rem" }}>No orders in this period yet.</p>
+        <p style={{ color: "#6a5d70", fontSize: "0.85rem" }}>No orders in this period yet.</p>
       ) : (
         <div style={{ overflowX: "auto" }}>
           <div
@@ -200,7 +200,7 @@ export default function OrdersChart() {
                   style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "26px", flexShrink: 0 }}
                   title={`${b.label}: ${b.count} order${b.count === 1 ? "" : "s"}`}
                 >
-                  <div style={{ fontSize: "0.65rem", color: "#3E2237", marginBottom: "2px" }}>
+                  <div style={{ fontSize: "0.65rem", color: "#241046", marginBottom: "2px" }}>
                     {b.count > 0 ? b.count : ""}
                   </div>
                   <div
@@ -222,14 +222,14 @@ export default function OrdersChart() {
               gap: "8px",
               minWidth: buckets.length * 34,
               marginTop: "6px",
-              borderTop: "1px solid #D9CEC1",
+              borderTop: "1px solid #E7DDCF",
               paddingTop: "6px",
             }}
           >
             {buckets.map((b) => (
               <div
                 key={b.label}
-                style={{ width: "26px", flexShrink: 0, fontSize: "0.6rem", color: "#8A607A", textAlign: "center", whiteSpace: "nowrap" }}
+                style={{ width: "26px", flexShrink: 0, fontSize: "0.6rem", color: "#6a5d70", textAlign: "center", whiteSpace: "nowrap" }}
               >
                 {b.label}
               </div>

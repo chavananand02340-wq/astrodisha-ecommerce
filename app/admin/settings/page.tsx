@@ -103,20 +103,20 @@ function SettingsContent() {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "640px", margin: "0 auto", fontFamily: "Inter, sans-serif" }}>
-      <h1 style={{ fontFamily: "Playfair Display, serif", color: "#3E2237" }}>Settings</h1>
+    <div style={{ padding: "2rem", maxWidth: "640px", margin: "0 auto", fontFamily: "var(--font-sans)" }}>
+      <h1 style={{ fontFamily: "var(--font-serif)", color: "#241046" }}>Settings</h1>
 
       <div
         style={{
-          backgroundColor: "#FBF8F2",
-          border: "1px solid #D9CEC1",
+          backgroundColor: "#FFFDF9",
+          border: "1px solid #E7DDCF",
           borderRadius: "8px",
           padding: "1.5rem",
           marginTop: "1.5rem",
         }}
       >
-        <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginBottom: "0.5rem" }}>Marketing tracking</h2>
-        <p style={{ fontSize: "0.8rem", color: "#8A607A", marginBottom: "1rem" }}>
+        <h2 style={{ fontSize: "1.1rem", color: "#241046", marginBottom: "0.5rem" }}>Marketing tracking</h2>
+        <p style={{ fontSize: "0.8rem", color: "#6a5d70", marginBottom: "1rem" }}>
           Leave empty to turn tracking off. These IDs are public (they appear in the page source), so they are safe to show here.
         </p>
 
@@ -149,7 +149,7 @@ function SettingsContent() {
               type="submit"
               disabled={saving}
               style={{
-                backgroundColor: "#5A3150",
+                backgroundColor: "#2d1155",
                 color: "#fff",
                 border: "none",
                 borderRadius: "6px",
@@ -164,7 +164,7 @@ function SettingsContent() {
           </form>
         )}
 
-        {msg && <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#3E2237" }}>{msg}</p>}
+        {msg && <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#241046" }}>{msg}</p>}
       </div>
     </div>
   );
@@ -174,7 +174,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: "0.8rem",
   fontWeight: "bold",
-  color: "#3E2237",
+  color: "#241046",
   marginBottom: "0.3rem",
 };
 
@@ -183,7 +183,7 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.6rem",
   marginBottom: "0.75rem",
-  border: "1px solid #D9CEC1",
+  border: "1px solid #E7DDCF",
   borderRadius: "4px",
   backgroundColor: "#fff",
 };

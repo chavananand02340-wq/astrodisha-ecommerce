@@ -200,24 +200,24 @@ function BannersContent() {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto", fontFamily: "Inter, sans-serif" }}>
-      <h1 style={{ fontFamily: "Playfair Display, serif", color: "#3E2237" }}>
+    <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto", fontFamily: "var(--font-sans)" }}>
+      <h1 style={{ fontFamily: "var(--font-serif)", color: "#241046" }}>
         Manage Homepage Banners
       </h1>
-      <p style={{ color: "#8A607A", fontSize: "0.85rem" }}>
+      <p style={{ color: "#6a5d70", fontSize: "0.85rem" }}>
         Only one banner can be active at a time. Activating a new one automatically deactivates the previous.
       </p>
 
       <div
         style={{
-          backgroundColor: "#FBF8F2",
-          border: "1px solid #D9CEC1",
+          backgroundColor: "#FFFDF9",
+          border: "1px solid #E7DDCF",
           borderRadius: "8px",
           padding: "1.5rem",
           marginTop: "1.5rem",
         }}
       >
-        <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginBottom: "1rem" }}>Add Banner</h2>
+        <h2 style={{ fontSize: "1.1rem", color: "#241046", marginBottom: "1rem" }}>Add Banner</h2>
         <form onSubmit={handleAddBanner}>
           <input
             type="text"
@@ -254,7 +254,7 @@ function BannersContent() {
             disabled={uploading}
             style={{
               display: "block",
-              backgroundColor: "#5A3150",
+              backgroundColor: "#2d1155",
               color: "#fff",
               border: "none",
               borderRadius: "4px",
@@ -268,11 +268,11 @@ function BannersContent() {
         </form>
 
         {statusMsg && (
-          <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#3E2237" }}>{statusMsg}</p>
+          <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#241046" }}>{statusMsg}</p>
         )}
       </div>
 
-      <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginTop: "2rem", marginBottom: "1rem" }}>
+      <h2 style={{ fontSize: "1.1rem", color: "#241046", marginTop: "2rem", marginBottom: "1rem" }}>
         All Banners
       </h2>
 
@@ -286,10 +286,10 @@ function BannersContent() {
             <div
               key={b.id}
               style={{
-                border: b.is_active ? "2px solid #C6A15B" : "1px solid #D9CEC1",
+                border: b.is_active ? "2px solid #C6A15B" : "1px solid #E7DDCF",
                 borderRadius: "8px",
                 padding: "1rem",
-                backgroundColor: "#FBF8F2",
+                backgroundColor: "#FFFDF9",
               }}
             >
               <img
@@ -298,11 +298,11 @@ function BannersContent() {
                 style={{ width: "100%", maxHeight: "150px", objectFit: "cover", borderRadius: "6px" }}
               />
               <div style={{ marginTop: "0.5rem" }}>
-                <div style={{ fontWeight: "bold", color: "#3E2237" }}>
+                <div style={{ fontWeight: "bold", color: "#241046" }}>
                   {b.title} {b.is_active && <span style={{ color: "#C6A15B" }}>(Active)</span>}
                 </div>
                 {b.subtitle && (
-                  <div style={{ fontSize: "0.85rem", color: "#8A607A" }}>{b.subtitle}</div>
+                  <div style={{ fontSize: "0.85rem", color: "#6a5d70" }}>{b.subtitle}</div>
                 )}
               </div>
               <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
@@ -325,7 +325,7 @@ function BannersContent() {
                   <button
                     onClick={() => activateBanner(b)}
                     style={{
-                      backgroundColor: "#5A3150",
+                      backgroundColor: "#2d1155",
                       color: "#fff",
                       border: "none",
                       borderRadius: "4px",
@@ -340,7 +340,7 @@ function BannersContent() {
                 <button
                   onClick={() => deleteBanner(b)}
                   style={{
-                    backgroundColor: "#8A607A",
+                    backgroundColor: "#6a5d70",
                     color: "#fff",
                     border: "none",
                     borderRadius: "4px",
@@ -365,7 +365,7 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.6rem",
   marginBottom: "0.75rem",
-  border: "1px solid #D9CEC1",
+  border: "1px solid #E7DDCF",
   borderRadius: "4px",
   backgroundColor: "#fff",
 };
