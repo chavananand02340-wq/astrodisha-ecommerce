@@ -13,6 +13,8 @@ type ProductRow = {
   specifications: { key: string; value: string }[] | null;
   categories: { name: string; slug: string } | null;
   product_images: { image_url: string; is_primary: boolean; sort_order: number }[] | null;
+  // MRP / original price (optional). Only present once the column exists.
+  compare_at_price?: number | string | null;
 };
 
 // Extra columns only needed on the single product page
@@ -39,6 +41,24 @@ type ProductListRow = ProductRow & {
 const PRODUCT_DETAIL_SELECT =
   PRODUCT_SELECT + ", benefits, how_to_wear, product_details, certificate, certificate_image_url";
 
+// MRP support: the `compare_at_price` column is added by
+// supabase/migrations/20261125_add_compare_at_price.sql. Until that SQL has been run,
+// queries silently fall back to the old column list so the shop never breaks.
+const MRP_COLUMN = "compare_at_price";
+
+type QueryResult = { data: unknown; error: { message?: string; code?: string } | null };
+
+async function withMrp(
+  run: (select: string) => PromiseLike<QueryResult>,
+  baseSelect: string
+): Promise<QueryResult> {
+  const first = await run(`${baseSelect}, ${MRP_COLUMN}`);
+  if (first.error && (first.error.message || "").includes(MRP_COLUMN)) {
+    return run(baseSelect);
+  }
+  return first;
+}
+
 function mapRowToProduct(row: ProductRow): Product {
   const sortedImages = [...(row.product_images || [])].sort((a, b) => {
     if (a.is_primary) return -1;
@@ -57,6 +77,10 @@ function mapRowToProduct(row: ProductRow): Product {
     categorySlug: row.categories?.slug || undefined,
     description: row.short_description || "",
     price: Number(row.price),
+    mrp:
+      row.compare_at_price != null && Number(row.compare_at_price) > Number(row.price)
+        ? Number(row.compare_at_price)
+        : undefined,
     stock: typeof row.stock === "number" ? row.stock : Number(row.stock) || 0,
     image: primaryImage,
     images: imageUrls.length > 0 ? imageUrls : [primaryImage],
@@ -90,13 +114,13 @@ function mapRowToProductDetail(row: ProductDetailRow): Product {
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await withMrp((sel) => supabase
     .from("products")
-    .select(PRODUCT_SELECT)
+    .select(sel)
     .eq("is_active", true)
     .order("is_featured", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
-    .limit(limit);
+    .limit(limit), PRODUCT_SELECT);
 
   if (error || !data) {
     return [];
@@ -111,12 +135,12 @@ export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
 export async function getAllProducts(): Promise<Product[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await withMrp((sel) => supabase
     .from("products")
-    .select(PRODUCT_LIST_SELECT)
+    .select(sel)
     .eq("is_active", true)
     .order("display_order", { ascending: true, nullsFirst: false })
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }), PRODUCT_LIST_SELECT);
 
   if (error || !data) {
     return [];
@@ -140,13 +164,13 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
     return [];
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await withMrp((sel) => supabase
     .from("products")
-    .select(PRODUCT_LIST_SELECT)
+    .select(sel)
     .eq("is_active", true)
     .eq("category_id", category.id)
     .order("display_order", { ascending: true, nullsFirst: false })
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }), PRODUCT_LIST_SELECT);
 
   if (error || !data) {
     return [];
@@ -159,12 +183,12 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await withMrp((sel) => supabase
     .from("products")
-    .select(PRODUCT_DETAIL_SELECT)
+    .select(sel)
     .eq("is_active", true)
     .eq("slug", slug)
-    .maybeSingle();
+    .maybeSingle(), PRODUCT_DETAIL_SELECT);
 
   if (error || !data) {
     return null;
@@ -186,14 +210,14 @@ export async function getRelatedProducts(product: Product, limit = 8): Promise<P
       .maybeSingle();
 
     if (category) {
-      const { data } = await supabase
+      const { data } = await withMrp((sel) => supabase
         .from("products")
-        .select(PRODUCT_SELECT)
+        .select(sel)
         .eq("is_active", true)
         .eq("category_id", category.id)
         .neq("id", product.id)
         .order("created_at", { ascending: false })
-        .limit(limit);
+        .limit(limit), PRODUCT_SELECT);
 
       items = ((data || []) as unknown as ProductRow[]).map(mapRowToProduct);
     }
@@ -201,13 +225,13 @@ export async function getRelatedProducts(product: Product, limit = 8): Promise<P
 
   if (items.length < 4) {
     const excludeIds = [product.id, ...items.map((p) => p.id)];
-    const { data } = await supabase
+    const { data } = await withMrp((sel) => supabase
       .from("products")
-      .select(PRODUCT_SELECT)
+      .select(sel)
       .eq("is_active", true)
       .not("id", "in", `(${excludeIds.join(",")})`)
       .order("created_at", { ascending: false })
-      .limit(limit - items.length);
+      .limit(limit - items.length), PRODUCT_SELECT);
 
     items = [...items, ...((data || []) as unknown as ProductRow[]).map(mapRowToProduct)];
   }

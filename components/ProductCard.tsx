@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useStore } from "./StoreProvider";
 import Icon from "./ui/Icon";
+import { discountPercent } from "@/lib/pricing";
 
 export type PdpBenefit = { title: string; description: string };
 export type PdpStep = { title: string; description: string; icon: string };
@@ -29,6 +30,8 @@ export type Product = {
   categorySlug?: string;
   description: string;
   price: number;
+  /** MRP / original price — shown struck through with a "% OFF" badge when higher than price */
+  mrp?: number;
   stock: number;
   image: string;
   images?: string[];
@@ -77,6 +80,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const stock = product.stock ?? 0;
   const outOfStock = stock <= 0;
   const lowStock = !outOfStock && stock <= 5;
+  const off = discountPercent(product.price, product.mrp);
 
   // Second photo cross-fades in on hover (desktop) when the product has one
   const hoverImage = product.images && product.images.length > 1 ? product.images[1] : undefined;
@@ -138,8 +142,14 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/10 to-transparent"
         />
 
+        {off > 0 && !outOfStock && (
+          <span className="absolute left-2.5 top-2.5 rounded-full bg-astro-terracotta px-2.5 py-1 text-[10.5px] font-bold tracking-[0.04em] text-white shadow-astro-sm">
+            {off}% OFF
+          </span>
+        )}
+
         {lowStock && (
-          <span className="absolute left-2.5 top-2.5 rounded-full bg-astro-card/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-astro-terracotta shadow-astro-sm backdrop-blur">
+          <span className="absolute bottom-2.5 left-2.5 rounded-full bg-[#f6d98c] px-2.5 py-1 text-[10.5px] font-semibold text-[#5a3a00] shadow-astro-sm">
             Only {stock} left
           </span>
         )}
@@ -200,9 +210,16 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         )}
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-3">
-          <span className="text-[17px] font-semibold tracking-tight text-astro-text sm:text-[19px]">
-            ₹{product.price.toLocaleString("en-IN")}
-          </span>
+          <div className="min-w-0 leading-tight">
+            <span className="block text-[17px] font-semibold tracking-tight text-astro-text sm:text-[19px]">
+              ₹{product.price.toLocaleString("en-IN")}
+            </span>
+            {off > 0 && (
+              <span className="block text-[12px] text-astro-mauve line-through decoration-astro-mauve/70 sm:text-[13px]">
+                <span className="sr-only">MRP </span>₹{product.mrp!.toLocaleString("en-IN")}
+              </span>
+            )}
+          </div>
 
           <button
             type="button"

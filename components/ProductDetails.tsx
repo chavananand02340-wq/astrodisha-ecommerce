@@ -7,6 +7,7 @@ import ProductCard from "./ProductCard";
 import type { Product, PdpCertificate } from "./ProductCard";
 import { useStore } from "./StoreProvider";
 import Icon, { type IconName } from "./ui/Icon";
+import { discountPercent } from "@/lib/pricing";
 import { WHATSAPP_NUMBER, WHATSAPP_ICON_PATH } from "@/lib/site";
 import { createClient } from "@/utils/supabase/client";
 import {
@@ -907,6 +908,16 @@ export default function ProductDetails({ product, related = [] }: { product: Pro
               <p className="text-[32px] font-semibold leading-none tracking-tight text-astro-text">
                 ₹{product.price.toLocaleString("en-IN")}
               </p>
+              {discountPercent(product.price, product.mrp) > 0 && (
+                <>
+                  <p className="text-[17px] text-astro-mauve line-through decoration-astro-mauve/70">
+                    <span className="sr-only">MRP </span>₹{product.mrp!.toLocaleString("en-IN")}
+                  </p>
+                  <span className="rounded-full bg-astro-terracotta px-2.5 py-1 text-[12px] font-bold text-white">
+                    {discountPercent(product.price, product.mrp)}% OFF
+                  </span>
+                </>
+              )}
               {outOfStock ? (
                 <span className="rounded-full bg-[color-mix(in_srgb,var(--astro-terracotta)_12%,transparent)] px-3 py-1 text-xs font-semibold text-astro-terracotta">
                   Out of Stock
@@ -924,7 +935,12 @@ export default function ProductDetails({ product, related = [] }: { product: Pro
                 </span>
               )}
             </div>
-            <p className="mt-2 text-[12.5px] text-astro-mauve">
+            {discountPercent(product.price, product.mrp) > 0 && (
+              <p className="mt-2 text-[13px] font-semibold text-astro-emerald">
+                You save ₹{(product.mrp! - product.price).toLocaleString("en-IN")}
+              </p>
+            )}
+            <p className="mt-1 text-[12.5px] text-astro-mauve">
               {product.price >= FREE_SHIPPING_THRESHOLD
                 ? "Free shipping on this piece"
                 : `Free shipping on orders above ₹${FREE_SHIPPING_THRESHOLD.toLocaleString("en-IN")}`}
@@ -1515,7 +1531,14 @@ export default function ProductDetails({ product, related = [] }: { product: Pro
           <img src={product.image} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-[13px] font-medium text-astro-text">{product.name}</p>
-            <p className="text-[15px] font-semibold text-astro-text">₹{product.price.toLocaleString("en-IN")}</p>
+            <p className="text-[15px] font-semibold text-astro-text">
+              ₹{product.price.toLocaleString("en-IN")}
+              {discountPercent(product.price, product.mrp) > 0 && (
+                <span className="ml-1.5 text-[12px] font-normal text-astro-mauve line-through">
+                  ₹{product.mrp!.toLocaleString("en-IN")}
+                </span>
+              )}
+            </p>
           </div>
           {outOfStock ? (
             <a
