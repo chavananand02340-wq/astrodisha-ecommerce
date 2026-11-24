@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { Product } from "./ProductCard";
 import ProductBrowser, { type BrowserCategory } from "./catalog/ProductBrowser";
-import Icon, { type IconName } from "./ui/Icon";
+import Icon from "./ui/Icon";
+import TrustStrip from "./TrustStrip";
 import { ButtonLink } from "./ui/Button";
 import { categories as localCategories } from "@/data/categories";
 import { getCategoryContent, getCategoryFallbackImage } from "@/lib/categoryContent";
-import { WHATSAPP_URL, WHATSAPP_ICON_PATH, FREE_SHIPPING_THRESHOLD } from "@/lib/site";
+import { WHATSAPP_URL, WHATSAPP_ICON_PATH } from "@/lib/site";
 
 type CategoryPageProps = {
   /** Category slug (e.g. "crystals") — drives the hero copy, fallback image and
@@ -19,18 +20,10 @@ type CategoryPageProps = {
   categories?: BrowserCategory[];
   /** "shop" shows category chips + a category filter */
   variant?: "category" | "shop";
+  /** Pre-filled search (e.g. /gemstones?q=emerald from "Find Your Stone") */
+  initialQuery?: string;
 };
 
-const TRUST: { icon: IconName; title: string; text: string }[] = [
-  { icon: "shield", title: "100% Authentic", text: "Quality-checked pieces" },
-  { icon: "sparkle", title: "Energised", text: "Purified & consecrated" },
-  {
-    icon: "truck",
-    title: "Free Shipping",
-    text: `On orders above ₹${FREE_SHIPPING_THRESHOLD.toLocaleString("en-IN")}`,
-  },
-  { icon: "lotus", title: "Expert Guidance", text: "Help choosing, on WhatsApp" },
-];
 
 export default function CategoryPage({
   slug,
@@ -40,6 +33,7 @@ export default function CategoryPage({
   products,
   categories = [],
   variant = "category",
+  initialQuery = "",
 }: CategoryPageProps) {
   const local = slug ? localCategories.find((c) => c.slug === slug) : undefined;
   const content = getCategoryContent(slug);
@@ -145,22 +139,7 @@ export default function CategoryPage({
         </div>
       </section>
 
-      {/* =========================== TRUST STRIP =========================== */}
-      <section className="border-b border-astro-border bg-astro-bg">
-        <ul className="no-scrollbar mx-auto flex max-w-7xl gap-6 overflow-x-auto px-5 py-4 sm:px-8 lg:grid lg:grid-cols-4 lg:gap-8 lg:py-5">
-          {TRUST.map((t) => (
-            <li key={t.title} className="flex shrink-0 items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-astro-border bg-astro-card text-astro-accent">
-                <Icon name={t.icon} className="h-[18px] w-[18px]" />
-              </span>
-              <div>
-                <p className="text-[13px] font-semibold text-astro-text">{t.title}</p>
-                <p className="text-[12px] text-astro-mauve">{t.text}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <TrustStrip />
 
       {/* ========================= PRODUCTS / EMPTY ========================= */}
       <section className="mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-8 sm:pt-12">
@@ -176,6 +155,7 @@ export default function CategoryPage({
             categories={categories}
             showCategoryFilter={isShop}
             collectionName={resolvedTitle}
+            initialQuery={initialQuery}
           />
         )}
       </section>
