@@ -4,12 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Icon, { type IconName } from "../ui/Icon";
 
 /* "Not Just Chosen. Prepared For You."
-   Six steps on a zig-zag gold line. A glowing light travels 01 → 06 along the line;
+   Six steps on a zig-zag gold line, driven by the page scroll (like a scroll story):
+   the section pins to the screen while you scroll, a glowing light travels 01 → 06,
    the line fills with gold behind it and each step lights up as the light reaches it.
-   At 06 it rests, then everything resets and starts again from 01.
-   On phones the row scrolls along with the light so it always stays in view.
-   Driven by JavaScript so it also runs with battery-saver / reduced animations;
-   touching the row pauses it (swipe by hand), and it carries on a moment later. */
+   Scrolling back up reverses it. On phones the row slides sideways with the light. */
 
 const STEPS: { title: string; text: string; icon: IconName }[] = [
   { title: "Discover", text: "Find what aligns with you.", icon: "search" },
@@ -24,11 +22,11 @@ const HIGH_Y = 120; // node centre for steps 01, 03, 05
 const LOW_Y = 178; // node centre for steps 02, 04, 06
 const STEP_H = 300;
 
-const SEGMENT_MS = 1500; // light travel time between two steps
-const END_HOLD_MS = 2200; // rest at 06 before starting again
-const START_HOLD_MS = 700;
+// Extra page scroll (px) the section stays pinned for while the light travels
+const PIN_SCROLL = 900;
 
 export default function JourneyTimeline() {
+  const sectionRef = useRef<HTMLElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLOListElement>(null);
   const litRef = useRef<SVGPolylineElement>(null);
@@ -54,101 +52,78 @@ export default function JourneyTimeline() {
   const polyline = points.map((p) => `${p.x},${p.y}`).join(" ");
 
   useEffect(() => {
+    const section = sectionRef.current;
     const scroller = scrollerRef.current;
     const lit = litRef.current;
     const orb = orbRef.current;
-    if (!scroller || !lit || !orb) return;
+    if (!section || !scroller || !lit || !orb) return;
 
     const segments = STEPS.length - 1;
-    const travelMs = segments * SEGMENT_MS;
-    const cycleMs = START_HOLD_MS + travelMs + END_HOLD_MS;
-
-    let elapsed = 0;
-    let last = performance.now();
-    let paused = false;
-    let resumeTimer = 0;
+    let shown = -1; // progress currently drawn (0..1), eased toward target
     let frame = 0;
     let lastActive = -1;
 
-    const pointAt = (t: number) => {
-      // t: 0..segments (segment index + fraction)
+    // 0 when the pinned view starts, 1 when it is about to release
+    const targetProgress = () => {
+      const rect = section.getBoundingClientRect();
+      const range = section.offsetHeight - window.innerHeight;
+      if (range <= 0) return 1;
+      // start a little early (light begins as the section arrives) and finish
+      // slightly before release so 06 is seen lit while still pinned
+      const p = (-rect.top + window.innerHeight * 0.15) / (range * 0.9);
+      return Math.min(Math.max(p, 0), 1);
+    };
+
+    const draw = (p: number) => {
+      const t = p * segments;
       const i = Math.min(Math.floor(t), segments - 1);
       const f = t - i;
       const a = points[i];
       const b = points[i + 1];
-      return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, i, f };
-    };
-
-    const render = () => {
-      const inTravel = Math.min(Math.max(elapsed - START_HOLD_MS, 0), travelMs);
-      // ease each segment so the light slows as it arrives at a step
-      const raw = inTravel / SEGMENT_MS;
-      const seg = Math.min(Math.floor(raw), segments - 1);
-      const frac = raw >= segments ? 1 : raw - seg;
-      const eased = frac < 0.5 ? 2 * frac * frac : 1 - Math.pow(-2 * frac + 2, 2) / 2;
-      const t = seg + eased;
-
-      const { x, y } = pointAt(t);
-      const travelled = segLens.slice(0, seg).reduce((a, b) => a + b, 0) + segLens[seg] * eased;
+      const x = a.x + (b.x - a.x) * f;
+      const y = a.y + (b.y - a.y) * f;
+      const travelled = segLens.slice(0, i).reduce((s2, l) => s2 + l, 0) + segLens[i] * f;
 
       lit.style.strokeDashoffset = String(total - travelled);
       orb.setAttribute("transform", `translate(${x} ${y})`);
-      orb.style.opacity = elapsed < START_HOLD_MS * 0.5 ? "0" : "1";
+      orb.style.opacity = p > 0.005 && p < 0.995 ? "1" : "0";
 
-      const nowActive = elapsed < START_HOLD_MS ? 1 : Math.min(STEPS.length, Math.floor(t + 0.08) + 1);
+      const nowActive = Math.min(STEPS.length, Math.floor(t + 0.06) + 1);
       if (nowActive !== lastActive) {
         lastActive = nowActive;
         setActive(nowActive);
       }
 
-      // keep the light in view on narrow screens
-      if (!paused && scroller.scrollWidth > scroller.clientWidth + 4) {
-        const target = Math.max(0, Math.min(x - scroller.clientWidth / 2, scroller.scrollWidth - scroller.clientWidth));
-        scroller.scrollLeft += (target - scroller.scrollLeft) * 0.12;
+      // phones: slide the row so the light stays centred
+      const max = scroller.scrollWidth - scroller.clientWidth;
+      if (max > 4) {
+        scroller.scrollLeft = Math.round(Math.max(0, Math.min(x - scroller.clientWidth / 2, max)));
       }
     };
 
-    const tick = (now: number) => {
-      const dt = Math.min(now - last, 64);
-      last = now;
-      if (!paused) {
-        elapsed += dt;
-        if (elapsed >= cycleMs) elapsed = 0; // back to 01
-        render();
-      }
-      frame = requestAnimationFrame(tick);
+    const loop = () => {
+      const target = targetProgress();
+      shown = shown < 0 ? target : shown + (target - shown) * 0.18;
+      if (Math.abs(target - shown) < 0.0005) shown = target;
+      draw(shown);
+      frame = requestAnimationFrame(loop);
     };
+    frame = requestAnimationFrame(loop);
 
-    const pause = () => {
-      paused = true;
-      window.clearTimeout(resumeTimer);
-    };
-    const resume = () => {
-      window.clearTimeout(resumeTimer);
-      resumeTimer = window.setTimeout(() => {
-        paused = false;
-      }, 2500);
-    };
-
-    scroller.addEventListener("touchstart", pause, { passive: true });
-    scroller.addEventListener("touchend", resume, { passive: true });
-    render();
-    frame = requestAnimationFrame(tick);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      window.clearTimeout(resumeTimer);
-      scroller.removeEventListener("touchstart", pause);
-      scroller.removeEventListener("touchend", resume);
-    };
-    // re-start when the step width (and so the geometry) changes
+    return () => cancelAnimationFrame(frame);
+    // geometry depends on the measured step width
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepW]);
 
   const trackW = stepW * STEPS.length;
 
   return (
-    <section className="relative overflow-hidden bg-[#160828] py-12 text-[#f4effb] sm:py-16">
+    <section
+      ref={sectionRef}
+      className="relative bg-[#160828] text-[#f4effb]"
+      style={{ height: `calc(100vh + ${PIN_SCROLL}px)` }}
+    >
+      <div className="sticky top-[68px] flex h-[calc(100vh-68px)] flex-col justify-center overflow-hidden py-6">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[900px] -translate-x-1/2 rounded-full opacity-60 blur-3xl"
@@ -166,7 +141,7 @@ export default function JourneyTimeline() {
           </p>
         </div>
 
-        <div ref={scrollerRef} className="no-scrollbar mt-6 overflow-x-auto sm:mt-8">
+        <div ref={scrollerRef} className="no-scrollbar mt-6 overflow-x-hidden sm:mt-8">
           <div className="relative mx-auto" style={{ width: trackW, height: STEP_H }}>
             {/* the zig-zag: dim base line, gold "filled" line, travelling light */}
             <svg
@@ -244,6 +219,7 @@ export default function JourneyTimeline() {
             </ol>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );
