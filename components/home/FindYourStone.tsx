@@ -59,6 +59,67 @@ function GemGlyph({ color, id }: { color: [string, string]; id: string }) {
   );
 }
 
+/** Slowly turning gold zodiac wheel — the placeholder before a Rashi is chosen */
+function ZodiacWheel() {
+  const R = 84;
+  // round so server and browser render identical numbers (avoids hydration warnings)
+  const pt = (r: number, a: number) => [Math.round((100 + r * Math.cos(a)) * 100) / 100, Math.round((100 + r * Math.sin(a)) * 100) / 100];
+  return (
+    <div className="relative mx-auto h-[200px] w-[200px]" aria-hidden="true">
+      <div
+        className="absolute inset-6 rounded-full"
+        style={{ background: "radial-gradient(circle, rgba(215,180,106,0.28), transparent 70%)" }}
+      />
+      <svg viewBox="0 0 200 200" className="astro-wheel absolute inset-0 h-full w-full">
+        <circle cx="100" cy="100" r="96" fill="none" stroke="#c6a15b" strokeOpacity="0.55" strokeWidth="0.8" />
+        <circle cx="100" cy="100" r="72" fill="none" stroke="#c6a15b" strokeOpacity="0.35" strokeWidth="0.8" />
+        <circle cx="100" cy="100" r="40" fill="none" stroke="#c6a15b" strokeOpacity="0.3" strokeWidth="0.8" strokeDasharray="2 4" />
+        {RASHIS.map((r, i) => {
+          const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+          const a2 = a + Math.PI / 12;
+          return (
+            <g key={r.name}>
+              <line
+                x1={pt(72, a2)[0]}
+                y1={pt(72, a2)[1]}
+                x2={pt(96, a2)[0]}
+                y2={pt(96, a2)[1]}
+                stroke="#c6a15b"
+                strokeOpacity="0.45"
+                strokeWidth="0.8"
+              />
+              <text
+                x={pt(R, a)[0]}
+                y={pt(R, a)[1]}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize="13"
+                fill="#e3c27e"
+                style={{ fontFamily: '"Segoe UI Symbol", "Noto Sans Symbols 2", "Apple Symbols", serif' }}
+              >
+                {r.glyph + "\uFE0E"}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      {/* still centre gem */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <svg viewBox="0 0 64 64" className="h-14 w-14 drop-shadow-[0_0_18px_rgba(227,194,126,0.55)]">
+          <defs>
+            <linearGradient id="wheel-gem" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#fff3cf" />
+              <stop offset="100%" stopColor="#c6a15b" />
+            </linearGradient>
+          </defs>
+          <path d="M18 10h28l12 14-26 32L6 24z" fill="url(#wheel-gem)" />
+          <path d="M6 24h52M18 10l8 14 6 32M46 10l-8 14-6 32M26 24l6-14 6 14" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 export default function FindYourStone() {
   const [selected, setSelected] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -162,17 +223,9 @@ export default function FindYourStone() {
                 </div>
               </div>
             ) : (
-              <div className="py-6">
-                <div
-                  aria-hidden="true"
-                  className="astro-drift mx-auto h-28 w-28 rounded-full blur-[1px]"
-                  style={{
-                    background:
-                      "conic-gradient(from 200deg, #f6d38b, #f2a7c3, #a98cf0, #7fc6e8, #9be3b8, #f6d38b)",
-                    boxShadow: "0 0 60px rgba(169, 140, 240, 0.45)",
-                  }}
-                />
-                <h3 className="astro-serif mt-7 text-[30px] leading-tight">Your stone awaits</h3>
+              <div className="py-2">
+                <ZodiacWheel />
+                <h3 className="astro-serif mt-6 text-[30px] leading-tight">Your stone awaits</h3>
                 <p className="mt-2 text-[13.5px] text-[#f4effb]/70">Tap your Rashi to reveal it ✦</p>
               </div>
             )}

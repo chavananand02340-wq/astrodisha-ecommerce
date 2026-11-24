@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import ProductCard from "./ProductCard";
 import type { Product, PdpCertificate } from "./ProductCard";
 import { useStore } from "./StoreProvider";
+import Icon, { type IconName } from "./ui/Icon";
 import { WHATSAPP_NUMBER, WHATSAPP_ICON_PATH } from "@/lib/site";
 import { createClient } from "@/utils/supabase/client";
 import {
@@ -17,59 +18,17 @@ import {
   REFUND_PROCESSING_DAYS,
 } from "@/lib/legal-info";
 
-const HEART_PATH =
-  "M12 20s-7-4.4-9.2-8.6C1.2 8.2 3 4.8 6.4 4.5c2-.2 3.8.9 5.6 3 1.8-2.1 3.6-3.2 5.6-3 3.4.3 5.2 3.7 3.6 6.9C19 15.6 12 20 12 20z";
-
-const CART_ICON_PATH_1 = "M6 7h12l-1 13H7L6 7z";
-const CART_ICON_PATH_2 = "M9 7a3 3 0 0 1 6 0";
-
 const STAR_PATH =
   "M12 2.5l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3l-6.2 3.5 1.6-6.8-5.2-4.6 6.9-.6z";
 
 const GOLD = "#C6A15B";
 
-const TRUST_STRIP = [
-  {
-    label: "100% Authentic",
-    icon: (
-      <>
-        <path d="M6 3h12l3 6-9 12L3 9z" />
-        <path d="M3 9h18" />
-        <path d="M9 3l3 6 3-6" />
-        <path d="M12 21L9 9M12 21l3-12" />
-      </>
-    ),
-  },
-  {
-    label: "Lab Certified & Purity Check",
-    icon: (
-      <>
-        <circle cx="12" cy="9" r="6" />
-        <path d="M9 14.5L7.5 21 12 18.5 16.5 21 15 14.5" />
-        <path d="M9.5 9l1.8 1.8 3.2-3.3" />
-      </>
-    ),
-  },
-  {
-    label: "Pan India Delivery",
-    icon: (
-      <>
-        <path d="M3 6h11v9H3z" />
-        <path d="M14 9h4l3 3v3h-7" />
-        <circle cx="7" cy="17.5" r="1.6" />
-        <circle cx="17" cy="17.5" r="1.6" />
-      </>
-    ),
-  },
-  {
-    label: "Secure Payments",
-    icon: (
-      <>
-        <path d="M12 3L4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z" />
-        <path d="M9 12l2 2 4-4" />
-      </>
-    ),
-  },
+// Trust badges under the buy buttons (all backed by store policy / process)
+const TRUST_BADGES: { icon: IconName; title: string; text: string }[] = [
+  { icon: "shield", title: "100% Authentic", text: "Quality-checked" },
+  { icon: "sparkle", title: "Energised", text: "Mantra & sankalp" },
+  { icon: "truck", title: "Free Shipping", text: "On orders ₹999+" },
+  { icon: "card", title: "Secure Payments", text: "Safe checkout" },
 ];
 
 type ReviewRow = {
@@ -320,8 +279,9 @@ function AccordionSection({
 }) {
   return (
     <section
+      id={id}
       style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-      className="overflow-hidden rounded-2xl border"
+      className="scroll-mt-24 overflow-hidden rounded-[22px] border shadow-astro-sm"
     >
       <button
         type="button"
@@ -330,7 +290,9 @@ function AccordionSection({
         aria-controls={`${id}-panel`}
         className="flex w-full items-center gap-3 px-4 py-3.5 text-left sm:px-5"
       >
-        <PdpIcon name={icon} className="h-6 w-6 shrink-0 text-[color:var(--astro-primary)]" />
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-astro-gold-soft text-astro-accent">
+          <PdpIcon name={icon} className="h-5 w-5" />
+        </span>
         <span className="min-w-0 flex-1">
           <span style={{ color: "var(--astro-text)" }} className="astro-serif block text-[17px] leading-snug sm:text-lg">
             {title}
@@ -741,14 +703,29 @@ export default function ProductDetails({ product, related = [] }: { product: Pro
     router.push("/checkout");
   }
 
+  // Phones: show a compact buy bar once the main buttons scroll out of view
+  const actionsRef = useRef<HTMLDivElement>(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+
+  useEffect(() => {
+    const el = actionsRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <main style={{ backgroundColor: "var(--astro-bg)" }} className="min-h-screen px-4 pb-10 pt-3 sm:px-8 sm:pt-6">
+    <main className="min-h-screen bg-astro-bg px-4 pb-28 pt-3 sm:px-8 sm:pt-6 md:pb-12">
       <div className="mx-auto max-w-6xl">
         {/* BREADCRUMB */}
         <nav aria-label="Breadcrumb" className="no-scrollbar overflow-x-auto">
-          <ol className="flex items-center gap-1.5 whitespace-nowrap text-[12px]">
+          <ol className="flex items-center gap-1.5 whitespace-nowrap text-[12px] text-astro-mauve sm:text-[13px]">
             <li>
-              <Link href="/" style={{ color: "var(--astro-mauve)" }} className="transition hover:opacity-75">
+              <Link href="/" className="transition hover:text-astro-primary">
                 Home
               </Link>
             </li>
@@ -756,187 +733,214 @@ export default function ProductDetails({ product, related = [] }: { product: Pro
               <ChevronIcon direction="right" className="h-3 w-3 opacity-60" />
             </li>
             <li>
-              <Link href={categoryHref} style={{ color: "var(--astro-mauve)" }} className="transition hover:opacity-75">
+              <Link href={categoryHref} className="transition hover:text-astro-primary">
                 {product.category}
               </Link>
             </li>
             <li aria-hidden="true">
               <ChevronIcon direction="right" className="h-3 w-3 opacity-60" />
             </li>
-            <li style={{ color: "var(--astro-text)" }} className="font-medium" aria-current="page">
+            <li className="font-medium text-astro-text" aria-current="page">
               {product.name}
             </li>
           </ol>
         </nav>
 
-        <div className="mt-3 grid gap-6 md:mt-5 md:grid-cols-2 md:gap-12">
-          {/* GALLERY */}
-          <div>
-            <div
-              style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-              className="relative aspect-[4/3] overflow-hidden rounded-2xl border"
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-            >
-              {!imageLoaded && (
-                <div className="absolute inset-0 animate-pulse opacity-60" style={{ backgroundColor: "var(--astro-border)" }} />
-              )}
-
-              <button
-                type="button"
-                onClick={openLightbox}
-                aria-label="Open image full screen"
-                className="block h-full w-full cursor-zoom-in"
+        <div className="mt-4 grid gap-7 md:mt-6 md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] md:gap-12 lg:gap-16">
+          {/* ============================ GALLERY ============================ */}
+          <div className="md:sticky md:top-[92px] md:self-start">
+            <div className="flex flex-col gap-3 lg:flex-row-reverse">
+              <div
+                className="group/gal relative aspect-square flex-1 overflow-hidden rounded-[28px] border border-astro-border bg-astro-surface shadow-astro-sm"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
               >
-                <img
-                  ref={imgRef}
-                  src={galleryImages[activeIndex]}
-                  alt={`${product.name} - image ${activeIndex + 1}`}
-                  loading="eager"
-                  className={`h-full w-full object-cover transition-opacity duration-300 ${
-                    imageLoaded ? "opacity-100" : "opacity-0"
-                  } ${outOfStock ? "opacity-70 grayscale-[30%]" : ""}`}
-                  onLoad={() => setImageLoaded(true)}
-                  onError={(event) => {
-                    const image = event.currentTarget;
-                    if (!image.src.includes("placeholder-product.svg")) {
-                      image.src = "/images/placeholder-product.svg";
-                    }
-                    setImageLoaded(true);
-                  }}
-                />
-              </button>
+                {!imageLoaded && <div className="astro-skeleton absolute inset-0" aria-hidden="true" />}
 
-              {/* Zoom button */}
-              <button
-                type="button"
-                onClick={openLightbox}
-                aria-label="Zoom image"
-                style={{ backgroundColor: "var(--astro-card)", color: "var(--astro-primary)" }}
-                className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full shadow-[0_2px_8px_rgba(36,16,70,0.15)] transition active:scale-95"
-              >
-                <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="11" cy="11" r="6.5" />
-                  <path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5" />
-                </svg>
-              </button>
-
-              {imageCount > 1 && (
-                <span
-                  style={{ backgroundColor: "rgba(22,8,40,0.55)" }}
-                  className="pointer-events-none absolute bottom-3 right-3 rounded-full px-2.5 py-1 text-[10px] font-medium text-white"
+                <button
+                  type="button"
+                  onClick={openLightbox}
+                  aria-label="Open image full screen"
+                  className="block h-full w-full cursor-zoom-in"
                 >
-                  {activeIndex + 1} / {imageCount}
-                </span>
-              )}
+                  <img
+                    ref={imgRef}
+                    src={galleryImages[activeIndex]}
+                    alt={`${product.name} - image ${activeIndex + 1}`}
+                    loading="eager"
+                    fetchPriority="high"
+                    className={`h-full w-full object-cover transition-[opacity,transform] duration-700 ease-[var(--ease-astro)] group-hover/gal:scale-[1.03] ${
+                      imageLoaded ? "opacity-100" : "opacity-0"
+                    } ${outOfStock ? "grayscale-[30%]" : ""}`}
+                    onLoad={() => setImageLoaded(true)}
+                    onError={(event) => {
+                      const image = event.currentTarget;
+                      if (!image.src.includes("placeholder-product.svg")) {
+                        image.src = "/images/placeholder-product.svg";
+                      }
+                      setImageLoaded(true);
+                    }}
+                  />
+                </button>
 
-              {outOfStock && (
-                <div
-                  style={{ backgroundColor: "rgba(22,8,40,0.5)" }}
-                  className="pointer-events-none absolute inset-0 flex items-center justify-center"
-                >
-                  <span
-                    style={{ backgroundColor: "var(--astro-card)", color: "var(--astro-text)" }}
-                    className="rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-wide"
+                {hasCertificate && (
+                  <a
+                    href="#pdp-certificate"
+                    onClick={() => setOpenSections((c) => ({ ...c, certificate: true }))}
+                    className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-astro-card/90 px-3 py-1.5 text-[11px] font-semibold text-astro-emerald shadow-astro-sm backdrop-blur"
                   >
-                    Out of Stock
-                  </span>
+                    <Icon name="certificate" className="h-3.5 w-3.5" />
+                    Certified
+                  </a>
+                )}
+
+                {/* Zoom button */}
+                <button
+                  type="button"
+                  onClick={openLightbox}
+                  aria-label="Zoom image"
+                  className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-astro-card/90 text-astro-primary shadow-astro-sm backdrop-blur transition hover:scale-105 active:scale-95"
+                >
+                  <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="6.5" />
+                    <path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5" />
+                  </svg>
+                </button>
+
+                {imageCount > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => showImage(activeIndex - 1)}
+                      aria-label="Previous image"
+                      className="absolute left-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-astro-card/90 text-astro-text opacity-0 shadow-astro-sm backdrop-blur transition group-hover/gal:opacity-100 md:flex"
+                    >
+                      <ChevronIcon direction="left" className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => showImage(activeIndex + 1)}
+                      aria-label="Next image"
+                      className="absolute right-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-astro-card/90 text-astro-text opacity-0 shadow-astro-sm backdrop-blur transition group-hover/gal:opacity-100 md:flex"
+                    >
+                      <ChevronIcon direction="right" className="h-4 w-4" />
+                    </button>
+
+                    {/* dots (phones) */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center gap-1.5 md:hidden">
+                      {galleryImages.map((_, i) => (
+                        <span
+                          key={i}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            i === activeIndex ? "w-5 bg-white" : "w-1.5 bg-white/60"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {outOfStock && (
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[rgba(22,8,40,0.4)]">
+                    <span className="rounded-full bg-astro-card px-5 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-astro-text">
+                      Out of Stock
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* THUMBNAILS — row on phones, column beside the photo on large screens */}
+              {imageCount > 1 && (
+                <div className="no-scrollbar flex gap-2.5 overflow-x-auto lg:max-h-[520px] lg:w-[76px] lg:flex-col lg:overflow-y-auto lg:overflow-x-visible">
+                  {galleryImages.map((img, index) => (
+                    <button
+                      key={img + index}
+                      type="button"
+                      aria-label={`Show image ${index + 1}`}
+                      aria-current={index === activeIndex}
+                      onClick={() => showImage(index)}
+                      className={`aspect-square w-[72px] shrink-0 overflow-hidden rounded-2xl border-2 transition lg:w-full ${
+                        index === activeIndex
+                          ? "border-astro-gold shadow-astro-sm"
+                          : "border-transparent opacity-70 hover:opacity-100"
+                      }`}
+                    >
+                      <img src={img} alt={`${product.name} thumbnail ${index + 1}`} loading="lazy" className="h-full w-full object-cover" />
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
-
-            {/* THUMBNAILS — 4 visible, scroll if more */}
-            {imageCount > 1 && (
-              <div className="no-scrollbar mt-2.5 flex gap-2 overflow-x-auto">
-                {galleryImages.map((img, index) => (
-                  <button
-                    key={img + index}
-                    type="button"
-                    aria-label={`Show image ${index + 1}`}
-                    aria-current={index === activeIndex}
-                    onClick={() => showImage(index)}
-                    style={{
-                      borderColor: index === activeIndex ? "var(--astro-primary)" : "var(--astro-border)",
-                      borderWidth: index === activeIndex ? "2px" : "1px",
-                      flex: "0 0 calc((100% - 1.5rem) / 4)",
-                    }}
-                    className="aspect-[4/3] overflow-hidden rounded-lg border"
-                  >
-                    <img
-                      src={img}
-                      alt={`${product.name} thumbnail ${index + 1}`}
-                      loading="lazy"
-                      className="h-full w-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* INFO */}
-          <div className="md:pt-1">
-            <h1 style={{ color: "var(--astro-text)" }} className="astro-serif text-[28px] leading-tight sm:text-4xl">
-              {product.name}
-            </h1>
+          {/* ============================== INFO ============================== */}
+          <div className="md:pt-2">
+            <Link
+              href={categoryHref}
+              className="text-[11px] font-semibold uppercase tracking-[0.24em] text-astro-accent transition hover:text-astro-primary"
+            >
+              {product.category}
+            </Link>
+
+            <h1 className="astro-serif mt-2 text-[32px] leading-[1.08] text-astro-text sm:text-[44px]">{product.name}</h1>
 
             {/* Rating — real reviews only */}
-            <div className="mt-2 min-h-[20px]">
+            <div className="mt-2.5 min-h-[20px]">
               {!reviewsLoading &&
                 (liveCount > 0 ? (
-                  <a href="#reviews" className="flex items-center gap-1 text-sm">
+                  <a href="#reviews" className="inline-flex items-center gap-1 text-sm">
                     {[1, 2, 3, 4, 5].map((n) => (
                       <Star key={n} filled={n <= liveStars} className="h-4 w-4" />
                     ))}
-                    <span style={{ color: "var(--astro-mauve)" }} className="ml-1 text-xs">
+                    <span className="ml-1 text-xs text-astro-mauve underline-offset-2 hover:underline">
                       {liveAverage.toFixed(1)} ({liveCount} review{liveCount === 1 ? "" : "s"})
                     </span>
                   </a>
                 ) : (
-                  <a href="#reviews" style={{ color: "var(--astro-mauve)" }} className="text-xs">
-                    No reviews yet
+                  <a href="#reviews" className="text-xs text-astro-mauve underline-offset-2 hover:underline">
+                    No reviews yet — be the first
                   </a>
                 ))}
             </div>
 
-            <p style={{ color: "var(--astro-primary)" }} className="mt-2 text-[28px] font-bold leading-none">
-              ₹{product.price.toLocaleString("en-IN")}
-            </p>
-
-            {/* Stock pill */}
-            <div className="mt-3">
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <p className="text-[32px] font-semibold leading-none tracking-tight text-astro-text">
+                ₹{product.price.toLocaleString("en-IN")}
+              </p>
               {outOfStock ? (
-                <span
-                  style={{ backgroundColor: "rgba(194,65,42,0.12)", color: "#C2412A" }}
-                  className="inline-block rounded-full px-3 py-1 text-xs font-semibold"
-                >
+                <span className="rounded-full bg-[color-mix(in_srgb,var(--astro-terracotta)_12%,transparent)] px-3 py-1 text-xs font-semibold text-astro-terracotta">
                   Out of Stock
                 </span>
               ) : (
                 <span
-                  style={{ backgroundColor: "rgba(63,163,77,0.15)", color: "#3FA34D" }}
-                  className="inline-block rounded-full px-3 py-1 text-xs font-semibold"
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                    lowStock
+                      ? "bg-[color-mix(in_srgb,var(--astro-terracotta)_12%,transparent)] text-astro-terracotta"
+                      : "bg-astro-emerald-soft text-astro-emerald"
+                  }`}
                 >
-                  {lowStock ? `In Stock — only ${stock} left` : "In Stock"}
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+                  {lowStock ? `Only ${stock} left` : "In Stock"}
                 </span>
               )}
             </div>
+            <p className="mt-2 text-[12.5px] text-astro-mauve">
+              {product.price >= FREE_SHIPPING_THRESHOLD
+                ? "Free shipping on this piece"
+                : `Free shipping on orders above ₹${FREE_SHIPPING_THRESHOLD.toLocaleString("en-IN")}`}
+            </p>
 
             {/* DESCRIPTION — Read More */}
             {product.description && (
-              <div className="mt-3">
-                <p
-                  style={{ color: "var(--astro-mauve)" }}
-                  className={`text-[15px] leading-7 ${descExpanded ? "" : "line-clamp-3"}`}
-                >
+              <div className="mt-5">
+                <p className={`text-[15px] leading-7 text-astro-body ${descExpanded ? "" : "line-clamp-3"}`}>
                   {product.description}
                 </p>
                 {longDescription && (
                   <button
                     type="button"
                     onClick={() => setDescExpanded((v) => !v)}
-                    style={{ color: "var(--astro-primary)" }}
-                    className="mt-1 text-sm font-semibold underline underline-offset-2"
+                    className="mt-1 text-sm font-semibold text-astro-primary underline underline-offset-2"
                   >
                     {descExpanded ? "Read Less" : "Read More"}
                   </button>
@@ -944,27 +948,39 @@ export default function ProductDetails({ product, related = [] }: { product: Pro
               </div>
             )}
 
+            {/* BENEFITS AT A GLANCE */}
+            {benefits.length > 0 && (
+              <ul className="mt-5 flex flex-wrap gap-2">
+                {benefits.slice(0, 4).map((b, i) => (
+                  <li
+                    key={b.title + i}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-astro-border bg-astro-card px-3 py-1.5 text-[12.5px] font-medium text-astro-text"
+                  >
+                    <Icon name="sparkle" className="h-3.5 w-3.5 text-astro-gold" />
+                    {b.title}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className="my-6 h-px bg-astro-border" />
+
             {/* QUANTITY + WISHLIST */}
-            <div className="mt-5 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-astro-mauve">Qty</span>
               <div
-                style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-                className={`flex h-12 items-center rounded-[10px] border ${outOfStock ? "opacity-50" : ""}`}
+                className={`flex h-12 items-center rounded-full border border-astro-border bg-astro-card ${outOfStock ? "opacity-50" : ""}`}
               >
                 <button
                   type="button"
                   aria-label="Decrease quantity"
                   disabled={outOfStock || safeQty <= 1}
                   onClick={() => setQty(Math.max(1, safeQty - 1))}
-                  style={{ color: "var(--astro-primary)" }}
-                  className="flex h-12 w-12 items-center justify-center text-xl disabled:opacity-40"
+                  className="flex h-12 w-11 items-center justify-center text-xl text-astro-primary disabled:opacity-40"
                 >
                   −
                 </button>
-                <span
-                  style={{ color: "var(--astro-text)" }}
-                  className="w-8 text-center text-[15px] font-semibold"
-                  aria-live="polite"
-                >
+                <span className="w-8 text-center text-[15px] font-semibold text-astro-text" aria-live="polite">
                   {outOfStock ? 0 : safeQty}
                 </span>
                 <button
@@ -972,8 +988,7 @@ export default function ProductDetails({ product, related = [] }: { product: Pro
                   aria-label="Increase quantity"
                   disabled={outOfStock || safeQty >= stock}
                   onClick={() => setQty(Math.min(stock, safeQty + 1))}
-                  style={{ color: "var(--astro-primary)" }}
-                  className="flex h-12 w-12 items-center justify-center text-xl disabled:opacity-40"
+                  className="flex h-12 w-11 items-center justify-center text-xl text-astro-primary disabled:opacity-40"
                 >
                   +
                 </button>
@@ -984,146 +999,121 @@ export default function ProductDetails({ product, related = [] }: { product: Pro
                 onClick={() => toggleWishlist(baseProduct)}
                 aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
                 aria-pressed={wishlisted}
-                style={{
-                  borderColor: wishlisted ? "var(--astro-accent)" : "var(--astro-border)",
-                  backgroundColor: "var(--astro-card)",
-                  color: wishlisted ? "var(--astro-accent)" : "var(--astro-primary)",
-                }}
-                className="flex h-12 w-12 items-center justify-center rounded-[10px] border transition active:scale-95"
+                className={`ml-auto flex h-12 w-12 items-center justify-center rounded-full border bg-astro-card transition hover:scale-105 active:scale-95 ${
+                  wishlisted ? "border-astro-terracotta text-astro-terracotta" : "border-astro-border text-astro-primary"
+                }`}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5"
-                  fill={wishlisted ? "currentColor" : "none"}
-                  stroke="currentColor"
-                  strokeWidth={1.8}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d={HEART_PATH} />
-                </svg>
+                <Icon name="heart" filled={wishlisted} className="h-5 w-5" strokeWidth={1.8} />
               </button>
             </div>
 
             {/* ACTIONS */}
-            <button
-              type="button"
-              disabled={outOfStock}
-              onClick={addSelectedToCart}
-              style={
-                outOfStock
-                  ? { backgroundColor: "var(--astro-border)", color: "var(--astro-mauve)" }
-                  : { backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }
-              }
-              className={`mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-[10px] text-[15px] font-semibold transition duration-150 ${
-                outOfStock ? "cursor-not-allowed" : "hover:opacity-90 active:scale-[0.99]"
-              }`}
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d={CART_ICON_PATH_1} />
-                <path d={CART_ICON_PATH_2} />
-              </svg>
-              {outOfStock ? "Out of Stock" : "Add to Cart"}
-            </button>
-
-            {!outOfStock && (
+            <div ref={actionsRef} className="mt-4 grid gap-3 sm:grid-cols-2">
               <button
                 type="button"
-                onClick={handleBuyNow}
-                style={{ backgroundColor: "var(--astro-buy-bg, #E8B23F)", color: "var(--astro-buy-text, #160828)" }}
-                className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-[10px] text-[15px] font-semibold transition duration-150 hover:opacity-90 active:scale-[0.99]"
+                disabled={outOfStock}
+                onClick={addSelectedToCart}
+                className={`flex h-[52px] w-full items-center justify-center gap-2 rounded-full text-[15px] font-semibold transition duration-300 ${
+                  outOfStock
+                    ? "cursor-not-allowed bg-astro-border text-astro-mauve sm:col-span-2"
+                    : "bg-astro-primary text-astro-on-primary shadow-astro-sm hover:bg-astro-primary-hover hover:shadow-astro-md active:scale-[0.99]"
+                }`}
               >
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
-                  <path d="M13 2L4 14h6l-1 8 9-12h-6z" />
-                </svg>
-                Buy Now
+                <Icon name="bag" className="h-5 w-5" strokeWidth={1.8} />
+                {outOfStock ? "Out of Stock" : "Add to Cart"}
               </button>
-            )}
+
+              {!outOfStock && (
+                <button
+                  type="button"
+                  onClick={handleBuyNow}
+                  style={{ backgroundColor: "var(--astro-buy-bg, #E8B23F)", color: "var(--astro-buy-text, #160828)" }}
+                  className="flex h-[52px] w-full items-center justify-center gap-2 rounded-full text-[15px] font-semibold shadow-astro-sm transition duration-300 hover:shadow-astro-md hover:brightness-105 active:scale-[0.99]"
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
+                    <path d="M13 2L4 14h6l-1 8 9-12h-6z" />
+                  </svg>
+                  Buy Now
+                </button>
+              )}
+            </div>
 
             <a
               href={askUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ borderColor: "var(--astro-primary)", color: "var(--astro-primary)" }}
-              className="mt-3 flex h-12 items-center justify-center gap-2 rounded-[10px] border text-[14px] font-semibold transition hover:opacity-80"
+              className="group mt-3 flex items-center gap-3 rounded-[20px] border border-astro-border bg-astro-card px-4 py-3 transition hover:border-astro-gold hover:shadow-astro-sm"
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
-                <path d={WHATSAPP_ICON_PATH} />
-              </svg>
-              {outOfStock ? "Ask When It's Back in Stock" : "Ask an Expert About This Product"}
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366]/15 text-[#1a9e4b]">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
+                  <path d={WHATSAPP_ICON_PATH} />
+                </svg>
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[14px] font-semibold text-astro-text">
+                  {outOfStock ? "Ask when it's back in stock" : "Not sure? Ask an expert"}
+                </span>
+                <span className="block text-[12px] text-astro-mauve">Personal guidance on WhatsApp</span>
+              </span>
+              <ChevronIcon direction="right" className="h-4 w-4 text-astro-mauve transition group-hover:translate-x-0.5" />
             </a>
 
-            {/* TRUST STRIP */}
-            <div
-              style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-              className="mt-5 grid grid-cols-4 rounded-2xl border py-3"
-            >
-              {TRUST_STRIP.map((item, i) => (
-                <div
-                  key={item.label}
-                  style={{ borderColor: "var(--astro-border)" }}
-                  className={`flex flex-col items-center gap-1.5 px-1 text-center ${i > 0 ? "border-l" : ""}`}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke={GOLD}
-                    strokeWidth={1.5}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    {item.icon}
-                  </svg>
-                  <span style={{ color: "var(--astro-text)" }} className="text-[10.5px] leading-[1.3] sm:text-xs">
-                    {item.label}
+            {/* TRUST BADGES */}
+            <ul className="mt-6 grid grid-cols-2 gap-2.5">
+              {TRUST_BADGES.map((t) => (
+                <li key={t.title} className="flex items-center gap-3 rounded-[18px] bg-astro-surface px-3 py-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-astro-card text-astro-accent shadow-astro-sm">
+                    <Icon name={t.icon} className="h-[18px] w-[18px]" />
                   </span>
-                </div>
+                  <span className="min-w-0">
+                    <span className="block text-[12.5px] font-semibold leading-tight text-astro-text">{t.title}</span>
+                    <span className="block text-[11px] leading-tight text-astro-mauve">{t.text}</span>
+                  </span>
+                </li>
               ))}
-            </div>
-
+            </ul>
           </div>
         </div>
 
-        {/* PRODUCT INFORMATION ACCORDIONS — all closed by default */}
-        <div className="mt-8 space-y-3">
-          {benefits.length > 0 && (
-            <AccordionSection
-              id="pdp-benefits"
-              icon="diamond"
-              title={`Benefits of ${product.name}`}
-              subtitle="What this product is traditionally associated with."
-              open={!!openSections.benefits}
-              onToggle={() => toggleSection("benefits")}
-            >
-              <div className="space-y-2.5">
-                {benefits.map((b, i) => (
-                  <InfoCard key={b.title + i}>
-                    <div className="flex gap-3">
-                      <span style={{ backgroundColor: GOLD }} className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full" aria-hidden="true" />
-                      <div className="min-w-0">
-                        <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-[17px] leading-snug">
-                          {b.title}
-                        </h3>
-                        {b.description && (
-                          <p style={{ color: "var(--astro-mauve)" }} className="mt-1 text-[14px] leading-6">
-                            {b.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </InfoCard>
-                ))}
-              </div>
-              <p style={{ color: "var(--astro-mauve)" }} className="mt-4 text-[12px] leading-5 opacity-90">
-                Benefits described above reflect traditional astrological beliefs and practices. They are not
-                guarantees of specific health, financial, career or relationship outcomes.
+        {/* ============================ BENEFITS ============================ */}
+        {benefits.length > 0 && (
+          <section id="pdp-benefits" className="mt-14 scroll-mt-24 sm:mt-20">
+            <div className="text-center">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-astro-accent">Why wear it</p>
+              <h2 className="astro-serif mt-2 text-[30px] leading-tight text-astro-text sm:text-[40px]">
+                Benefits of {product.name}
+              </h2>
+              <p className="mx-auto mt-2 max-w-md text-[13.5px] text-astro-mauve">
+                What this piece is traditionally associated with.
               </p>
-            </AccordionSection>
-          )}
+            </div>
+            <div className="mt-8 grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+              {benefits.map((b, i) => (
+                <div
+                  key={b.title + i}
+                  className="flex gap-4 rounded-[22px] border border-astro-border bg-astro-card p-4 shadow-astro-sm transition duration-300 hover:-translate-y-0.5 hover:border-astro-gold hover:shadow-astro-md sm:block sm:p-5"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-astro-gold-soft text-astro-accent">
+                    <Icon name="sparkle" className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="astro-serif text-[20px] leading-snug text-astro-text sm:mt-4 sm:text-[21px]">{b.title}</h3>
+                    {b.description && <p className="mt-1 text-[14px] leading-6 text-astro-body sm:mt-1.5">{b.description}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mx-auto mt-5 max-w-2xl text-center text-[12px] leading-5 text-astro-mauve">
+              Benefits described above reflect traditional astrological beliefs and practices. They are not guarantees of
+              specific health, financial, career or relationship outcomes.
+            </p>
+          </section>
+        )}
 
+        {/* PRODUCT INFORMATION ACCORDIONS — all closed by default */}
+        <section className="mx-auto mt-14 max-w-3xl sm:mt-20">
+          <h2 className="astro-serif text-center text-[28px] text-astro-text sm:text-[36px]">Know your piece</h2>
+          <div className="mt-6 space-y-3">
           {howToWear.length > 0 && (
             <AccordionSection
               id="pdp-how-to-wear"
@@ -1297,10 +1287,11 @@ export default function ProductDetails({ product, related = [] }: { product: Pro
               </Link>
             </NoteBox>
           </AccordionSection>
-        </div>
+          </div>
+        </section>
 
         {/* REVIEWS */}
-        <section id="reviews" style={{ scrollMarginTop: "90px" }} className="mt-10">
+        <section id="reviews" style={{ scrollMarginTop: "90px" }} className="mx-auto mt-14 max-w-3xl sm:mt-20">
           <div className="flex items-end justify-between gap-3">
             <div>
               <h2 style={{ color: "var(--astro-text)" }} className="astro-serif text-2xl sm:text-[28px]">
@@ -1491,25 +1482,74 @@ export default function ProductDetails({ product, related = [] }: { product: Pro
 
         {/* YOU MAY ALSO LIKE */}
         {related.length > 0 && (
-          <section className="mt-10">
+          <section className="mt-16 sm:mt-24">
             <div className="flex items-end justify-between gap-3">
-              <h2 style={{ color: "var(--astro-text)" }} className="astro-serif text-2xl sm:text-[28px]">
-                You May Also Like
-              </h2>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-astro-accent">Complete your ritual</p>
+                <h2 className="astro-serif mt-1.5 text-[30px] leading-tight text-astro-text sm:text-[40px]">You May Also Like</h2>
+              </div>
               <Link href={categoryHref} style={{ color: "var(--astro-primary)" }} className="flex shrink-0 items-center gap-1 text-[13px] font-semibold">
                 View All
                 <ChevronIcon direction="right" className="h-3.5 w-3.5" />
               </Link>
             </div>
-            <div className="no-scrollbar -mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
-              {related.map((item) => (
-                <div key={item.id} className="flex w-[62%] shrink-0 snap-start sm:w-[260px]">
+            <div className="no-scrollbar -mx-4 mt-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:gap-5 sm:px-0 lg:grid lg:grid-cols-4 lg:overflow-visible">
+              {related.slice(0, 8).map((item) => (
+                <div key={item.id} className="flex w-[62%] shrink-0 snap-start sm:w-[260px] lg:w-auto">
                   <ProductCard product={item} />
                 </div>
               ))}
             </div>
           </section>
         )}
+      </div>
+
+      {/* PHONE STICKY BUY BAR */}
+      <div
+        className={`fixed inset-x-0 bottom-0 z-40 border-t border-astro-border bg-astro-bg/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-10px_30px_rgba(36,16,70,0.08)] backdrop-blur-md transition-transform duration-500 ease-[var(--ease-astro)] md:hidden ${
+          showStickyBar ? "translate-y-0" : "translate-y-full"
+        }`}
+        aria-hidden={!showStickyBar}
+      >
+        <div className="flex items-center gap-3">
+          <img src={product.image} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[13px] font-medium text-astro-text">{product.name}</p>
+            <p className="text-[15px] font-semibold text-astro-text">₹{product.price.toLocaleString("en-IN")}</p>
+          </div>
+          {outOfStock ? (
+            <a
+              href={askUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              tabIndex={showStickyBar ? 0 : -1}
+              className="flex h-11 items-center rounded-full border border-astro-border bg-astro-card px-4 text-[13px] font-semibold text-astro-text"
+            >
+              Notify me
+            </a>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={addSelectedToCart}
+                tabIndex={showStickyBar ? 0 : -1}
+                aria-label="Add to cart"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-astro-border bg-astro-card text-astro-primary"
+              >
+                <Icon name="bag" className="h-5 w-5" strokeWidth={1.8} />
+              </button>
+              <button
+                type="button"
+                onClick={handleBuyNow}
+                tabIndex={showStickyBar ? 0 : -1}
+                style={{ backgroundColor: "var(--astro-buy-bg, #E8B23F)", color: "var(--astro-buy-text, #160828)" }}
+                className="flex h-11 items-center rounded-full px-5 text-[14px] font-semibold"
+              >
+                Buy Now
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* LIGHTBOX — full-screen viewer with swipe + tap-to-zoom */}

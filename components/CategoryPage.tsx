@@ -62,20 +62,26 @@ export default function CategoryPage({
           style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--astro-primary) 12%, transparent), transparent 65%)" }}
         />
 
-        {/* MOBILE: photo as a soft full-bleed backdrop */}
+        {/* MOBILE: photo behind, solid page colour on the left fading to the photo on the right (original style) */}
         {heroImage && (
           <div className="absolute inset-0 md:hidden" aria-hidden="true">
             <img src={heroImage} alt="" fetchPriority="high" className="h-full w-full object-cover object-center" />
-            <div className="absolute inset-0 bg-gradient-to-t from-astro-surface from-40% via-astro-surface/70 via-65% to-transparent" />
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(to right, var(--astro-surface) 0%, var(--astro-surface) 38%, color-mix(in srgb, var(--astro-surface) 55%, transparent) 62%, transparent 85%)",
+              }}
+            />
           </div>
         )}
 
         <div
           className={`relative mx-auto grid max-w-7xl items-center gap-10 px-5 pb-9 sm:px-8 md:grid-cols-12 md:pb-16 md:pt-12 lg:pb-20 lg:pt-14 ${
-            heroImage ? "pt-32" : "pt-10"
+            "pt-8"
           }`}
         >
-          <div className="md:col-span-7 lg:col-span-7">
+          <div className={`md:col-span-7 lg:col-span-7 ${heroImage ? "max-w-[74%] md:max-w-none" : ""}`}>
             <Breadcrumb title={resolvedTitle} />
 
             <p className="mt-6 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-astro-accent">
