@@ -50,6 +50,21 @@ type FacetGroup = { key: string; label: string; values: { value: string; count: 
 const norm = (v: string) => v.trim().toLowerCase();
 const titleCase = (v: string) => v.replace(/\s+/g, " ").trim().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 
+function matchesQuery(p: Product, query: string): boolean {
+  const q = norm(query);
+  if (!q) return true;
+  const hay = [
+    p.name,
+    p.category,
+    p.description,
+    ...(p.specifications || []).map((s) => `${s.key} ${s.value}`),
+    ...(p.benefits || []).map((b) => b.title),
+  ]
+    .join(" ")
+    .toLowerCase();
+  return q.split(/\s+/).every((word) => hay.includes(word));
+}
+
 function productFacetValues(p: Product, key: string): string[] {
   if (key === BENEFITS_KEY) {
     return (p.benefits || []).map((b) => b?.title?.trim()).filter(Boolean).map((t) => titleCase(t as string));
@@ -123,13 +138,19 @@ export default function ProductBrowser({
   categories = [],
   showCategoryFilter = false,
   collectionName,
+  initialQuery = "",
 }: {
   products: Product[];
   categories?: BrowserCategory[];
   showCategoryFilter?: boolean;
   collectionName: string;
+  initialQuery?: string;
 }) {
-  const [query, setQuery] = useState("");
+  // A pre-filled search that matches nothing falls back to the full collection
+  // with a gentle note, instead of opening on an empty grid.
+  const [initialMatches] = useState(() => !initialQuery || products.some((p) => matchesQuery(p, initialQuery)));
+  const [query, setQuery] = useState(initialMatches ? initialQuery : "");
+  const [missedQuery, setMissedQuery] = useState(initialMatches ? "" : initialQuery);
   const [sort, setSort] = useState<SortKey>("featured");
   const [priceBands, setPriceBands] = useState<string[]>([]);
   const [facetSel, setFacetSel] = useState<Record<string, string[]>>({});
@@ -173,18 +194,7 @@ export default function ProductBrowser({
         const pv = productFacetValues(p, key);
         if (!values.some((v) => pv.includes(v))) return false;
       }
-      if (q) {
-        const hay = [
-          p.name,
-          p.category,
-          p.description,
-          ...(p.specifications || []).map((s) => `${s.key} ${s.value}`),
-          ...(p.benefits || []).map((b) => b.title),
-        ]
-          .join(" ")
-          .toLowerCase();
-        if (!q.split(/\s+/).every((word) => hay.includes(word))) return false;
-      }
+      if (q && !matchesQuery(p, q)) return false;
       return true;
     });
 
@@ -372,6 +382,22 @@ export default function ProductBrowser({
               </div>
             )}
           </div>
+
+          {missedQuery && (
+            <div className="mt-5 flex items-start gap-3 rounded-2xl border border-astro-border bg-astro-gold-soft/60 px-4 py-3 text-[13px] text-astro-body">
+              <Icon name="sparkle" className="mt-0.5 h-4 w-4 shrink-0 text-astro-accent" />
+              <p className="flex-1">
+                <span className="font-semibold capitalize text-astro-text">{missedQuery}</span> isn&apos;t in stock online right
+                now — here&apos;s the full collection.{" "}
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-astro-primary underline underline-offset-2">
+                  Ask us to source it
+                </a>
+              </p>
+              <button type="button" onClick={() => setMissedQuery("")} aria-label="Dismiss" className="text-astro-mauve">
+                <Icon name="close" className="h-4 w-4" />
+              </button>
+            </div>
+          )}
 
           {/* GRID */}
           <div className="pt-5 lg:pt-6">

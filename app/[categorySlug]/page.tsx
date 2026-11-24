@@ -7,10 +7,14 @@ import { getActiveCategories } from "@/lib/getCategories";
 
 export default async function DynamicCategoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ categorySlug: string }>;
+  searchParams: Promise<{ q?: string | string[] }>;
 }) {
   const { categorySlug } = await params;
+  const { q } = await searchParams;
+  const initialQuery = (Array.isArray(q) ? q[0] : q)?.slice(0, 60) || "";
 
   const supabase = await createClient();
   const { data: category } = await supabase
@@ -39,6 +43,7 @@ export default async function DynamicCategoryPage({
         image={category.image_url || undefined}
         products={products}
         categories={categories}
+        initialQuery={initialQuery}
       />
     </>
   );

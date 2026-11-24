@@ -1,9 +1,12 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import SafeImage from "@/components/SafeImage";
 import Reveal from "@/components/Reveal";
-import SwipeRow from "@/components/SwipeRow";
+import JourneyTimeline from "@/components/home/JourneyTimeline";
+import FindYourStone from "@/components/home/FindYourStone";
+import MobileActionBar from "@/components/home/MobileActionBar";
+import TrustStrip from "@/components/TrustStrip";
+import { getCategoryContent } from "@/lib/categoryContent";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import { getFeaturedProducts } from "@/lib/getProducts";
 import { getActiveBanner } from "@/lib/getBanner";
@@ -126,16 +129,6 @@ const HOME_CATEGORY_IMAGES: Record<string, string> = {
   "divine-products": "/images/category-divine-products.webp",
 };
 
-/* Journey photos: compressed WebP in public/images/ */
-const JOURNEY_STEPS = [
-  { n: "01", title: "DISCOVER", text: "Find what aligns with you.", icon: ICONS.lotus, img: "/images/journey-1-discover.webp" },
-  { n: "02", title: "AUTHENTICATE", text: "Tested for authenticity and quality.", icon: ICONS.gem, img: "/images/journey-2-authenticate.webp" },
-  { n: "03", title: "PURIFY", text: "Cleansed with traditional shuddhi process.", icon: ICONS.droplet, img: "/images/journey-3-purify.webp" },
-  { n: "04", title: "CONSECRATE", text: "Energised with mantra and sankalp.", icon: ICONS.flame, img: "/images/journey-4-consecrate.webp" },
-  { n: "05", title: "DELIVER", text: "Carefully packed and delivered to your doorstep.", icon: ICONS.truck, img: "/images/journey-5-deliver.webp" },
-  { n: "06", title: "ALIGN", text: "Guidance on how to wear and use for best results.", icon: ICONS.book, img: "/images/journey-6-align-ring.webp" },
-];
-
 const WHY_ITEMS = [
   {
     slug: "authenticity",
@@ -193,8 +186,10 @@ export default async function HomePage() {
   const heroMobileImage = activeBanner?.image_url || HERO_MOBILE;
   const heroDesktopImage = activeBanner?.image_url || HERO_DESKTOP;
 
+  const isDefaultTitle = !activeBanner?.title;
+
   return (
-    <main style={{ backgroundColor: "var(--astro-bg)" }} className="min-h-screen">
+    <main className="min-h-screen bg-astro-bg pb-24 md:pb-0">
       {/* The hero photo is the largest thing on screen: tell the browser to fetch it first.
           Each screen size downloads only its own photo. */}
       <link
@@ -214,7 +209,7 @@ export default async function HomePage() {
 
       <Header />
 
-      {/* HERO — photo behind, text on a soft cream fade (mobile-first) */}
+      {/* ================================ HERO ================================ */}
       <section className="relative isolate overflow-hidden">
         <div
           aria-hidden="true"
@@ -237,9 +232,7 @@ export default async function HomePage() {
           }}
         />
 
-        {/* Readability fades (use the page background token, so they follow the theme).
-            Mobile: strong + wide, since the heading/description text spans further right.
-            Desktop: lighter + narrower, since that photo already has empty sky on the left. */}
+        {/* Readability fades (follow the theme via --astro-bg) */}
         <div
           aria-hidden="true"
           className="absolute inset-0 md:hidden"
@@ -253,302 +246,197 @@ export default async function HomePage() {
           className="absolute inset-0 hidden md:block"
           style={{
             background:
-              "linear-gradient(90deg, color-mix(in srgb, var(--astro-bg) 80%, transparent) 0%, color-mix(in srgb, var(--astro-bg) 55%, transparent) 20%, transparent 58%)",
+              "linear-gradient(90deg, color-mix(in srgb, var(--astro-bg) 82%, transparent) 0%, color-mix(in srgb, var(--astro-bg) 55%, transparent) 22%, transparent 58%)",
           }}
         />
 
-        <div className="relative mx-auto flex max-w-7xl flex-col justify-start px-5 pb-10 pt-7 sm:min-h-[640px] md:min-h-[560px] md:justify-center md:pt-10 md:px-8 lg:min-h-[640px]">
-          <div className="astro-fade-up max-w-[64%] md:max-w-lg">
-            <h1 style={{ color: "var(--astro-text)" }} className="astro-serif text-[32px] leading-[1.1] md:text-5xl lg:text-6xl">
-              {activeBanner ? activeBanner.title : "Discover What Aligns With You."}
+        <div className="relative mx-auto flex max-w-7xl flex-col justify-start px-5 pb-12 pt-9 sm:min-h-[600px] md:min-h-[560px] md:justify-center md:px-8 md:pt-10 lg:min-h-[640px]">
+          <div className="astro-fade-up max-w-[66%] md:max-w-xl">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-astro-accent sm:text-[11px]">
+              ✦ Gemstones · Crystals · Rudraksha
+            </p>
+
+            <h1 className="astro-serif mt-3 text-[34px] leading-[1.04] text-astro-text md:text-[56px] lg:text-[72px]">
+              {isDefaultTitle ? (
+                <>
+                  Discover What <span className="italic text-astro-accent">Aligns With You.</span>
+                </>
+              ) : (
+                activeBanner?.title
+              )}
             </h1>
 
-            <p style={{ color: "var(--astro-text)", opacity: 0.78 }} className="mt-4 text-[15px] leading-7 sm:text-base">
+            <p className="mt-4 max-w-md text-[14.5px] leading-7 text-astro-body sm:text-base">
               {activeBanner?.subtitle ||
-                "Explore authentic gemstones, crystals, Rudraksha and Puja essentials selected for your spiritual journey."}
+                "Explore authentic gemstones, crystals, Rudraksha and Puja essentials — purified, energised and selected for your spiritual journey."}
             </p>
           </div>
 
-          <div className="mt-5 flex max-w-[64%] flex-col gap-2.5 sm:max-w-sm sm:gap-3 md:mt-8">
+          <div className="mt-6 flex max-w-[66%] flex-col gap-2.5 sm:max-w-none sm:flex-row sm:gap-3 md:mt-9">
             <Link
-              href={activeBanner?.button_link || "/gemstones"}
-              style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-              className="inline-flex h-10 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[12px] font-semibold tracking-wide transition hover:opacity-90 sm:h-12 sm:gap-2 sm:px-6 sm:text-sm"
+              href={activeBanner?.button_link || ALL_PRODUCTS_URL}
+              className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-astro-primary px-5 text-[13px] font-semibold text-astro-on-primary shadow-astro-md transition hover:bg-astro-primary-hover sm:h-[52px] sm:px-8 sm:text-[15px]"
             >
               {activeBanner?.button_text || "Explore Collection"}
               <ArrowIcon />
             </Link>
 
             <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: "var(--astro-primary)",
-                borderColor: "var(--astro-primary)",
-                backgroundColor: "color-mix(in srgb, var(--astro-bg) 88%, transparent)",
-              }}
-              className="inline-flex h-10 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-[12px] font-semibold tracking-wide backdrop-blur-sm transition hover:opacity-80 sm:h-12 sm:gap-2 sm:px-6 sm:text-sm"
+              href="#find-your-stone"
+              className="inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-astro-gold bg-[color-mix(in_srgb,var(--astro-bg)_80%,transparent)] px-5 text-[13px] font-semibold text-astro-text backdrop-blur-sm transition hover:bg-astro-gold-soft sm:h-[52px] sm:px-8 sm:text-[15px]"
             >
-              <WhatsAppIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-              Connect with Our Experts
+              <span className="text-astro-accent">✦</span> Find Your Stone
             </a>
           </div>
         </div>
       </section>
 
-      {/* JOURNEY — 6 steps, one connected flow (swipe on mobile, one row on desktop) */}
-      <section className="px-5 pb-8 pt-9 sm:px-6 sm:pb-10 sm:pt-12">
+      <TrustStrip layout="grid" />
+
+      {/* ============================ SHOP BY CATEGORY ============================ */}
+      <section className="px-4 pb-6 pt-14 sm:px-8 sm:pt-20">
         <div className="mx-auto max-w-7xl">
-          <Reveal className="text-center">
-            <span style={{ color: "var(--astro-accent)" }} className="text-sm" aria-hidden="true">
-              ✦
-            </span>
-            <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mt-2 text-[28px] leading-tight sm:text-4xl">
-              Not Just Chosen.{" "}
-              <span style={{ color: "var(--astro-accent)" }}>Prepared For You.</span>
-            </h2>
-            <p style={{ color: "var(--astro-mauve)" }} className="mx-auto mt-3 max-w-md text-sm leading-6">
-              A sacred journey — from selection to guidance, crafted for your higher alignment.
-            </p>
-          </Reveal>
+          <SectionHeading eyebrow="Explore" title="Shop by Category" href={ALL_PRODUCTS_URL} />
 
-          <SwipeRow
-            ariaLabel="Our process"
-            className="-mx-5 mt-10 scroll-px-5 px-5 pt-6 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:justify-between lg:overflow-visible lg:px-0"
-            itemClassName="w-[150px] sm:w-[172px] lg:w-auto lg:flex-1"
-            separatorClassName="flex w-7 justify-center pt-[104px] sm:pt-[117px] lg:pt-[113px]"
-            dotsClassName="lg:hidden"
-            separator={
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="var(--astro-accent)" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M4 12h14M13 7l5 5-5 5" />
-              </svg>
-            }
-            items={JOURNEY_STEPS.map((step, i) => (
-              <Reveal key={step.n} delay={i * 80}>
-                <div className="flex flex-col items-center text-center">
-                  <div className="relative mt-5 w-full">
-                    <span
-                      className="absolute -top-5 left-1/2 z-10 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border"
-                      style={{ backgroundColor: "var(--astro-primary)", borderColor: "var(--astro-accent)" }}
-                    >
-                      <LineIcon icon={step.icon} className="h-5 w-5" />
-                    </span>
+          <div
+            className="mt-7 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-5 lg:[grid-template-columns:repeat(var(--cat-cols),minmax(0,1fr))]"
+            style={{ "--cat-cols": Math.min(Math.max(categories.length, 3), 6) } as React.CSSProperties}
+          >
+            {categories.map((category, i) => {
+              // odd count on phones: the last card spans the full row as a wide banner
+              const wideOnMobile = categories.length % 2 === 1 && i === categories.length - 1;
+              return (
+              <Reveal key={category.slug} delay={i * 70} className={wideOnMobile ? "col-span-2 lg:col-span-1" : ""}>
+                <Link
+                  href={`/${category.slug}`}
+                  className={`group relative block overflow-hidden rounded-[24px] bg-astro-surface shadow-astro-sm transition duration-500 ease-[var(--ease-astro)] hover:-translate-y-1 hover:shadow-astro-lg ${
+                    wideOnMobile ? "aspect-[16/9] lg:aspect-[3/4]" : "aspect-[4/5] lg:aspect-[3/4]"
+                  }`}
 
-                    <div
-                      className="relative aspect-[4/5] w-full overflow-hidden rounded-b-2xl rounded-t-[999px] border"
-                      style={{
-                        borderColor: "var(--astro-accent)",
-                        backgroundImage: `url("${step.img}"), linear-gradient(160deg, #f7ecdc 0%, #efd6b6 100%)`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                      }}
-                    >
-                      <span
-                        className="absolute bottom-2 left-1/2 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border text-[12px] font-semibold"
-                        style={{
-                          backgroundColor: "var(--astro-bg)",
-                          borderColor: "var(--astro-accent)",
-                          color: "var(--astro-primary)",
-                        }}
-                      >
-                        {step.n}
+                >
+                  <img
+                    src={category.image}
+                    alt={category.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition duration-700 ease-[var(--ease-astro)] group-hover:scale-[1.06]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[rgba(22,8,40,0.85)] via-[rgba(22,8,40,0.15)] to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
+                    <p className="hidden text-[10px] font-semibold uppercase tracking-[0.2em] text-[#e3c27e] sm:block">
+                      {getCategoryContent(category.slug).eyebrow}
+                    </p>
+                    <div className="mt-1 flex items-end justify-between gap-2">
+                      <h3 className="astro-serif text-[22px] leading-[1.05] text-white sm:text-[26px] xl:text-[30px]">{category.name}</h3>
+                      <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition duration-300 group-hover:bg-white group-hover:text-[#2d1155] sm:flex">
+                        <ArrowIcon />
                       </span>
                     </div>
                   </div>
-
-                  <h3 style={{ color: "var(--astro-primary)" }} className="mt-4 text-[12px] font-semibold uppercase tracking-[0.12em]">
-                    {step.title}
-                  </h3>
-                  <p style={{ color: "var(--astro-mauve)" }} className="mt-1.5 px-1 text-[11px] leading-4">
-                    {step.text}
-                  </p>
-                </div>
+                </Link>
               </Reveal>
-            ))}
-          />
-        </div>
-      </section>
-
-      {/* CATEGORIES */}
-      <section className="pb-8 pt-2 sm:pb-10">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-5 flex items-center justify-between gap-4 px-4 sm:mb-7 sm:px-6">
-            <div>
-              <p style={{ color: "var(--astro-accent)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
-                Explore
-              </p>
-              <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mt-1 text-3xl sm:text-4xl">
-                Shop by Category
-              </h2>
-            </div>
-
-            <Link
-              href={ALL_PRODUCTS_URL}
-              style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-5 text-xs font-semibold uppercase tracking-wide transition hover:opacity-90"
-            >
-              View All
-              <ArrowIcon />
-            </Link>
-          </div>
-
-          {/* Horizontal scroll row — categories come live from Supabase */}
-          <div className="no-scrollbar flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:scroll-px-6 sm:gap-5 sm:px-6">
-            {categories.map((category) => (
-              <Link
-                key={category.slug}
-                href={`/${category.slug}`}
-                style={{ borderColor: "var(--astro-border)", backgroundColor: "var(--astro-card)" }}
-                className="group flex w-[44%] shrink-0 snap-start flex-col overflow-hidden rounded-xl border sm:w-[30%] lg:w-[23%]"
-              >
-                <div className="h-36 shrink-0 overflow-hidden sm:h-52">
-                  <SafeImage
-                    src={category.image}
-                    alt={category.name}
-                  />
-                </div>
-
-                <div className="flex flex-1 flex-col p-4">
-                  <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-lg">
-                    {category.name}
-                  </h3>
-
-                  <p style={{ color: "var(--astro-mauve)" }} className="mt-1 line-clamp-2 text-[10px] leading-4">
-                    {category.description}
-                  </p>
-
-                  <span style={{ color: "var(--astro-primary)" }} className="mt-auto inline-block pt-3 text-[9px] font-semibold uppercase tracking-[0.12em]">
-                    Explore →
-                  </span>
-                </div>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* FEATURED PRODUCTS — same background as Shop by Category (--astro-bg) */}
-      <section className="px-4 pb-8 pt-2 sm:px-6 sm:pb-10">
+      {/* ============================ FEATURED ============================ */}
+      <section className="px-4 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-5 flex items-center justify-between gap-4 sm:mb-7">
-            <div>
-              <p style={{ color: "var(--astro-accent)" }} className="text-[9px] font-semibold uppercase tracking-[0.18em]">
-                Curated For You
-              </p>
-
-              <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mt-1 text-3xl sm:text-4xl">
-                Featured Collection
-              </h2>
-            </div>
-
-            <Link
-              href={ALL_PRODUCTS_URL}
-              style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-5 text-xs font-semibold uppercase tracking-wide transition hover:opacity-90"
-            >
-              View All
-              <ArrowIcon />
-            </Link>
-          </div>
+          <SectionHeading eyebrow="Curated for you" title="Featured Collection" href={ALL_PRODUCTS_URL} />
 
           {featuredProducts.length === 0 ? (
-            <p style={{ color: "var(--astro-mauve)" }} className="text-sm">
+            <p className="mt-6 text-center text-sm text-astro-mauve">
               New products are being added soon. Please check back shortly.
             </p>
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
+            <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-10 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
               {featuredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}
+
+          <div className="mt-9 flex justify-center">
+            <Link
+              href={ALL_PRODUCTS_URL}
+              className="inline-flex h-12 items-center gap-2 rounded-full border border-astro-border bg-astro-card px-7 text-[14px] font-semibold text-astro-text transition hover:border-astro-gold hover:shadow-astro-sm"
+            >
+              View all products <ArrowIcon />
+            </Link>
+          </div>
         </div>
       </section>
+
+      {/* ======================== JOURNEY (compact, horizontal) ======================== */}
+      <JourneyTimeline />
+
+      {/* ========================== FIND YOUR STONE ========================== */}
+      <FindYourStone />
 
       {/* TESTIMONIALS (text / photo / video / audio) */}
       <TestimonialsSection testimonials={testimonials} />
 
-      {/* CONSULTATION */}
-      <section id="consult" className="px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-8">
-        <div
-          style={{ backgroundColor: "var(--astro-primary)" }}
-          className="mx-auto max-w-7xl overflow-hidden rounded-2xl px-6 py-10 text-center sm:px-10 sm:py-14"
-        >
-          <p style={{ color: "var(--astro-accent)" }} className="text-[9px] font-semibold uppercase tracking-[0.22em]">
-            Personal Guidance
-          </p>
-
-          <h2 style={{ color: "var(--astro-primary-text)" }} className="astro-serif mt-3 text-3xl sm:text-4xl">
-            Need Help Choosing?
-          </h2>
-
-          <p style={{ color: "var(--astro-primary-text)", opacity: 0.8 }} className="mx-auto mt-4 max-w-xl text-sm leading-6">
-            Connect with AstroDisha for guidance around gemstones, crystals,
-            Rudraksha and spiritual essentials.
-          </p>
-
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ backgroundColor: "var(--astro-bg)", color: "var(--astro-primary)" }}
-            className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-full px-7 text-sm font-semibold transition hover:opacity-90"
-          >
-            <WhatsAppIcon className="h-5 w-5" />
-            Consult an Expert
-          </a>
+      {/* ============================ CONSULTATION ============================ */}
+      <section id="consult" className="px-4 py-10 sm:px-8 sm:py-14">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[32px] bg-[#1b0c33] px-6 py-12 text-center text-[#f4effb] sm:px-10 sm:py-16">
+          <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            {[640, 480, 320].map((size) => (
+              <div
+                key={size}
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#c6a15b]/15"
+                style={{ width: size, height: size }}
+              />
+            ))}
+          </div>
+          <div className="relative">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[#d7b46a]">Personal guidance</p>
+            <h2 className="astro-serif mt-3 text-[34px] leading-tight sm:text-[48px]">Need Help Choosing?</h2>
+            <p className="mx-auto mt-3 max-w-xl text-[14px] leading-6 text-[#f4effb]/75">
+              Connect with AstroDisha for guidance around gemstones, crystals, Rudraksha and spiritual essentials.
+            </p>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#d7b46a] px-7 text-[14px] font-semibold text-[#1d0b38] shadow-[0_10px_30px_rgba(215,180,106,0.35)] transition hover:brightness-105"
+            >
+              <WhatsAppIcon className="h-5 w-5" />
+              Consult an Expert
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* WHY ASTRODISHA — 5 swipeable cards */}
-      <section className="px-5 pb-8 pt-4 sm:px-6 md:pb-12 md:pt-6">
-        <div className="mx-auto max-w-[1100px] lg:px-8">
-          <p style={{ color: "var(--astro-accent)" }} className="mb-3 text-center text-[12px] font-semibold uppercase tracking-[3px] md:mb-5 md:text-[14px]">
-            Why AstroDisha
-          </p>
+      {/* ============================ WHY ASTRODISHA ============================ */}
+      <section className="px-4 pb-14 pt-6 sm:px-8 sm:pb-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-astro-accent">Why AstroDisha</p>
+            <h2 className="astro-serif mx-auto mt-2 max-w-3xl text-[32px] leading-[1.1] text-astro-text sm:text-[48px]">
+              Thoughtfully Chosen. <span className="italic text-astro-accent">Simply Presented.</span>
+            </h2>
+          </div>
 
-          <h2 style={{ color: "var(--astro-text)" }} className="astro-serif mx-auto mb-6 max-w-[800px] text-center text-[30px] font-normal leading-[1.1] sm:text-[38px] md:mb-8 md:text-[52px] lg:text-[64px]">
-            Thoughtfully Chosen.
-            <br />
-            Simply Presented.
-          </h2>
-
-          <SwipeRow
-            ariaLabel="Why AstroDisha"
-            className="-mx-5 scroll-px-5 gap-3 px-5 pb-1 sm:-mx-6 sm:scroll-px-6 sm:gap-6 sm:px-6 lg:mx-0 lg:scroll-px-0 lg:px-0"
-            itemClassName="w-[82%] sm:w-[46%] lg:w-[31%]"
-            items={WHY_ITEMS.map((item) => (
-              <Link
-                key={item.slug}
-                href={`/why/${item.slug}`}
-                className="flex h-full items-center gap-3 rounded-[18px] border border-[color:var(--astro-border)] bg-[color:var(--astro-card)] px-4 py-4 shadow-[0_4px_20px_rgba(36,16,70,0.05)] transition duration-200 ease-in-out hover:-translate-y-0.5 hover:border-[#b69bee] sm:gap-4 sm:rounded-[22px] sm:px-5 sm:py-5 md:gap-7 md:p-8 lg:px-8 lg:py-8"
-              >
-                <span
-                  style={{ backgroundColor: "rgba(182, 155, 238, 0.15)" }}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full sm:h-16 sm:w-16 md:h-[70px] md:w-[70px]"
-                  aria-hidden="true"
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-12 sm:gap-5 lg:grid-cols-5">
+            {WHY_ITEMS.map((item, i) => (
+              <Reveal key={item.slug} delay={i * 60} className={i === WHY_ITEMS.length - 1 ? "col-span-2 lg:col-span-1" : ""}>
+                <Link
+                  href={`/why/${item.slug}`}
+                  className="group flex h-full flex-col rounded-[22px] border border-astro-border bg-astro-card p-4 shadow-astro-sm transition duration-300 hover:-translate-y-1 hover:border-astro-gold hover:shadow-astro-md sm:p-6"
                 >
-                  <LineIcon icon={item.icon} className="h-5 w-5 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />
-                </span>
-
-                <div className="min-w-0">
-                  <h3 style={{ color: "var(--astro-text)" }} className="astro-serif text-[16px] font-normal leading-tight sm:text-[24px] lg:text-[28px]">
-                    {item.title}
-                  </h3>
-
-                  <p style={{ color: "var(--astro-mauve)" }} className="mt-1 line-clamp-3 text-[11px] leading-[1.4] sm:mt-1.5 sm:text-[14px] sm:leading-[1.5] lg:text-[15px]">
-                    {item.text}
-                  </p>
-
-                  <span style={{ color: "var(--astro-primary)" }} className="mt-1.5 inline-block text-[10px] font-semibold uppercase tracking-[0.1em] sm:mt-2 sm:text-[11px]">
-                    Learn more →
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-astro-gold-soft" aria-hidden="true">
+                    <LineIcon icon={item.icon} className="h-5 w-5" />
                   </span>
-                </div>
-              </Link>
+                  <h3 className="astro-serif mt-4 text-[19px] leading-tight text-astro-text sm:text-[22px]">{item.title}</h3>
+                  <p className="mt-1.5 line-clamp-3 text-[12px] leading-[1.5] text-astro-mauve sm:text-[13px]">{item.text}</p>
+                  <span className="mt-auto inline-flex items-center gap-1 pt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-astro-primary">
+                    Learn more <span className="transition group-hover:translate-x-0.5">→</span>
+                  </span>
+                </Link>
+              </Reveal>
             ))}
-          />
+          </div>
         </div>
       </section>
 
@@ -562,21 +450,19 @@ export default async function HomePage() {
             <div className="astro-serif text-[40px] font-normal leading-none lg:text-[48px]">
               ASTRODISHA
             </div>
-            <p style={{ color: "#c6a15b" }} className="mt-3 text-[14px] font-medium tracking-[2.5px]">
+            <p style={{ color: "#c6a15b" }} className="mt-3 text-[12px] font-medium tracking-[2.5px] sm:text-[14px]">
               GUIDANCE&nbsp;&nbsp;•&nbsp;&nbsp;HEALING&nbsp;&nbsp;•&nbsp;&nbsp;DIVINE ALIGNMENT
             </p>
           </div>
 
-          <div className="mt-10 grid grid-cols-2 gap-8 sm:grid-cols-3 sm:mx-auto sm:max-w-2xl">
+          <div className="mt-10 grid grid-cols-2 gap-8 sm:mx-auto sm:max-w-2xl sm:grid-cols-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider">
-                Explore
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#d7b46a]">Explore</p>
 
               {/* Footer categories come live from Supabase (same list as Shop by Category) */}
-              <div className="mt-3 flex flex-col gap-2 text-xs opacity-75">
+              <div className="mt-3 flex flex-col gap-2.5 text-[13px] opacity-75">
                 {categories.map((category) => (
-                  <Link key={category.slug} href={`/${category.slug}`}>
+                  <Link key={category.slug} href={`/${category.slug}`} className="transition hover:opacity-100">
                     {category.name}
                   </Link>
                 ))}
@@ -584,11 +470,9 @@ export default async function HomePage() {
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider">
-                Support
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#d7b46a]">Support</p>
 
-              <div className="mt-3 flex flex-col gap-2 text-xs opacity-75">
+              <div className="mt-3 flex flex-col gap-2.5 text-[13px] opacity-75">
                 <Link href="/about">About Us</Link>
                 <Link href="/contact">Contact</Link>
                 <Link href="/consult">Consult an Expert</Link>
@@ -597,11 +481,9 @@ export default async function HomePage() {
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider">
-                Legal
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#d7b46a]">Legal</p>
 
-              <div className="mt-3 flex flex-col gap-2 text-xs opacity-75">
+              <div className="mt-3 flex flex-col gap-2.5 text-[13px] opacity-75">
                 <Link href="/privacy-policy">Privacy Policy</Link>
                 <Link href="/terms">Terms & Conditions</Link>
                 <Link href="/disclaimer">Disclaimer</Link>
@@ -612,23 +494,42 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div style={{ borderColor: "rgba(244, 239, 251, 0.15)" }} className="mt-8 border-t pt-5 text-center text-[9px] opacity-60">
+          <div style={{ borderColor: "rgba(244, 239, 251, 0.15)" }} className="mt-8 border-t pt-5 text-center text-[11px] opacity-60">
             © {new Date().getFullYear()} ASTRODISHA. All rights reserved.
           </div>
         </div>
       </footer>
 
-      {/* WHATSAPP */}
+      {/* Phones: Shop Now + WhatsApp bar. Larger screens: floating WhatsApp button. */}
+      <MobileActionBar />
       <a
         href={WHATSAPP_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with AstroDisha on WhatsApp"
-        style={{ backgroundColor: "var(--astro-primary)", color: "var(--astro-primary-text)" }}
-        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition hover:scale-105"
+        className="fixed bottom-5 right-4 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-astro-primary text-astro-on-primary shadow-astro-lg transition hover:scale-105 md:flex"
       >
         <WhatsAppIcon className="h-7 w-7" />
       </a>
     </main>
   );
-    }
+}
+
+function SectionHeading({ eyebrow, title, href }: { eyebrow: string; title: string; href?: string }) {
+  return (
+    <div className="flex items-end justify-between gap-4">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-astro-accent">{eyebrow}</p>
+        <h2 className="astro-serif mt-1.5 text-[32px] leading-tight text-astro-text sm:text-[46px]">{title}</h2>
+      </div>
+      {href && (
+        <Link
+          href={href}
+          className="mb-1.5 inline-flex shrink-0 items-center gap-1.5 text-[13px] font-semibold text-astro-primary underline-offset-4 hover:underline"
+        >
+          View all <ArrowIcon />
+        </Link>
+      )}
+    </div>
+  );
+}
