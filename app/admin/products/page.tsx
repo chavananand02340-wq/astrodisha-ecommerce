@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AdminGuard from "@/components/AdminGuard";
 import { createClient } from "@/utils/supabase/client";
 
@@ -40,6 +40,8 @@ type Product = {
   id: string;
   name: string;
   price: number;
+  /** MRP / original price (optional) */
+  compare_at_price?: number | null;
   stock: number;
   is_active: boolean;
   is_featured: boolean | null;
@@ -87,6 +89,7 @@ function ProductsContent() {
   const [name, setName] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [price, setPrice] = useState("");
+  const [mrp, setMrp] = useState("");
   const [stock, setStock] = useState("");
   const [displayOrder, setDisplayOrder] = useState("");
   const [shortDescription, setShortDescription] = useState("");
@@ -99,6 +102,11 @@ function ProductsContent() {
   const [editName, setEditName] = useState("");
   const [editCategoryId, setEditCategoryId] = useState("");
   const [editPrice, setEditPrice] = useState("");
+  const [editMrp, setEditMrp] = useState("");
+  // MRP needs the compare_at_price column (supabase/migrations/20261125_add_compare_at_price.sql).
+  // If the SQL hasn't been run yet, the page keeps working without MRP.
+  const mrpColRef = useRef(true);
+  const [hasMrpColumn, setHasMrpColumn] = useState(true);
   const [editStock, setEditStock] = useState("");
   const [editDisplayOrder, setEditDisplayOrder] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -124,7 +132,10 @@ function ProductsContent() {
 
     let query = supabase
       .from("products")
-      .select("id, name, price, stock, is_active, is_featured, display_order, category_id, short_description, specifications, benefits, how_to_wear, product_details, certificate, certificate_image_url, certificate_image_path, categories(name)");
+      .select(
+        "id, name, price, stock, is_active, is_featured, display_order, category_id, short_description, specifications, benefits, how_to_wear, product_details, certificate, certificate_image_url, certificate_image_path, categories(name)" +
+          (mrpColRef.current ? ", compare_at_price" : "")
+      );
 
     if (filterStatus === "active") {
       query = query.eq("is_active", true);
@@ -153,6 +164,12 @@ function ProductsContent() {
     }
 
     const { data: prods, error } = await query;
+
+    if (error && mrpColRef.current && (error.message || "").includes("compare_at_price")) {
+      mrpColRef.current = false;
+      setHasMrpColumn(false);
+      return loadData();
+    }
 
     if (error) {
       setStatusMsg("Failed to load products: " + error.message);
@@ -186,12 +203,29 @@ function ProductsContent() {
       .filter((r) => r.key && r.value);
   }
 
+  /** Returns the MRP to save (null = none), or a string error message. */
+  function parseMrp(mrpText: string, priceText: string): number | null | string {
+    if (!mrpText.trim()) return null;
+    const m = parseFloat(mrpText);
+    const p = parseFloat(priceText);
+    if (!(m > 0)) return "MRP must be a number.";
+    if (!(m > p)) return "MRP must be higher than the selling price (or leave MRP empty).";
+    if (!hasMrpColumn) return "To use MRP, first run the MRP SQL in Supabase (see supabase/migrations/20261125_add_compare_at_price.sql).";
+    return m;
+  }
+
   async function handleAddProduct(e: React.FormEvent) {
     e.preventDefault();
     setStatusMsg("");
 
     if (!name || !categoryId || !price) {
       setStatusMsg("Name, category, and price are required.");
+      return;
+    }
+
+    const mrpValue = parseMrp(mrp, price);
+    if (typeof mrpValue === "string") {
+      setStatusMsg(mrpValue);
       return;
     }
 
@@ -204,6 +238,7 @@ function ProductsContent() {
         slug: slugify(name),
         category_id: categoryId,
         price: parseFloat(price),
+        ...(hasMrpColumn ? { compare_at_price: mrpValue } : {}),
         stock: stock ? parseInt(stock, 10) : 0,
         display_order: displayOrder ? parseInt(displayOrder, 10) : null,
         short_description: shortDescription || null,
@@ -224,6 +259,7 @@ function ProductsContent() {
 
     setName("");
     setPrice("");
+    setMrp("");
     setStock("");
     setDisplayOrder("");
     setShortDescription("");
@@ -257,6 +293,7 @@ function ProductsContent() {
     setEditName(product.name);
     setEditCategoryId(product.category_id);
     setEditPrice(String(product.price));
+    setEditMrp(product.compare_at_price ? String(product.compare_at_price) : "");
     setEditStock(String(product.stock));
     setEditDisplayOrder(product.display_order ? String(product.display_order) : "");
     setEditDescription(product.short_description || "");
@@ -281,6 +318,12 @@ function ProductsContent() {
       return;
     }
 
+    const editMrpValue = parseMrp(editMrp, editPrice);
+    if (typeof editMrpValue === "string") {
+      setStatusMsg(editMrpValue);
+      return;
+    }
+
     setSavingEdit(true);
 
     const { error } = await supabase
@@ -289,6 +332,7 @@ function ProductsContent() {
         name: editName,
         category_id: editCategoryId,
         price: parseFloat(editPrice),
+        ...(hasMrpColumn ? { compare_at_price: editMrpValue } : {}),
         stock: editStock ? parseInt(editStock, 10) : 0,
         display_order: editDisplayOrder ? parseInt(editDisplayOrder, 10) : null,
         short_description: editDescription || null,
@@ -512,12 +556,12 @@ function ProductsContent() {
             ))}
           </select>
 
-          <input
-            type="number"
-            placeholder="Price (₹)"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            style={inputStyle}
+          <PriceFields
+            price={price}
+            mrp={mrp}
+            onPrice={setPrice}
+            onMrp={setMrp}
+            mrpEnabled={hasMrpColumn}
           />
 
           <input
@@ -663,12 +707,12 @@ function ProductsContent() {
                       </option>
                     ))}
                   </select>
-                  <input
-                    type="number"
-                    placeholder="Price"
-                    value={editPrice}
-                    onChange={(e) => setEditPrice(e.target.value)}
-                    style={inputStyle}
+                  <PriceFields
+                    price={editPrice}
+                    mrp={editMrp}
+                    onPrice={setEditPrice}
+                    onMrp={setEditMrp}
+                    mrpEnabled={hasMrpColumn}
                   />
                   <input
                     type="number"
@@ -755,7 +799,11 @@ function ProductsContent() {
                       )}
                     </div>
                     <div style={{ fontSize: "0.85rem", color: "#6a5d70" }}>
-                      {p.categories?.name || "-"} • ₹{p.price} • Stock: {p.stock} •{" "}
+                      {p.categories?.name || "-"} • ₹{p.price}
+                      {p.compare_at_price && p.compare_at_price > p.price
+                        ? ` (MRP ₹${p.compare_at_price}, ${Math.round(((p.compare_at_price - p.price) / p.compare_at_price) * 100)}% off)`
+                        : ""}{" "}
+                      • Stock: {p.stock} •{" "}
                       {p.is_active ? "Active" : "Inactive"} • Position: {p.display_order ?? "-"}
                       {p.specifications && p.specifications.length > 0
                         ? ` • ${p.specifications.length} spec${p.specifications.length === 1 ? "" : "s"}`
@@ -957,6 +1005,69 @@ function FeaturedCheckbox({
         </span>
       </span>
     </label>
+  );
+}
+
+/* Selling price + optional MRP, with a live preview of how the price will look on the site */
+function PriceFields({
+  price,
+  mrp,
+  onPrice,
+  onMrp,
+  mrpEnabled,
+}: {
+  price: string;
+  mrp: string;
+  onPrice: (v: string) => void;
+  onMrp: (v: string) => void;
+  mrpEnabled: boolean;
+}) {
+  const p = parseFloat(price);
+  const m = parseFloat(mrp);
+  const valid = p > 0 && m > p;
+  const off = valid ? Math.round(((m - p) / m) * 100) : 0;
+  const labelStyle: React.CSSProperties = { display: "block", fontSize: "12px", fontWeight: 600, color: "#6a5d70", marginBottom: "4px" };
+
+  return (
+    <div style={{ marginBottom: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+        <label>
+          <span style={labelStyle}>MRP / Original price (₹) — optional</span>
+          <input
+            type="number"
+            min="0"
+            placeholder={mrpEnabled ? "e.g. 399" : "Run MRP SQL first"}
+            value={mrp}
+            disabled={!mrpEnabled}
+            onChange={(e) => onMrp(e.target.value)}
+            style={{ ...inputStyle, marginBottom: 0, opacity: mrpEnabled ? 1 : 0.6 }}
+          />
+        </label>
+        <label>
+          <span style={labelStyle}>Selling price (₹) — customer pays</span>
+          <input
+            type="number"
+            min="0"
+            placeholder="e.g. 359"
+            value={price}
+            onChange={(e) => onPrice(e.target.value)}
+            style={{ ...inputStyle, marginBottom: 0 }}
+          />
+        </label>
+      </div>
+      {valid && (
+        <p style={{ marginTop: "6px", fontSize: "13px", color: "#241046" }}>
+          Customer sees: <strong>₹{p.toLocaleString("en-IN")}</strong>{" "}
+          <span style={{ textDecoration: "line-through", color: "#6a5d70" }}>₹{m.toLocaleString("en-IN")}</span>{" "}
+          <span style={{ background: "#b4664a", color: "#fff", borderRadius: "999px", padding: "1px 8px", fontSize: "11px", fontWeight: 700 }}>
+            {off}% OFF
+          </span>
+        </p>
+      )}
+      {mrp && p > 0 && !(m > p) && (
+        <p style={{ marginTop: "6px", fontSize: "12px", color: "#b4664a" }}>MRP should be higher than the selling price.</p>
+      )}
+    </div>
   );
 }
 
