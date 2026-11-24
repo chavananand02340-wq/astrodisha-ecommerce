@@ -28,8 +28,11 @@ const PIN_SCROLL = 900;
 export default function JourneyTimeline() {
   const sectionRef = useRef<HTMLElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLOListElement>(null);
   const litRef = useRef<SVGPolylineElement>(null);
+  const glowRef = useRef<SVGPolylineElement>(null);
   const orbRef = useRef<SVGGElement>(null);
 
   const [stepW, setStepW] = useState(150);
@@ -54,23 +57,27 @@ export default function JourneyTimeline() {
   useEffect(() => {
     const section = sectionRef.current;
     const scroller = scrollerRef.current;
+    const stage = stageRef.current;
+    const pin = pinRef.current;
     const lit = litRef.current;
     const orb = orbRef.current;
-    if (!section || !scroller || !lit || !orb) return;
+    if (!section || !scroller || !stage || !pin || !lit || !orb) return;
 
     const segments = STEPS.length - 1;
     let shown = -1; // progress currently drawn (0..1), eased toward target
+    let drawn = -2;
     let frame = 0;
     let lastActive = -1;
 
     // 0 when the pinned view starts, 1 when it is about to release
     const targetProgress = () => {
       const rect = section.getBoundingClientRect();
-      const range = section.offsetHeight - window.innerHeight;
+      // pinned distance = section height minus the pinned panel and the 68px header;
+      // measured from the panel, so mobile address-bar resizing doesn't make it jump
+      const range = section.offsetHeight - pin.offsetHeight - 68;
       if (range <= 0) return 1;
-      // start a little early (light begins as the section arrives) and finish
-      // slightly before release so 06 is seen lit while still pinned
-      const p = (-rect.top + window.innerHeight * 0.15) / (range * 0.9);
+      // start a little before pinning and finish just before release so 06 is seen lit
+      const p = (68 - rect.top + pin.offsetHeight * 0.15) / (range * 0.9);
       return Math.min(Math.max(p, 0), 1);
     };
 
@@ -85,6 +92,7 @@ export default function JourneyTimeline() {
       const travelled = segLens.slice(0, i).reduce((s2, l) => s2 + l, 0) + segLens[i] * f;
 
       lit.style.strokeDashoffset = String(total - travelled);
+      if (glowRef.current) glowRef.current.style.strokeDashoffset = String(total - travelled);
       orb.setAttribute("transform", `translate(${x} ${y})`);
       orb.style.opacity = p > 0.005 && p < 0.995 ? "1" : "0";
 
@@ -94,18 +102,20 @@ export default function JourneyTimeline() {
         setActive(nowActive);
       }
 
-      // phones: slide the row so the light stays centred
-      const max = scroller.scrollWidth - scroller.clientWidth;
-      if (max > 4) {
-        scroller.scrollLeft = Math.round(Math.max(0, Math.min(x - scroller.clientWidth / 2, max)));
-      }
+      // phones: slide the row (GPU transform, not scrollLeft) so the light stays centred
+      const max = stage.offsetWidth - scroller.clientWidth;
+      const shift = max > 4 ? Math.max(0, Math.min(x - scroller.clientWidth / 2, max)) : 0;
+      stage.style.transform = `translate3d(${-shift}px,0,0)`;
     };
 
     const loop = () => {
       const target = targetProgress();
-      shown = shown < 0 ? target : shown + (target - shown) * 0.18;
-      if (Math.abs(target - shown) < 0.0005) shown = target;
-      draw(shown);
+      shown = shown < 0 ? target : shown + (target - shown) * 0.22;
+      if (Math.abs(target - shown) < 0.0004) shown = target;
+      if (Math.abs(shown - drawn) > 0.0001) {
+        drawn = shown;
+        draw(shown);
+      }
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
@@ -121,12 +131,12 @@ export default function JourneyTimeline() {
     <section
       ref={sectionRef}
       className="relative bg-[#160828] text-[#f4effb]"
-      style={{ height: `calc(100vh + ${PIN_SCROLL}px)` }}
+      style={{ height: `calc(100svh + ${PIN_SCROLL}px)` }}
     >
-      <div className="sticky top-[68px] flex h-[calc(100vh-68px)] flex-col justify-center overflow-hidden py-6">
+      <div ref={pinRef} className="sticky top-[68px] flex h-[calc(100svh-68px)] flex-col justify-center overflow-hidden py-6">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[900px] -translate-x-1/2 rounded-full opacity-60 blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-0 h-[520px] w-[1000px] -translate-x-1/2 rounded-full opacity-70"
         style={{ background: "radial-gradient(closest-side, rgba(94, 62, 160, 0.55), transparent)" }}
       />
 
@@ -142,7 +152,7 @@ export default function JourneyTimeline() {
         </div>
 
         <div ref={scrollerRef} className="no-scrollbar mt-6 overflow-x-hidden sm:mt-8">
-          <div className="relative mx-auto" style={{ width: trackW, height: STEP_H }}>
+          <div ref={stageRef} className="relative mx-auto will-change-transform" style={{ width: trackW, height: STEP_H }}>
             {/* the zig-zag: dim base line, gold "filled" line, travelling light */}
             <svg
               aria-hidden="true"
@@ -151,13 +161,6 @@ export default function JourneyTimeline() {
               height={STEP_H}
             >
               <defs>
-                <filter id="astro-journey-glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3" result="b" />
-                  <feMerge>
-                    <feMergeNode in="b" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
                 <radialGradient id="astro-journey-orb">
                   <stop offset="0%" stopColor="#fff6dc" />
                   <stop offset="35%" stopColor="#f3d48f" stopOpacity="0.9" />
@@ -166,13 +169,22 @@ export default function JourneyTimeline() {
               </defs>
               <polyline points={polyline} fill="none" stroke="#c6a15b" strokeOpacity="0.22" strokeWidth="1.4" />
               <polyline
+                ref={glowRef}
+                points={polyline}
+                fill="none"
+                stroke="#e3c27e"
+                strokeOpacity="0.25"
+                strokeWidth="7"
+                strokeLinecap="round"
+                style={{ strokeDasharray: total, strokeDashoffset: total }}
+              />
+              <polyline
                 ref={litRef}
                 points={polyline}
                 fill="none"
                 stroke="#e3c27e"
                 strokeWidth="2"
                 strokeLinecap="round"
-                filter="url(#astro-journey-glow)"
                 style={{ strokeDasharray: total, strokeDashoffset: total }}
               />
               <g ref={orbRef} style={{ opacity: 0, transition: "opacity 300ms" }}>
