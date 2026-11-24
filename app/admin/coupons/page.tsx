@@ -124,21 +124,21 @@ function CouponsContent() {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto", fontFamily: "Inter, sans-serif" }}>
-      <h1 style={{ fontFamily: "Playfair Display, serif", color: "#3E2237" }}>
+    <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto", fontFamily: "var(--font-sans)" }}>
+      <h1 style={{ fontFamily: "var(--font-serif)", color: "#241046" }}>
         Manage Coupons
       </h1>
 
       <div
         style={{
-          backgroundColor: "#FBF8F2",
-          border: "1px solid #D9CEC1",
+          backgroundColor: "#FFFDF9",
+          border: "1px solid #E7DDCF",
           borderRadius: "8px",
           padding: "1.5rem",
           marginTop: "1.5rem",
         }}
       >
-        <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginBottom: "1rem" }}>Add Coupon</h2>
+        <h2 style={{ fontSize: "1.1rem", color: "#241046", marginBottom: "1rem" }}>Add Coupon</h2>
         <form onSubmit={handleAddCoupon}>
           <input
             type="text"
@@ -183,7 +183,7 @@ function CouponsContent() {
             />
           )}
 
-          <label style={{ fontSize: "0.8rem", color: "#8A607A" }}>Valid Until (optional)</label>
+          <label style={{ fontSize: "0.8rem", color: "#6a5d70" }}>Valid Until (optional)</label>
           <input
             type="date"
             value={validUntil}
@@ -203,7 +203,7 @@ function CouponsContent() {
             type="submit"
             disabled={submitting}
             style={{
-              backgroundColor: "#5A3150",
+              backgroundColor: "#2d1155",
               color: "#fff",
               border: "none",
               borderRadius: "4px",
@@ -217,11 +217,11 @@ function CouponsContent() {
         </form>
 
         {statusMsg && (
-          <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#3E2237" }}>{statusMsg}</p>
+          <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#241046" }}>{statusMsg}</p>
         )}
       </div>
 
-      <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginTop: "2rem", marginBottom: "1rem" }}>
+      <h2 style={{ fontSize: "1.1rem", color: "#241046", marginTop: "2rem", marginBottom: "1rem" }}>
         All Coupons
       </h2>
 
@@ -235,10 +235,10 @@ function CouponsContent() {
             <div
               key={c.id}
               style={{
-                border: "1px solid #D9CEC1",
+                border: "1px solid #E7DDCF",
                 borderRadius: "8px",
                 padding: "1rem",
-                backgroundColor: "#FBF8F2",
+                backgroundColor: "#FFFDF9",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -247,11 +247,11 @@ function CouponsContent() {
               }}
             >
               <div>
-                <div style={{ fontWeight: "bold", color: "#3E2237" }}>
+                <div style={{ fontWeight: "bold", color: "#241046" }}>
                   {c.code} — {c.discount_type === "percentage" ? `${c.discount_value}%` : `₹${c.discount_value}`}
                   {c.max_discount ? ` (max ₹${c.max_discount})` : ""}
                 </div>
-                <div style={{ fontSize: "0.8rem", color: "#8A607A" }}>
+                <div style={{ fontSize: "0.8rem", color: "#6a5d70" }}>
                   Min order: ₹{c.min_order_value} • Used: {c.used_count}
                   {c.usage_limit ? `/${c.usage_limit}` : ""} •{" "}
                   {c.valid_until
@@ -264,7 +264,7 @@ function CouponsContent() {
                 <button
                   onClick={() => toggleActive(c)}
                   style={{
-                    backgroundColor: c.is_active ? "#B00020" : "#5A3150",
+                    backgroundColor: c.is_active ? "#B00020" : "#2d1155",
                     color: "#fff",
                     border: "none",
                     borderRadius: "4px",
@@ -278,7 +278,7 @@ function CouponsContent() {
                 <button
                   onClick={() => deleteCoupon(c)}
                   style={{
-                    backgroundColor: "#8A607A",
+                    backgroundColor: "#6a5d70",
                     color: "#fff",
                     border: "none",
                     borderRadius: "4px",
@@ -303,7 +303,7 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.6rem",
   marginBottom: "0.75rem",
-  border: "1px solid #D9CEC1",
+  border: "1px solid #E7DDCF",
   borderRadius: "4px",
   backgroundColor: "#fff",
 };

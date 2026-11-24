@@ -227,18 +227,18 @@ function OrdersContent() {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "1000px", margin: "0 auto", fontFamily: "Inter, sans-serif" }}>
-      <h1 style={{ fontFamily: "Playfair Display, serif", color: "#3E2237", marginBottom: "0.5rem" }}>
+    <div style={{ padding: "2rem", maxWidth: "1000px", margin: "0 auto", fontFamily: "var(--font-sans)" }}>
+      <h1 style={{ fontFamily: "var(--font-serif)", color: "#241046", marginBottom: "0.5rem" }}>
         Orders & Clients
       </h1>
-      <p style={{ color: "#8A607A", marginBottom: "1.5rem" }}>
+      <p style={{ color: "#6a5d70", marginBottom: "1.5rem" }}>
         {orders.length} order{orders.length !== 1 ? "s" : ""} shown
       </p>
 
       <div
         style={{
-          backgroundColor: "#FBF8F2",
-          border: "1px solid #D9CEC1",
+          backgroundColor: "#FFFDF9",
+          border: "1px solid #E7DDCF",
           borderRadius: "8px",
           padding: "1rem",
           marginBottom: "1.5rem",
@@ -289,7 +289,7 @@ function OrdersContent() {
           <option value="amount_low">Amount: Low to High</option>
         </select>
 
-        <label style={{ fontSize: "0.75rem", color: "#8A607A" }}>
+        <label style={{ fontSize: "0.75rem", color: "#6a5d70" }}>
           From
           <input
             type="date"
@@ -299,7 +299,7 @@ function OrdersContent() {
           />
         </label>
 
-        <label style={{ fontSize: "0.75rem", color: "#8A607A" }}>
+        <label style={{ fontSize: "0.75rem", color: "#6a5d70" }}>
           To
           <input
             type="date"
@@ -312,7 +312,7 @@ function OrdersContent() {
         <button
           onClick={loadOrders}
           style={{
-            backgroundColor: "#5A3150",
+            backgroundColor: "#2d1155",
             color: "#fff",
             border: "none",
             borderRadius: "4px",
@@ -328,8 +328,8 @@ function OrdersContent() {
           onClick={clearFilters}
           style={{
             backgroundColor: "transparent",
-            color: "#8A607A",
-            border: "1px solid #D9CEC1",
+            color: "#6a5d70",
+            border: "1px solid #E7DDCF",
             borderRadius: "4px",
             padding: "0.5rem 1rem",
             fontSize: "0.8rem",
@@ -356,10 +356,10 @@ function OrdersContent() {
               <div
                 key={order.id}
                 style={{
-                  border: "1px solid #D9CEC1",
+                  border: "1px solid #E7DDCF",
                   borderRadius: "8px",
                   padding: "1rem",
-                  backgroundColor: "#FBF8F2",
+                  backgroundColor: "#FFFDF9",
                 }}
               >
                 <div
@@ -371,20 +371,20 @@ function OrdersContent() {
                   }}
                 >
                   <div>
-                    <div style={{ fontWeight: "bold", color: "#3E2237" }}>
+                    <div style={{ fontWeight: "bold", color: "#241046" }}>
                       AD{order.order_number} — {order.customer_name}
                     </div>
-                    <div style={{ fontSize: "0.8rem", color: "#8A607A" }}>
+                    <div style={{ fontSize: "0.8rem", color: "#6a5d70" }}>
                       {order.customer_mobile}
                       {order.customer_email ? ` • ${order.customer_email}` : ""}
                     </div>
-                    <div style={{ fontSize: "0.8rem", color: "#8A607A" }}>
+                    <div style={{ fontSize: "0.8rem", color: "#6a5d70" }}>
                       {formatDate(order.created_at)}
                     </div>
                   </div>
 
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ fontWeight: "bold", color: "#3E2237" }}>
+                    <div style={{ fontWeight: "bold", color: "#241046" }}>
                       ₹{order.total_amount.toLocaleString("en-IN")}
                     </div>
                     {order.coupon_code && (
@@ -397,7 +397,7 @@ function OrdersContent() {
                         COD — ₹{order.advance_paid} paid, ₹{dueOnDelivery} due
                       </div>
                     ) : (
-                      <div style={{ fontSize: "0.75rem", color: "#5A3150", fontWeight: "bold" }}>
+                      <div style={{ fontSize: "0.75rem", color: "#2d1155", fontWeight: "bold" }}>
                         Online — {order.payment_status}
                       </div>
                     )}
@@ -420,7 +420,7 @@ function OrdersContent() {
                     style={{
                       padding: "0.4rem 0.6rem",
                       borderRadius: "4px",
-                      border: "1px solid #D9CEC1",
+                      border: "1px solid #E7DDCF",
                       backgroundColor: "#fff",
                       fontSize: "0.85rem",
                     }}
@@ -435,7 +435,7 @@ function OrdersContent() {
                   <button
                     onClick={() => toggleExpand(order.id)}
                     style={{
-                      backgroundColor: "#8A607A",
+                      backgroundColor: "#6a5d70",
                       color: "#fff",
                       border: "none",
                       borderRadius: "4px",
@@ -452,10 +452,10 @@ function OrdersContent() {
                   <div
                     style={{
                       marginTop: "1rem",
-                      borderTop: "1px solid #D9CEC1",
+                      borderTop: "1px solid #E7DDCF",
                       paddingTop: "1rem",
                       fontSize: "0.85rem",
-                      color: "#3E2237",
+                      color: "#241046",
                     }}
                   >
                     <p style={{ marginBottom: "0.5rem" }}>
@@ -486,7 +486,7 @@ function OrdersContent() {
                                 href={order.tracking_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                style={{ color: "#5A3150", textDecoration: "underline" }}
+                                style={{ color: "#2d1155", textDecoration: "underline" }}
                               >
                                 Track
                               </a>
@@ -498,7 +498,7 @@ function OrdersContent() {
                           onClick={() => handleCreateShipment(order.id)}
                           disabled={creatingShipmentFor === order.id}
                           style={{
-                            backgroundColor: "#5A3150",
+                            backgroundColor: "#2d1155",
                             color: "#fff",
                             border: "none",
                             borderRadius: "4px",
@@ -547,7 +547,7 @@ function OrdersContent() {
 const selectStyle: React.CSSProperties = {
   padding: "0.5rem 0.6rem",
   borderRadius: "4px",
-  border: "1px solid #D9CEC1",
+  border: "1px solid #E7DDCF",
   backgroundColor: "#fff",
   fontSize: "0.8rem",
 };

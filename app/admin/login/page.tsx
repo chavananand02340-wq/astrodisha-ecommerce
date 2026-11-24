@@ -59,14 +59,14 @@ function AdminLoginForm() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#F7F3EC",
+        backgroundColor: "#F9F6F1",
       }}
     >
       <form
         onSubmit={handleLogin}
         style={{
-          backgroundColor: "#FBF8F2",
-          border: "1px solid #D9CEC1",
+          backgroundColor: "#FFFDF9",
+          border: "1px solid #E7DDCF",
           borderRadius: "8px",
           padding: "2.5rem",
           width: "100%",
@@ -75,15 +75,15 @@ function AdminLoginForm() {
       >
         <h1
           style={{
-            fontFamily: "Playfair Display, serif",
-            color: "#3E2237",
+            fontFamily: "var(--font-serif)",
+            color: "#241046",
             fontSize: "1.5rem",
             marginBottom: "0.25rem",
           }}
         >
           ASTRODISHA Admin
         </h1>
-        <p style={{ color: "#8A607A", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
+        <p style={{ color: "#6a5d70", fontSize: "0.85rem", marginBottom: "1.5rem" }}>
           Guidance • Healing • Divine Alignment
         </p>
 
@@ -98,7 +98,7 @@ function AdminLoginForm() {
             width: "100%",
             padding: "0.6rem",
             marginBottom: "0.75rem",
-            border: "1px solid #D9CEC1",
+            border: "1px solid #E7DDCF",
             borderRadius: "4px",
             backgroundColor: "#fff",
           }}
@@ -114,7 +114,7 @@ function AdminLoginForm() {
             width: "100%",
             padding: "0.6rem",
             marginBottom: "1rem",
-            border: "1px solid #D9CEC1",
+            border: "1px solid #E7DDCF",
             borderRadius: "4px",
             backgroundColor: "#fff",
           }}
@@ -126,7 +126,7 @@ function AdminLoginForm() {
           style={{
             width: "100%",
             padding: "0.7rem",
-            backgroundColor: "#5A3150",
+            backgroundColor: "#2d1155",
             color: "#fff",
             border: "none",
             borderRadius: "4px",

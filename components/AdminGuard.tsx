@@ -41,8 +41,8 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#F7F3EC",
-          color: "#3E2237",
+          backgroundColor: "#F9F6F1",
+          color: "#241046",
         }}
       >
         Checking admin access...

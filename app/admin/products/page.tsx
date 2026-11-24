@@ -480,21 +480,21 @@ function ProductsContent() {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "900px", margin: "0 auto", fontFamily: "Inter, sans-serif" }}>
-      <h1 style={{ fontFamily: "Playfair Display, serif", color: "#3E2237" }}>
+    <div style={{ padding: "2rem", maxWidth: "900px", margin: "0 auto", fontFamily: "var(--font-sans)" }}>
+      <h1 style={{ fontFamily: "var(--font-serif)", color: "#241046" }}>
         Manage Products
       </h1>
 
       <div
         style={{
-          backgroundColor: "#FBF8F2",
-          border: "1px solid #D9CEC1",
+          backgroundColor: "#FFFDF9",
+          border: "1px solid #E7DDCF",
           borderRadius: "8px",
           padding: "1.5rem",
           marginTop: "1.5rem",
         }}
       >
-        <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginBottom: "1rem" }}>Add Product</h2>
+        <h2 style={{ fontSize: "1.1rem", color: "#241046", marginBottom: "1rem" }}>Add Product</h2>
         <form onSubmit={handleAddProduct}>
           <input
             type="text"
@@ -559,7 +559,7 @@ function ProductsContent() {
             disabled={submitting}
             className="transition hover:opacity-85 active:scale-95"
             style={{
-              backgroundColor: "#5A3150",
+              backgroundColor: "#2d1155",
               color: "#fff",
               border: "none",
               borderRadius: "6px",
@@ -574,11 +574,11 @@ function ProductsContent() {
         </form>
 
         {statusMsg && (
-          <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#3E2237" }}>{statusMsg}</p>
+          <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#241046" }}>{statusMsg}</p>
         )}
       </div>
 
-      <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginTop: "2rem", marginBottom: "1rem" }}>
+      <h2 style={{ fontSize: "1.1rem", color: "#241046", marginTop: "2rem", marginBottom: "1rem" }}>
         All Products
       </h2>
 
@@ -636,12 +636,12 @@ function ProductsContent() {
           {products.map((p) => (
             <div
               key={p.id}
-              className="transition hover:border-[#5A3150]"
+              className="transition hover:border-[#2d1155]"
               style={{
-                border: p.is_featured ? "1px solid #C6A15B" : "1px solid #D9CEC1",
+                border: p.is_featured ? "1px solid #C6A15B" : "1px solid #E7DDCF",
                 borderRadius: "10px",
                 padding: "1.15rem",
-                backgroundColor: "#FBF8F2",
+                backgroundColor: "#FFFDF9",
               }}
             >
               {editingId === p.id ? (
@@ -708,7 +708,7 @@ function ProductsContent() {
                       disabled={savingEdit}
                       className="transition hover:opacity-85 active:scale-95"
                       style={{
-                        backgroundColor: "#5A3150",
+                        backgroundColor: "#2d1155",
                         color: "#fff",
                         border: "none",
                         borderRadius: "6px",
@@ -722,8 +722,8 @@ function ProductsContent() {
                       onClick={cancelEdit}
                       className="transition hover:opacity-85 active:scale-95"
                       style={{
-                        backgroundColor: "#D9CEC1",
-                        color: "#3E2237",
+                        backgroundColor: "#E7DDCF",
+                        color: "#241046",
                         border: "none",
                         borderRadius: "6px",
                         padding: "0.5rem 1rem",
@@ -737,7 +737,7 @@ function ProductsContent() {
               ) : (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
                   <div>
-                    <div style={{ fontWeight: "bold", color: "#3E2237", display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                    <div style={{ fontWeight: "bold", color: "#241046", display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                       {p.name}
                       {p.is_featured && (
                         <span
@@ -754,7 +754,7 @@ function ProductsContent() {
                         </span>
                       )}
                     </div>
-                    <div style={{ fontSize: "0.85rem", color: "#8A607A" }}>
+                    <div style={{ fontSize: "0.85rem", color: "#6a5d70" }}>
                       {p.categories?.name || "-"} • ₹{p.price} • Stock: {p.stock} •{" "}
                       {p.is_active ? "Active" : "Inactive"} • Position: {p.display_order ?? "-"}
                       {p.specifications && p.specifications.length > 0
@@ -767,7 +767,7 @@ function ProductsContent() {
                       onClick={() => startEdit(p)}
                       className="transition hover:opacity-85 active:scale-95"
                       style={{
-                        backgroundColor: "#5A3150",
+                        backgroundColor: "#2d1155",
                         color: "#fff",
                         border: "none",
                         borderRadius: "6px",
@@ -782,7 +782,7 @@ function ProductsContent() {
                       onClick={() => toggleExpand(p.id)}
                       className="transition hover:opacity-85 active:scale-95"
                       style={{
-                        backgroundColor: "#8A607A",
+                        backgroundColor: "#6a5d70",
                         color: "#fff",
                         border: "none",
                         borderRadius: "6px",
@@ -797,7 +797,7 @@ function ProductsContent() {
                       onClick={() => handleToggleActive(p)}
                       className="transition hover:opacity-85 active:scale-95"
                       style={{
-                        backgroundColor: p.is_active ? "#B00020" : "#5A3150",
+                        backgroundColor: p.is_active ? "#B00020" : "#2d1155",
                         color: "#fff",
                         border: "none",
                         borderRadius: "6px",
@@ -816,12 +816,12 @@ function ProductsContent() {
                 <div
                   style={{
                     marginTop: "1rem",
-                    borderTop: "1px solid #D9CEC1",
+                    borderTop: "1px solid #E7DDCF",
                     paddingTop: "1rem",
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <h3 style={{ fontSize: "0.95rem", color: "#3E2237", margin: 0 }}>
+                    <h3 style={{ fontSize: "0.95rem", color: "#241046", margin: 0 }}>
                       Product Images ({images.length})
                     </h3>
                     <button
@@ -829,7 +829,7 @@ function ProductsContent() {
                       style={{
                         background: "none",
                         border: "none",
-                        color: "#8A607A",
+                        color: "#6a5d70",
                         cursor: "pointer",
                         fontSize: "0.85rem",
                       }}
@@ -850,7 +850,7 @@ function ProductsContent() {
                       <div
                         key={img.id}
                         style={{
-                          border: img.is_primary ? "2px solid #C6A15B" : "1px solid #D9CEC1",
+                          border: img.is_primary ? "2px solid #C6A15B" : "1px solid #E7DDCF",
                           borderRadius: "6px",
                           padding: "0.3rem",
                           width: "100px",
@@ -869,7 +869,7 @@ function ProductsContent() {
                               fontSize: "0.65rem",
                               background: "none",
                               border: "none",
-                              color: img.is_primary ? "#C6A15B" : "#8A607A",
+                              color: img.is_primary ? "#C6A15B" : "#6a5d70",
                               cursor: "pointer",
                             }}
                           >
@@ -901,12 +901,12 @@ function ProductsContent() {
                       onChange={handleUploadImages}
                       disabled={uploading}
                     />
-                    <p style={{ fontSize: "0.75rem", color: "#8A607A", marginTop: "0.3rem" }}>
+                    <p style={{ fontSize: "0.75rem", color: "#6a5d70", marginTop: "0.3rem" }}>
                       Tip: tap and select up to 10 photos at once (Ctrl/Cmd or long-press to multi-select).
                     </p>
                     {uploading && <p style={{ fontSize: "0.85rem" }}>Uploading...</p>}
                     {imageMsg && (
-                      <p style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#3E2237" }}>
+                      <p style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#241046" }}>
                         {imageMsg}
                       </p>
                     )}
@@ -936,7 +936,7 @@ function FeaturedCheckbox({
         gap: "0.6rem",
         marginBottom: "1rem",
         padding: "0.75rem",
-        border: checked ? "1px solid #C6A15B" : "1px solid #D9CEC1",
+        border: checked ? "1px solid #C6A15B" : "1px solid #E7DDCF",
         borderRadius: "6px",
         backgroundColor: "#fff",
         cursor: "pointer",
@@ -946,13 +946,13 @@ function FeaturedCheckbox({
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        style={{ marginTop: "0.2rem", width: "18px", height: "18px", accentColor: "#5A3150" }}
+        style={{ marginTop: "0.2rem", width: "18px", height: "18px", accentColor: "#2d1155" }}
       />
       <span>
-        <span style={{ display: "block", fontWeight: "bold", color: "#3E2237", fontSize: "0.9rem" }}>
+        <span style={{ display: "block", fontWeight: "bold", color: "#241046", fontSize: "0.9rem" }}>
           ★ Show in homepage Featured Collection
         </span>
-        <span style={{ display: "block", color: "#8A607A", fontSize: "0.75rem", marginTop: "0.15rem" }}>
+        <span style={{ display: "block", color: "#6a5d70", fontSize: "0.75rem", marginTop: "0.15rem" }}>
           Featured products appear first on the homepage (8 products shown in total).
         </span>
       </span>
@@ -965,7 +965,7 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.6rem",
   marginBottom: "0.75rem",
-  border: "1px solid #D9CEC1",
+  border: "1px solid #E7DDCF",
   borderRadius: "4px",
   backgroundColor: "#fff",
 };
@@ -1197,10 +1197,10 @@ function PdpEditor({
 
   return (
     <div style={pdpBoxStyle}>
-      <p style={{ fontWeight: "bold", color: "#3E2237", fontSize: "0.95rem", marginBottom: "0.25rem" }}>
+      <p style={{ fontWeight: "bold", color: "#241046", fontSize: "0.95rem", marginBottom: "0.25rem" }}>
         Product Page Content
       </p>
-      <p style={{ color: "#8A607A", fontSize: "0.75rem", marginBottom: "0.75rem" }}>
+      <p style={{ color: "#6a5d70", fontSize: "0.75rem", marginBottom: "0.75rem" }}>
         Shown on the product page as expandable sections. Leave a section empty to hide it on the page.
       </p>
 
@@ -1222,7 +1222,7 @@ function PdpEditor({
           Copy
         </button>
       </div>
-      <p style={{ color: "#8A607A", fontSize: "0.7rem", marginTop: "-0.4rem", marginBottom: "0.75rem" }}>
+      <p style={{ color: "#6a5d70", fontSize: "0.7rem", marginTop: "-0.4rem", marginBottom: "0.75rem" }}>
         Copies Benefits, How to Wear and Product Details (not the certificate). Edit after copying if needed.
       </p>
 
@@ -1279,7 +1279,7 @@ function PdpEditor({
         <p style={hintStyle}>Steps are numbered on the product page in this order.</p>
         {value.how_to_wear.map((row, i) => (
           <div key={i} style={rowCardStyle}>
-            <p style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#8A607A", margin: "0 0 0.4rem" }}>
+            <p style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#6a5d70", margin: "0 0 0.4rem" }}>
               Step {i + 1}
             </p>
             <input
@@ -1410,7 +1410,7 @@ function PdpEditor({
 
         {CERT_FIELDS.map(({ key, label, placeholder }) => (
           <div key={key}>
-            <label style={{ fontSize: "0.75rem", color: "#3E2237", fontWeight: "bold" }}>{label}</label>
+            <label style={{ fontSize: "0.75rem", color: "#241046", fontWeight: "bold" }}>{label}</label>
             <input
               type="text"
               placeholder={placeholder}
@@ -1421,7 +1421,7 @@ function PdpEditor({
           </div>
         ))}
 
-        <label style={{ fontSize: "0.75rem", color: "#3E2237", fontWeight: "bold" }}>Certificate image</label>
+        <label style={{ fontSize: "0.75rem", color: "#241046", fontWeight: "bold" }}>Certificate image</label>
         {value.certificate_image_url ? (
           <div style={{ margin: "0.4rem 0 0.6rem" }}>
             <img
@@ -1431,7 +1431,7 @@ function PdpEditor({
                 width: "100%",
                 maxWidth: "320px",
                 borderRadius: "6px",
-                border: "1px solid #D9CEC1",
+                border: "1px solid #E7DDCF",
                 display: "block",
               }}
             />
@@ -1441,7 +1441,7 @@ function PdpEditor({
               style={{
                 marginTop: "0.4rem",
                 background: "none",
-                border: "1px solid #D9CEC1",
+                border: "1px solid #E7DDCF",
                 borderRadius: "4px",
                 color: "#B00020",
                 padding: "0.3rem 0.7rem",
@@ -1463,7 +1463,7 @@ function PdpEditor({
         <p style={{ ...hintStyle, marginTop: "0.3rem" }}>
           {value.certificate_image_url ? "Choose a file to replace the current image." : "Upload a clear photo/scan of the real certificate."}
         </p>
-        {certMsg && <p style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#3E2237" }}>{certMsg}</p>}
+        {certMsg && <p style={{ fontSize: "0.8rem", fontWeight: "bold", color: "#241046" }}>{certMsg}</p>}
       </details>
     </div>
   );
@@ -1492,12 +1492,12 @@ function RowActions({
 }) {
   const btn: React.CSSProperties = {
     background: "none",
-    border: "1px solid #D9CEC1",
+    border: "1px solid #E7DDCF",
     borderRadius: "4px",
     padding: "0.25rem 0.6rem",
     fontSize: "0.75rem",
     cursor: "pointer",
-    color: "#3E2237",
+    color: "#241046",
   };
   return (
     <div style={{ display: "flex", gap: "0.4rem" }}>
@@ -1516,7 +1516,7 @@ function RowActions({
 
 function smallBtnStyle(disabled: boolean): React.CSSProperties {
   return {
-    backgroundColor: "#8A607A",
+    backgroundColor: "#6a5d70",
     color: "#fff",
     border: "none",
     borderRadius: "4px",
@@ -1536,28 +1536,28 @@ const pdpBoxStyle: React.CSSProperties = {
 };
 
 const sectionStyle: React.CSSProperties = {
-  border: "1px solid #D9CEC1",
+  border: "1px solid #E7DDCF",
   borderRadius: "6px",
   padding: "0.6rem 0.75rem",
   marginBottom: "0.6rem",
-  backgroundColor: "#FBF8F2",
+  backgroundColor: "#FFFDF9",
 };
 
 const summaryStyle: React.CSSProperties = {
   fontWeight: "bold",
-  color: "#3E2237",
+  color: "#241046",
   fontSize: "0.9rem",
   cursor: "pointer",
 };
 
 const hintStyle: React.CSSProperties = {
-  color: "#8A607A",
+  color: "#6a5d70",
   fontSize: "0.72rem",
   margin: "0.5rem 0 0.6rem",
 };
 
 const rowCardStyle: React.CSSProperties = {
-  border: "1px solid #E1D7CC",
+  border: "1px solid #E7DDCF",
   borderRadius: "6px",
   padding: "0.6rem",
   marginBottom: "0.6rem",

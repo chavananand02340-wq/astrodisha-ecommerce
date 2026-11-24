@@ -336,24 +336,24 @@ function CategoriesContent() {
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "900px", margin: "0 auto", fontFamily: "Inter, sans-serif" }}>
-      <h1 style={{ fontFamily: "Playfair Display, serif", color: "#3E2237" }}>
+    <div style={{ padding: "2rem", maxWidth: "900px", margin: "0 auto", fontFamily: "var(--font-sans)" }}>
+      <h1 style={{ fontFamily: "var(--font-serif)", color: "#241046" }}>
         Manage Categories
       </h1>
-      <p style={{ color: "#8A607A", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+      <p style={{ color: "#6a5d70", fontSize: "0.85rem", marginTop: "0.25rem" }}>
         Add a category here and its page goes live automatically at /its-name — no code changes needed.
       </p>
 
       <div
         style={{
-          backgroundColor: "#FBF8F2",
-          border: "1px solid #D9CEC1",
+          backgroundColor: "#FFFDF9",
+          border: "1px solid #E7DDCF",
           borderRadius: "8px",
           padding: "1.5rem",
           marginTop: "1.5rem",
         }}
       >
-        <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginBottom: "1rem" }}>Add Category</h2>
+        <h2 style={{ fontSize: "1.1rem", color: "#241046", marginBottom: "1rem" }}>Add Category</h2>
         <form onSubmit={handleAddCategory}>
           <input
             type="text"
@@ -363,7 +363,7 @@ function CategoriesContent() {
             style={inputStyle}
           />
           {name.trim() && (
-            <p style={{ fontSize: "0.75rem", color: "#8A607A", marginTop: "-0.5rem", marginBottom: "0.75rem" }}>
+            <p style={{ fontSize: "0.75rem", color: "#6a5d70", marginTop: "-0.5rem", marginBottom: "0.75rem" }}>
               Page will be: /{slugify(name)}
             </p>
           )}
@@ -400,7 +400,7 @@ function CategoriesContent() {
             disabled={submitting}
             className="transition hover:opacity-85 active:scale-95"
             style={{
-              backgroundColor: "#5A3150",
+              backgroundColor: "#2d1155",
               color: "#fff",
               border: "none",
               borderRadius: "6px",
@@ -415,11 +415,11 @@ function CategoriesContent() {
         </form>
 
         {statusMsg && (
-          <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#3E2237", fontSize: "0.9rem" }}>{statusMsg}</p>
+          <p style={{ marginTop: "1rem", fontWeight: "bold", color: "#241046", fontSize: "0.9rem" }}>{statusMsg}</p>
         )}
       </div>
 
-      <h2 style={{ fontSize: "1.1rem", color: "#3E2237", marginTop: "2rem", marginBottom: "1rem" }}>
+      <h2 style={{ fontSize: "1.1rem", color: "#241046", marginTop: "2rem", marginBottom: "1rem" }}>
         All Categories (in display order)
       </h2>
 
@@ -431,10 +431,10 @@ function CategoriesContent() {
             <div
               key={cat.id}
               style={{
-                border: cat.is_active ? "1px solid #D9CEC1" : "1px solid #B00020",
+                border: cat.is_active ? "1px solid #E7DDCF" : "1px solid #B00020",
                 borderRadius: "10px",
                 padding: "1rem",
-                backgroundColor: "#FBF8F2",
+                backgroundColor: "#FFFDF9",
               }}
             >
               {editingId === cat.id ? (
@@ -470,7 +470,7 @@ function CategoriesContent() {
                     style={{ marginBottom: "0.5rem" }}
                   />
                   {cat.home_image_url && (
-                    <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#3E2237", marginBottom: "0.75rem" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#241046", marginBottom: "0.75rem" }}>
                       <input
                         type="checkbox"
                         checked={editUseDefaultHome}
@@ -487,13 +487,13 @@ function CategoriesContent() {
                     <button
                       onClick={() => saveEdit(cat)}
                       disabled={savingEdit}
-                      style={{ backgroundColor: "#5A3150", color: "#fff", border: "none", borderRadius: "6px", padding: "0.5rem 1rem", cursor: "pointer" }}
+                      style={{ backgroundColor: "#2d1155", color: "#fff", border: "none", borderRadius: "6px", padding: "0.5rem 1rem", cursor: "pointer" }}
                     >
                       {savingEdit ? "Saving..." : "Save"}
                     </button>
                     <button
                       onClick={cancelEdit}
-                      style={{ backgroundColor: "#D9CEC1", color: "#3E2237", border: "none", borderRadius: "6px", padding: "0.5rem 1rem", cursor: "pointer" }}
+                      style={{ backgroundColor: "#E7DDCF", color: "#241046", border: "none", borderRadius: "6px", padding: "0.5rem 1rem", cursor: "pointer" }}
                     >
                       Cancel
                     </button>
@@ -525,12 +525,12 @@ function CategoriesContent() {
                             width: "70px",
                             height: "70px",
                             borderRadius: "8px",
-                            border: "1px dashed #D9CEC1",
+                            border: "1px dashed #E7DDCF",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             fontSize: "0.65rem",
-                            color: "#8A607A",
+                            color: "#6a5d70",
                             textAlign: "center",
                             padding: "0.25rem",
                           }}
@@ -542,7 +542,7 @@ function CategoriesContent() {
                     </div>
                   </div>
                   <div style={{ flex: 1, minWidth: "180px" }}>
-                    <div style={{ fontWeight: "bold", color: "#3E2237", display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                    <div style={{ fontWeight: "bold", color: "#241046", display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                       {cat.name}
                       {!cat.is_active && (
                         <span style={{ backgroundColor: "#B00020", color: "#fff", fontSize: "0.65rem", fontWeight: "bold", padding: "0.15rem 0.5rem", borderRadius: "999px" }}>
@@ -550,33 +550,33 @@ function CategoriesContent() {
                         </span>
                       )}
                     </div>
-                    <div style={{ fontSize: "0.8rem", color: "#8A607A" }}>/{cat.slug}</div>
-                    <div style={{ fontSize: "0.85rem", color: "#5A3150", marginTop: "0.25rem" }}>{cat.description}</div>
+                    <div style={{ fontSize: "0.8rem", color: "#6a5d70" }}>/{cat.slug}</div>
+                    <div style={{ fontSize: "0.85rem", color: "#2d1155", marginTop: "0.25rem" }}>{cat.description}</div>
 
                     <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.7rem" }}>
                       <button
                         onClick={() => move(cat, "up")}
                         disabled={i === 0}
-                        style={{ backgroundColor: "#8A607A", color: "#fff", border: "none", borderRadius: "6px", padding: "0.4rem 0.7rem", fontSize: "0.8rem", cursor: i === 0 ? "not-allowed" : "pointer", opacity: i === 0 ? 0.5 : 1 }}
+                        style={{ backgroundColor: "#6a5d70", color: "#fff", border: "none", borderRadius: "6px", padding: "0.4rem 0.7rem", fontSize: "0.8rem", cursor: i === 0 ? "not-allowed" : "pointer", opacity: i === 0 ? 0.5 : 1 }}
                       >
                         ↑ Move Up
                       </button>
                       <button
                         onClick={() => move(cat, "down")}
                         disabled={i === categories.length - 1}
-                        style={{ backgroundColor: "#8A607A", color: "#fff", border: "none", borderRadius: "6px", padding: "0.4rem 0.7rem", fontSize: "0.8rem", cursor: i === categories.length - 1 ? "not-allowed" : "pointer", opacity: i === categories.length - 1 ? 0.5 : 1 }}
+                        style={{ backgroundColor: "#6a5d70", color: "#fff", border: "none", borderRadius: "6px", padding: "0.4rem 0.7rem", fontSize: "0.8rem", cursor: i === categories.length - 1 ? "not-allowed" : "pointer", opacity: i === categories.length - 1 ? 0.5 : 1 }}
                       >
                         ↓ Move Down
                       </button>
                       <button
                         onClick={() => startEdit(cat)}
-                        style={{ backgroundColor: "#5A3150", color: "#fff", border: "none", borderRadius: "6px", padding: "0.4rem 0.7rem", fontSize: "0.8rem", cursor: "pointer" }}
+                        style={{ backgroundColor: "#2d1155", color: "#fff", border: "none", borderRadius: "6px", padding: "0.4rem 0.7rem", fontSize: "0.8rem", cursor: "pointer" }}
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => toggleActive(cat)}
-                        style={{ backgroundColor: cat.is_active ? "#B00020" : "#5A3150", color: "#fff", border: "none", borderRadius: "6px", padding: "0.4rem 0.7rem", fontSize: "0.8rem", cursor: "pointer" }}
+                        style={{ backgroundColor: cat.is_active ? "#B00020" : "#2d1155", color: "#fff", border: "none", borderRadius: "6px", padding: "0.4rem 0.7rem", fontSize: "0.8rem", cursor: "pointer" }}
                       >
                         {cat.is_active ? "Deactivate" : "Activate"}
                       </button>
@@ -603,7 +603,7 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.6rem",
   marginBottom: "0.75rem",
-  border: "1px solid #D9CEC1",
+  border: "1px solid #E7DDCF",
   borderRadius: "4px",
   backgroundColor: "#fff",
 };
@@ -612,13 +612,13 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: "0.85rem",
   fontWeight: "bold",
-  color: "#3E2237",
+  color: "#241046",
   marginBottom: "0.2rem",
 };
 
 const hintStyle: React.CSSProperties = {
   fontSize: "0.75rem",
-  color: "#8A607A",
+  color: "#6a5d70",
   marginTop: 0,
   marginBottom: "0.4rem",
 };
@@ -626,6 +626,6 @@ const hintStyle: React.CSSProperties = {
 const thumbLabelStyle: React.CSSProperties = {
   display: "block",
   fontSize: "0.65rem",
-  color: "#8A607A",
+  color: "#6a5d70",
   marginTop: "0.2rem",
 };

@@ -1,7 +1,12 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import Icon, { type IconName } from "../ui/Icon";
 
 /* "Not Just Chosen. Prepared For You." — six steps on a zig-zag gold line that
-   drifts slowly sideways in a seamless loop (pauses on hover / touch).
+   drifts slowly sideways in a seamless loop. Driven by JavaScript (not CSS) so it
+   keeps moving on phones with battery-saver / reduced animations; it pauses while
+   the visitor touches or hovers it, and can still be swiped by hand.
    Steps alternate high and low; each step draws its own connector to the next,
    so the zig-zag continues unbroken across the loop. */
 
@@ -71,6 +76,62 @@ function Step({ step, i, copy = false }: { step: (typeof STEPS)[number]; i: numb
 }
 
 export default function JourneyTimeline() {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    let pos = el.scrollLeft;
+    let paused = false;
+    let resumeTimer = 0;
+    let frame = 0;
+    let last = performance.now();
+    const SPEED = 28; // px per second
+
+    const tick = (now: number) => {
+      const dt = Math.min(now - last, 64);
+      last = now;
+      if (!paused) {
+        const half = el.scrollWidth / 2;
+        pos += (SPEED * dt) / 1000;
+        if (pos >= half) pos -= half;
+        el.scrollLeft = Math.round(pos);
+      }
+      frame = requestAnimationFrame(tick);
+    };
+
+    const pause = () => {
+      paused = true;
+      window.clearTimeout(resumeTimer);
+    };
+    const resumeSoon = (delay: number) => {
+      window.clearTimeout(resumeTimer);
+      resumeTimer = window.setTimeout(() => {
+        const half = el.scrollWidth / 2;
+        pos = el.scrollLeft >= half ? el.scrollLeft - half : el.scrollLeft;
+        paused = false;
+      }, delay);
+    };
+    const onTouchEnd = () => resumeSoon(2500);
+    const onLeave = () => resumeSoon(300);
+
+    el.addEventListener("touchstart", pause, { passive: true });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("mouseenter", pause);
+    el.addEventListener("mouseleave", onLeave);
+    frame = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(resumeTimer);
+      el.removeEventListener("touchstart", pause);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("mouseenter", pause);
+      el.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
   return (
     <section className="relative overflow-hidden bg-[#160828] py-12 text-[#f4effb] sm:py-16">
       <div
@@ -100,8 +161,8 @@ export default function JourneyTimeline() {
           </p>
         </div>
 
-        <div className="astro-journey mt-6 overflow-hidden sm:mt-8">
-          <ol aria-label="How every piece is prepared" className="astro-journey-track flex w-max">
+        <div ref={scrollerRef} className="astro-journey no-scrollbar mt-6 overflow-x-auto sm:mt-8">
+          <ol aria-label="How every piece is prepared" className="flex w-max">
             {STEPS.map((step, i) => (
               <Step key={step.title} step={step} i={i} />
             ))}
